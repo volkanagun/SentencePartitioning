@@ -1,0 +1,943 @@
+{
+
+   
+  "intrinsic": [
+    {
+      "label": "similarity",
+      "semeval": "1A",
+      "classifier": "Taxonomic",
+      "texts": [
+
+        "hayvan:kedi",
+        "hayvan:karınca",
+        
+        
+        "memeli:yunus",
+        "memeli:yarasa",
+        
+        "okul:üniversite",
+        "okul:lise",
+
+        "politikacı:bakan",
+        "politikacı:milletvekili",
+  
+        "ağaç:çam",
+        "ağaç:selvi",
+        
+        "çiçek:papatya",
+        "çiçek:lale",
+        
+        "renk:yeşil",
+        "renk:kırmızı"
+
+        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "1B",
+      "classifier": "Functional",
+      "texts": [
+        "silah:bıçak",
+        "silah:tabanca",
+        
+        "oyuncak:çember",
+        "oyuncak:tahta"        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "1C",
+      "classifier": "Singular Collective",
+      "texts": [
+        "renk:mavi",
+        "renk:kırmızı",
+        "internet:site",
+        "kitap:roman",
+        "ışık:lamba",
+        "et:kıyma",
+        "mobilya:dolap",
+        "içecek:süt",
+        "balık:somon",
+        "sanat:resim",
+        "uzay:yıldız"
+        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "1D",
+      "classifier": "Class Individual",
+      "texts": [
+        "dağ:everest",
+        "dağ:alp",
+        "şehir:ankara",        
+        "şehir:berlin",
+        "gezegen:mars",
+        "yıldız:güneş",
+        
+        "ülke:türkiye",
+        "ülke:almanya"
+        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2A",
+      "classifier": "Object:Component",
+      "texts": [
+        "araba:motor",
+        "uçak:motor",
+        "saat:akrep",
+        "kalem:uç",
+        "dolap:kapak"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2B",
+      "classifier": "Collection:Member",
+      "texts": [
+        "orman:ağaç",
+        "filo:gemi",
+        "takım:oyuncu"        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2C",
+      "classifier": "Mass:Portion",
+      "texts": [
+        "su:damla",
+        "kilometre:metre",
+        "pizza:dilim"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2D",
+      "classifier": "Event:Feature",
+      "texts": [
+        "düğün:gelin",
+        "maç:top",
+        "toplantı:konu"
+
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2E",
+      "classifier": "Activity:Stage",
+      "texts": [
+        "alışveriş:ödeme",
+        "yolculuk:varış",
+        "gezi:mola"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2F",
+      "classifier": "Item:Topological Part",
+      "texts": [
+        "araba:bagaj",
+        "uçak:kokpit",
+        "tren:tuvalet"
+        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2G",
+      "classifier": "Object:Stuff",
+      "texts": [
+        "buzul:buz",
+        "parke:tahta",
+        "tuz:sodyum",
+        "işlemci:transistör",
+        "duvar:beton"
+
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2H",
+      "classifier": "Creature:Possession",
+      "texts": [
+        "milyoner:para",
+        "yazar:telif",
+        "fırıncı:ekmek",
+        "çiftçi:mahsul"        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2I",
+      "classifier": "Item:Distinctive Nonpart",
+      "texts": [
+        "tundra:ağaç",
+        "at:kanat",
+        "boşluk:madde",
+        "mükemmelliyet:hata"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2J",
+      "classifier": "Ex-part:Ex-possesion",
+      "texts": [
+        "metal:atık",
+        "dönek:inanç",
+        "tahta:kıymık"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3A",
+      "classifier": "Synonymity",
+      "texts": [
+        "araba:oto",
+        "hızlı:çabuk",
+        "yetişkin:olgun",
+	"ana:anne",
+	"anlam:mana",
+	"bellek:hafıza",
+	"devir:çağ",
+	"fakir:yoksul",
+	"hiddet:öfke",
+	"hadise:olay",
+	"ırk:soy",
+	"ilginç:enteresan",
+	"mağlup:yenik",
+	"suni:yapay",
+	"sulh:barış",
+	"sınav:imtihan",
+	"şöhret:ün",
+	"tanık:şahit",
+	"teklif:öneri",
+	"ülkü:ideal",
+	"vatan:yurt",
+	"yapıt:eser",
+	"yargıç:hakim",
+	"zaman:vakit"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3B",
+      "classifier": "Dimensional Similarity",
+      "texts": [
+        "meltem:bora",
+        "heves:coşkunluk",
+        "pişmek:kaynamak",
+        "yetenek:ustalık",
+        "akıntı:nehir"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3C",
+      "classifier": "Dimensional Excessive",
+      "texts": [
+        "şıklık:züppelik",
+        "ilgili:takıntılı",
+        "ince:zayıf",
+        "nemli:ıslak"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3D",
+      "classifier": "Dimensional Naughty",
+      "texts": [
+        "kopyalamak:aşırmak",
+        "haykırış:bağrış"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3E",
+      "classifier": "Conversion",
+      "texts": [
+        "tay:at",
+        "oğlan:adam",
+        "kız:kadın",
+        "hamile:anne"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3F",
+      "classifier": "Attribute Similarity",
+      "texts": [
+        "tırmık:çatal",
+        "kule:uç",
+        "vadi:çukur"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3G",
+      "classifier": "Coordinates",
+      "texts": [
+        "oğlan:kız",
+        "dev:cüce",
+        "kadın:adam"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3H",
+      "classifier": "Change",
+      "texts": [
+        "müzik:ritim",
+        "maç:skor",
+        "deniz:derinlik",
+        "dağ:yükseklik",
+        "yol:mesafe"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4B",
+      "classifier": "Contradictory",
+      "texts": [
+        "canlı:ölü",
+        "suçlu:masum",
+        "ağır:hafif",
+        "ceza:ödül",
+        "cimri:cömert",
+        "dar:geniş",
+        "hayır:şer",
+        "yerli:yabancı",
+        "üretici:tüketici"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4B",
+      "classifier": "Contrary",
+      "texts": [
+        "yaşlı:genç",
+        "mutlu:üzgün",
+        "zayıf:şişman",
+        "düz:pürüzlü",
+        "uzun:kısa"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4C",
+      "classifier": "Reverse",
+      "texts": [
+        "al:ver",
+        "genleş:büzül",
+        "alçalt:yükselt",
+        "doldur:boşalt",
+        "kalk:otur",
+        "gir:çık",
+        "tırman:in"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4D",
+      "classifier": "Directional",
+      "texts": [
+        "ön:arka",
+        "alt:üst",
+        "sol:sağ",
+        "doğu:batı",
+        "iç:dış",
+        "yukarı:aşağı"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4E",
+      "classifier": "Incompatible",
+      "texts": [
+        "yavaş:durağan",
+        "uyanık:umursamaz",
+        "dürüst:riyakar"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4F",
+      "classifier": "Asymmetric Contrary*",
+      "texts": [
+        "sıcak:soğuk",
+        "kuru:nemli",
+        "şişman:cılız",
+        "geniş:minik",
+        "zengin:muhtaç"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4G",
+      "classifier": "Pseudoantonym*",
+      "texts": [
+        "popüler:utangaç",
+        "doğru:kötü",
+        "inan:yalanla",
+        "ittir:çekiştir"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4H",
+      "classifier": "Defective*",
+      "texts": [
+        "kekele:konuş",
+        "miyop:net",
+        "topalla:yürü"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5A",
+      "classifier": "Item - Attribute (Noun:Adjective)",
+      "texts": [
+        "dilenci:fakir",
+	"zengin:paralı",
+	"şampiyon:başarılı",
+	"yarışçı:hızlı",
+	"usta:becerikli",
+	"tüy:hafif",
+	"pamuk:yumuşak",
+	"tahta:sert",
+	"süre:çabuk"	
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5B",
+      "classifier": "Object Attribute:Condition (adjective:adjective)",
+      "texts": [
+        "hızlı:çabuk",
+        "yavaş:durağan"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5C",
+      "classifier": "Object:State (noun:noun)",
+      "texts": [
+        "dilenci:yoksulluk",
+        "çırak:acemilik",
+        "yaşlı:yaşlılık",
+        "buz:erime",
+        "su:buharlaşma",
+        "otobüs:hareket",
+        "öğrenci:mezuniyet",
+        "kar:yağış"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5D",
+      "classifier": "Agent Attribute:State (adjective:noun)",
+      "texts": [
+        "kavgacı:kavga",
+        "suskun:sessizlik",
+        "üzgün:keder",
+        "donuk:soğuk",
+        "mutlu:memnuniyet"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5E",
+      "classifier": "Object:Typical Action (noun:verb)",
+      "texts": [
+        "kavgacı:kavga",
+        "suskun:sessizlik"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5F",
+      "classifier": "Agent/Object Attribute:Typical Action (adjective:verb)",
+      "texts": [
+        "yenebilir:ye",
+        "görünebilir:bak",
+        "alınabilir:al"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5G",
+      "classifier": "Action:Attribute",
+      "texts": [
+        "kır:kırık",
+        "sakla:saklı"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5H",
+      "classifier": "Action:Object Attribute",
+      "texts": [
+        "temizle:kirli",
+        "kokla:kokulu",
+        "iç:içilebilir"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5I",
+      "classifier": "Action:Resultant Attribute (verb:noun/adjective)",
+      "texts": [
+        "benekle:nokta",
+        "kır:kırılmış",
+        "ısıt:sıcak",
+        "temizle:temiz",
+        "ye:doymuş"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6A",
+      "classifier": "Item:NonAttribute (noun/adjective)",
+      "texts": [
+        "ahenk:uyumsuz",
+        "kale:güçsüz",
+        "görgü:ahlaksız"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6B",
+      "classifier": "Object Attribute:Noncondition (adjective:adjective)",
+      "texts": [
+        "kırılgan:kalıpsı",
+        "avutulamaz:avunmuş",
+        "emsal:eleştirilen"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6C",
+      "classifier": "Object:Nonstate (noun:noun)",
+      "texts": [
+        "ruhsuz:cingöz",
+        "ölümsüz:ölüm",
+        "bakire:hafifmeşreplik"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6D",
+      "classifier": "Attribute:Nonstate (adjective:noun)",
+      "texts": [
+        "ödül almış:şeref",
+        "açlık:bolluk"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6E",
+      "classifier": "Object:Atypical Action (noun:verb)",
+      "texts": [
+        "münzevi:sosyalleş",
+        "münzevi:hoşgör",
+        "sahip:küçümse"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6F",
+      "classifier": "Agent/Object Attribute: A typical Action (adjective:verb)",
+      "texts": [
+        "sessiz:konuş",
+        "çarpıtmak:anla",
+        "uyuşuk:hareketlendir"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6G",
+      "classifier": "Action:Action Nonattribute*",
+      "texts": [
+        "yavaşla:hızlı",
+        "tırman:alçak",
+        "düzelt:eğik"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6H",
+      "classifier": "Action:Object Nonattribute",
+      "texts": [
+        "süsle:sade",
+	"gör:saklı",
+	"tutun:boşluk"	
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7A",
+      "classifier": "Agent:Object",
+      "texts": [
+        "terzi:elbise",
+        "kahin:kehanet",
+        "jüri:karar",
+        "fırıncı:un",
+        "heykeltraş:taş",
+        "tesisatçı:boru",
+        "aşçı:yemek",
+        "öğretmen:ödev",
+        "mimar:bina",
+        "öğretmen:kitap",
+        "bahçıvan:bahçe",
+        "yazar:daktilo",
+        "yazar:kalem",
+        "şair:mısra",
+        "yazar:hikaye",
+        "sanatçı:resim",
+        "müzisyen:şarkı",
+        "şef:tarif"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7B",
+      "classifier": "Agent:Recipient",
+      "texts": [
+        "doktor:hasta",
+        "usta:çırak",
+        "hakim:davacı",
+        "öğretmen:öğrenci"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7C",
+      "classifier": "Agent:Instrument",
+      "texts": [
+        "çiftçi:traktör",
+        "orkestra şefi:çubuk",
+        "biçici:tırpan",
+        "taklitçi:kalem",
+        "kundakçı:kibrit"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7D",
+      "classifier": "Action:Object",
+      "texts": [
+        "sür:toprak",
+        "azarlamak:çekin",
+        "ele:buğday",
+        "kıravat:ilmek",
+        "af:günah"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7E",
+      "classifier": "Action:Recipient",
+      "texts": [
+        "öğret:öğrenci"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7F",
+      "classifier": "Object:Recipient",
+      "texts": [
+        "miras:mirasçı",
+        "konuşma:dinleyici",
+        "gösteri:izleyici",
+        "ödül:şampiyon"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7G",
+      "classifier": "Object:Instrument",
+      "texts": [
+        "hasta:stetoskop",
+        "su:oluk",
+        "keman:yay",
+        "boru:anahtar"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7H",
+      "classifier": "Recipient:Instrument",
+      "texts": [
+        "mirasçı:vasiyetname"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8A",
+      "classifier": "Cause:Effect",
+      "texts": [
+        "gizem:şaşkınlık",
+        "şaka:kahkaha"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8B",
+      "classifier": "Cause:Compensatory Action",
+      "texts": [
+        "açlık:ye",
+        "yorgunluk:uyu"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8C",
+      "classifier": "Enabling Agent:Object",
+      "texts": [
+        "kibrit:mum",
+        "mazot:araba",
+        "anımsatıcı:anı"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8D",
+      "classifier": "Action/Activity:Goal",
+      "texts": [
+        "yemek:doygunluk",
+        "koş:kaç",
+        "yarış:ödül",
+        "gübrele:yetiş"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8E",
+      "classifier": "Agent:Goal",
+      "texts": [
+        "hacı:türbe",
+        "avcı:av",
+        "yarışma:ödül",
+        "katil:ölüm",
+        "dağcı:zirve"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8F",
+      "classifier": "Instrument:Goal",
+      "texts": [
+        "ayar:denge",
+        "kamuflaj:aldatma",
+        "silah:intikam",
+        "yanıltmaca:aldatma"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8G",
+      "classifier": "Instrument:Intended Action",
+      "texts": [
+        "silah:vur",
+        "tokmak:ez",
+        "traktör:sür",
+        "klavye:yaz",
+        "fare:tıkla",
+        "telefon:ara"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8H",
+      "classifier": "Prevention",
+      "texts": [
+        "ilaç:haşere",
+        "sabitleyici:oynaklık",
+        "panzehir:zehir",
+        "yağmur:kuraklık"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9A",
+      "classifier": "Item:Location",
+      "texts": [
+        "cephanelik:silah",
+        "cami:imam",
+        "otopark:araba",
+        "üniversite:hoca",
+        "mobilyacı:mobilya",
+        "havaalanı:uçak",
+        "eczane:ilaç",
+        "manav:meyve"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9B",
+      "classifier": "Location:Process/Product",
+      "texts": [
+        "fırın:ekmek",
+        "okul:öğrenme"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9C",
+      "classifier": "Location:Action/Activity",
+      "texts": [
+        "okul:öğren",
+        "yol:sür",
+        "deniz:yüz",
+        "sinema:izle"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9D",
+      "classifier": "Location:Instrument/Associated Item",
+      "texts": [
+        "okul:kitap",
+        "çiflik:traktör",
+        "plaj:mayo"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9E",
+      "classifier": "Contiguity",
+      "texts": [
+        "kıyı:okyanus",
+        "kaldırım:yol"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9F",
+      "classifier": "Time:Action/Activity",
+      "texts": [
+        "yaz:hasat",
+        "çocukluk:oyun"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9G",
+      "classifier": "Time:Associated Item",
+      "texts": [
+        "emeklilik:maaş",
+        "bebeklik:beşik",
+        "kış:kar",
+        "sonbahar:yağmur"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9H",
+      "classifier": "Sequence",
+      "texts": [
+        "önsöz:öykü",
+        "başlangıç:gelişim",
+        "final:senfoni"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9I",
+      "classifier": "Attachment",
+      "texts": [
+        "kemer:bel",
+        "perçin:kiriş",
+        "şapka:baş",
+        "atkı:boyun",
+        "çiçek:bahçe"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10A",
+      "classifier": "Sign:Significant",
+      "texts": [
+        "siren:tehlike",
+        "diploma:eğitim",
+        "yağmur:fırtına",
+        "kırmızı:dur",
+        "ameliyat:hastane",
+        "bayrak:millet",
+        "zil:ders"
+      
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10B",
+      "classifier": "Expression",
+      "texts": [
+        "gülümseme:samimiyet",
+        "ağıt:ıstırap",
+        "methiye:övgü",
+        "kucaklamak:sevgi",
+        "azarlama:kınama",
+        "beğenme:beğeni"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10C",
+      "classifier": "Representation",
+      "texts": [
+        "kişi:portre",
+        "kişi:profil",
+        "fon:görünüm",
+        "günlük:kişi",
+        "olay:haber"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10D",
+      "classifier": "Plan",
+      "texts": [
+        "gündem:toplantı",
+        "prosedür:diagram",
+        "tarife:kek",
+        "menü:yemek",
+        "müfredat:ders",
+        "harita:şehir",
+        "koreografi:dans",
+        "proje:bina"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10E",
+      "classifier": "Knowledge",
+      "texts": [
+        "kuşbilim:kuşlar",
+        "psikoloji:akıl",
+        "dahiliye:böbrek",
+        "gökbilim:yıldızlar",
+        "mühendis:inşaat",
+        "pilot:uçak",
+        "şöför:otobüs",
+        "aşçı:yemek",
+        "asker:cephane"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10F",
+      "classifier": "Concealment",
+      "texts": [
+        "rumuz:ad",
+        "kamuflaj:yer",
+        "maske:yüz",
+        "örtü:araba",
+        "gözlük:göz"
+      ]
+    } 
+    
+  ]
+}
