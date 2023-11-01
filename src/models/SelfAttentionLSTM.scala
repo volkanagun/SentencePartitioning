@@ -20,36 +20,59 @@ import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.indexing.NDArrayIndex
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
+import sampling.experiments.SampleParams
 import utils.Params
 
 import java.io.{File, FileInputStream, FileOutputStream, ObjectInputStream, ObjectOutputStream}
 import scala.io.Source
 
-class SelfAttentionLSTM(params: Params) extends EmbeddingModel(params){
+class SelfAttentionLSTM(params: SampleParams) extends EmbeddingModel(params){
 
   def onehot(indices: Array[Int]): INDArray = {
     val ndarray = Nd4j.zeros(1, params.dictionarySize, params.modelWindowLength)
-    indices.foreach(indice => {
-      ndarray.put(Array(NDArrayIndex.point(indice)), 1f)
+    indices.zipWithIndex.foreach(pair => {
+      ndarray.put(Array(NDArrayIndex.point(0), NDArrayIndex.point(pair._1), NDArrayIndex.point(pair._2)), 1f)
     })
     ndarray
   }
+
+
+  def index(indices: Array[Int]): INDArray = {
+    val ndarray = Nd4j.zeros(1,  params.modelWindowLength)
+    indices.zipWithIndex.foreach(pair => {
+      ndarray.put(Array(NDArrayIndex.point(0), NDArrayIndex.point(pair._2)), pair._1.toFloat)
+    })
+    ndarray
+  }
+
+
   def onehot(indices: Array[Int], categorySize:Int): INDArray = {
     val ndarray = Nd4j.zeros(1, categorySize, params.modelWindowLength)
-    indices.foreach(indice => {
-      ndarray.put(Array(NDArrayIndex.point(indice)), 1f)
+    indices.zipWithIndex.foreach(pair => {
+      ndarray.put(Array(NDArrayIndex.point(0), NDArrayIndex.point(pair._1), NDArrayIndex.point(pair._2)), 1f)
     })
     ndarray
   }
  def onehot(indice: Int, categorySize:Int): INDArray = {
     val ndarray = Nd4j.zeros(1, categorySize)
-    ndarray.put(Array(NDArrayIndex.point(indice)), 1f)
+    ndarray.put(Array(NDArrayIndex.point(0), NDArrayIndex.point(indice)), 1f)
     ndarray
   }
 
   def vectorize(sentence: String): Array[INDArray] = {
     tokenize(sentence).sliding(params.modelWindowLength, params.modelWindowLength)
       .map(ngrams => onehot(ngrams.map(update(_))))
+      .toArray
+  }
+  def vectorizeIndex(sentence: String): Array[INDArray] = {
+    tokenize(sentence).sliding(params.modelWindowLength, params.modelWindowLength)
+      .map(ngrams => index(ngrams.map(update(_))))
+      .toArray
+  }
+
+  def vectorizeOneHotLast(sentence: String): Array[INDArray] = {
+    tokenize(sentence).sliding(params.modelWindowLength, params.modelWindowLength)
+      .map(ngrams => onehot(update(ngrams.last), params.dictionarySize))
       .toArray
   }
 
@@ -63,8 +86,8 @@ class SelfAttentionLSTM(params: Params) extends EmbeddingModel(params){
 
   def maskOutput(sentenceVector: Array[INDArray]): Array[INDArray] = {
     sentenceVector.map(_ => {
-      val mask = Nd4j.zeros(1, params.modelWindowLength)
-      mask.put(Array(NDArrayIndex.point(params.modelWindowLength - 1)), 1f)
+      val mask = Nd4j.zeros(1, 1)
+      mask.put(Array(NDArrayIndex.point(0), NDArrayIndex.point(0)), 1f)
       mask
     })
   }
@@ -75,13 +98,30 @@ class SelfAttentionLSTM(params: Params) extends EmbeddingModel(params){
 
       var lines = Source.fromFile(filename).getLines()
       override def next(i: Int): MultiDataSet = {
-        val sentenceVector = vectorize(lines.next())
-        val maskingInput = Nd4j.vstack(maskInput(sentenceVector): _*)
-        val maskingOutput = Nd4j.vstack(maskOutput(sentenceVector): _*)
-        val trainVector = Nd4j.vstack(sentenceVector: _*)
-        sampleCount += sentenceVector.length
+        var cnt = 0
+        var trainStack = Array[INDArray]()
+        var trainOutputStack = Array[INDArray]()
+        var maskInputStack = Array[INDArray]()
+        var maskOutputStack = Array[INDArray]()
 
-        new org.nd4j.linalg.dataset.MultiDataSet(trainVector, trainVector, maskingInput, maskingOutput)
+
+        while(cnt < params.batchSize && hasNext){
+          val sentence = lines.next()
+          val sentenceVector = vectorizeIndex(sentence)
+          val lastWordVector = vectorizeOneHotLast(sentence)
+
+          trainStack = trainStack ++ sentenceVector
+          trainOutputStack = trainOutputStack ++ lastWordVector
+          maskInputStack = maskInputStack ++ maskInput(sentenceVector)
+          maskOutputStack = maskOutputStack ++ maskOutput(sentenceVector)
+          cnt += 1
+        }
+
+        val maskingInput = Nd4j.vstack(maskInputStack: _*)
+        val maskingOutput = Nd4j.vstack(maskOutputStack: _*)
+        val trainVector = Nd4j.vstack(trainStack: _*)
+        val trainOutputVector = Nd4j.vstack(trainOutputStack: _*)
+        new org.nd4j.linalg.dataset.MultiDataSet(trainVector, trainOutputVector, maskingInput, maskingOutput)
       }
 
       override def setPreProcessor(multiDataSetPreProcessor: MultiDataSetPreProcessor): Unit = ???
@@ -114,20 +154,20 @@ class SelfAttentionLSTM(params: Params) extends EmbeddingModel(params){
 
     net.addListeners(new StatsListener(statsStorage, 1))
 
-    net.init()
     val multiDataSetIterator = iterator(filename)
 
     var start = System.currentTimeMillis()
     var isTrained = false
+    sampleCount = 0
     while (i < params.epocs) {
 
       println("Epoc : " + i)
+
       net.fit(multiDataSetIterator)
-      multiDataSetIterator.reset()
-      println("Saving model...")
       multiDataSetIterator.reset()
 
       i = i + 1
+      sampleCount += params.batchSize
       //System.gc()
     }
     val passedTime = System.currentTimeMillis() - start
@@ -143,9 +183,10 @@ class SelfAttentionLSTM(params: Params) extends EmbeddingModel(params){
 
   def save(net:ComputationGraph): EmbeddingModel = {
     val weights = net.getVertex("embedding").paramTable(false).get("W")
+    //val weightsMatrix = weights.toFloatMatrix
     val objectOutput = new ObjectOutputStream(new FileOutputStream(params.dictionaryFilename()))
     objectOutput.writeInt(dictionaryIndex.size)
-    dictionaryIndex.foreach{case(ngram, id)=>{
+    dictionaryIndex.foreach{case(ngram, id) => {
       val embeddingVector = weights.get(NDArrayIndex.point(id)).toFloatVector
        objectOutput.writeObject(ngram)
        objectOutput.writeObject(embeddingVector)
@@ -156,15 +197,18 @@ class SelfAttentionLSTM(params: Params) extends EmbeddingModel(params){
   }
 
   override def load(): SelfAttentionLSTM.this.type = {
-    val objectInput = new ObjectInputStream(new FileInputStream(params.dictionaryFilename()))
-    val size = objectInput.readInt()
-    Range(0, size).foreach { _ => {
-      val ngram = objectInput.readObject().asInstanceOf[String]
-      val vector = objectInput.readObject().asInstanceOf[Array[Float]]
-      dictionary = dictionary.updated(ngram, vector)
+    if(new File(params.dictionaryFilename()).exists()) {
+      val objectInput = new ObjectInputStream(new FileInputStream(params.dictionaryFilename()))
+      val size = objectInput.readInt()
+      Range(0, size).foreach { index => {
+        val ngram = objectInput.readObject().asInstanceOf[String]
+        val vector = objectInput.readObject().asInstanceOf[Array[Float]]
+        dictionary = dictionary.updated(ngram, vector)
+        dictionaryIndex = dictionaryIndex.updated(ngram, index)
+      }
+      }
+      objectInput.close()
     }
-    }
-    objectInput.close()
     this
 
   }
@@ -186,12 +230,12 @@ class SelfAttentionLSTM(params: Params) extends EmbeddingModel(params){
         .nOut(params.embeddingLength).build(), "input")
       .layer("input-lstm", new LSTM.Builder().nIn(params.embeddingLength).nOut(params.hiddenLength)
         .activation(Activation.TANH).build, "embedding")
-      .layer("attention", new SelfAttentionLayer.Builder().nOut(params.hiddenLength / params.nheads).nHeads(params.nheads).projectInput(true).build(), "input-lstm")
+      .layer("attention", new SelfAttentionLayer.Builder().nOut(params.hiddenLength).nHeads(params.nheads).projectInput(true).build(), "input-lstm")
       .layer("pooling", new GlobalPoolingLayer.Builder().poolingType(PoolingType.MAX).build(), "attention")
       .layer("dense_base", new DenseLayer.Builder().nIn(params.hiddenLength).nOut(params.hiddenLength).activation(Activation.RELU).build(), "pooling")
       .layer("dense", new DenseLayer.Builder().nIn(params.hiddenLength).nOut(params.hiddenLength).activation(Activation.RELU).build(), "dense_base")
-      .layer("output", new OutputLayer.Builder().nIn(params.hiddenLength).nOut(params.dictionarySize).activation(Activation.SIGMOID)
-        .lossFunction(LossFunctions.LossFunction.XENT).build, "dense")
+      .layer("output", new OutputLayer.Builder().nIn(params.hiddenLength).nOut(params.dictionarySize).activation(Activation.SOFTMAX)
+        .lossFunction(LossFunctions.LossFunction.MCXENT).build, "dense")
       .setInputTypes(InputType.recurrent(params.dictionarySize))
       .build()
 
@@ -216,5 +260,5 @@ class SelfAttentionLSTM(params: Params) extends EmbeddingModel(params){
 
   override def filter(group: Array[String]): Boolean = true
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = new InstrinsicEvaluationReport()
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = new InstrinsicEvaluationReport()
 }

@@ -21,8 +21,8 @@ import scala.util.control.Breaks
 
 object ExperimentSPL {
 
-  val samplingNames = Array("KMeans", "VocabSelect", "VotedDivergence",  "VE", "LM", "Mahalonabis", "Euclidean", "Entropy","Hopfield",  "KL", "Least", "Boltzmann")
-  val taskNames = Array("intrinsic", "ner", "pos",  "sentiment")
+  val samplingNames = Array("KMeans", "VocabSelect", "VotedDivergence", "VE", "LM", "Mahalonabis", "Euclidean", "Entropy", "Hopfield", "KL", "Least", "Boltzmann")
+  val taskNames = Array("intrinsic", "ner", "pos", "sentiment")
 
   //val samplingNames = Array("Boltzmann")
   val tokenization = Array("feature")
@@ -120,9 +120,11 @@ object ExperimentSPL {
     else null
   }
 
-
-
-
+  def selectText(sentence: String): Boolean = {
+    val found1 = "[\\+\\-][\\p{L}\\d]+".r.findAllIn(sentence).isEmpty
+    val found2 = "nbsp\\;".r.findAllIn(sentence).isEmpty
+    (found1 && found2)
+  }
 
   def createMainDataset(sampleParams: SampleParams, extractor: Extractor, dictionaryFilename: String, datasetFilename: String): Iterator[TextInstance] = {
     val f = new File(datasetFilename)
@@ -133,11 +135,16 @@ object ExperimentSPL {
     else {
       val pw = new PrintWriter(f)
       val evalDictionary = Source.fromFile(dictionaryFilename).getLines().toArray
-      val mainSentences = Source.fromFile(sampleParams.sentenceFilename).getLines().toArray
 
-      evalDictionary.foreach(word => mainSentences.par
-        .filter(text => text.contains(word)).take(sampleParams.maxWordSamples).toArray
-        .foreach(item => pw.println(item)))
+      evalDictionary.zipWithIndex.par.map(wordPair => {
+        val word = wordPair._1
+        println("Word search Index: "+wordPair._2 + "/" + evalDictionary.length)
+        val mainSentences = Source.fromFile(sampleParams.sentenceFilename).getLines()
+        mainSentences.filter(text => text.contains(word) && selectText(word))
+          .take(sampleParams.maxWordSamples)
+          .toArray
+      }).toArray.foreach(sentences=> sentences.foreach(sentence=>pw.println(sentence)))
+
       pw.close()
 
       createMainDataset(sampleParams, extractor, dictionaryFilename, datasetFilename)
@@ -232,7 +239,7 @@ object ExperimentSPL {
 
   def createSamples(): Unit = {
 
-    taskNames.foreach(taskName=> {
+    taskNames.foreach(taskName => {
       tokenization.foreach(extractorName => {
         selectionSizes.foreach(selectionSize => {
           val parCollection = samplingNames.par
@@ -257,7 +264,7 @@ object ExperimentSPL {
   }
 
   def createMajority(): Unit = {
-    taskNames.foreach(taskName=>{
+    taskNames.foreach(taskName => {
       tokenization.foreach(extractorName => {
         selectionSizes.foreach(selectionSize => {
           embedParams.taskName = taskName
@@ -269,14 +276,12 @@ object ExperimentSPL {
         })
       })
     })
-
   }
 
   def main(args: Array[String]): Unit = {
-    System.setProperty("org.bytedeco.openblas.load", "mkl")
+    //System.setProperty("org.bytedeco.openblas.load", "mkl")
     createSamples()
     createMajority()
-
   }
 }
 

@@ -1,6 +1,7 @@
 package evaluation
 
 import models.EmbeddingModel
+import sampling.experiments.SampleParams
 import utils.Params
 
 import java.io.PrintWriter
@@ -414,7 +415,7 @@ abstract class IntrinsicFunction() extends Serializable {
 
   def filter(group: Array[String]): Boolean
 
-  def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport
+  def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport
 
   def contains(dictionary: Map[String, Array[Float]], words: Array[String]): Boolean = {
     words.par.exists(subword => dictionary.contains(subword))
@@ -598,7 +599,7 @@ case class TextCosineOrder(var classifier: String, val wordSource: String, val w
   }
 
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = {
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = {
     val ier = new InstrinsicEvaluationReport()
       .incrementTestPair()
     val dictionary = model.getDictionary()
@@ -691,7 +692,7 @@ case class Text3CosAddAnalogyOrder(var classifier: String, val wordA: String, va
     EvalScore(tp, score)
   }
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = {
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = {
     val ier = new InstrinsicEvaluationReport().incrementTestPair()
     ier.incrementQueryCount(classifier, 1d)
     val evalScore = evaluate(model)
@@ -804,7 +805,7 @@ case class Text3CosAddAnalogy(var classifier: String, val wordA: String, val wor
     else evaluateAll(model)
   }
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = {
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = {
     val ier = new InstrinsicEvaluationReport().incrementTestPair()
     ier.incrementQueryCount(classifier, 1d)
 
@@ -938,7 +939,7 @@ case class Text3CosMulAnalogy(var classifier: String, val wordA: String, val wor
     else evaluateAll(model)
   }
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = {
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = {
     val ier = new InstrinsicEvaluationReport().incrementTestPair()
     ier.incrementQueryCount(classifier, 1d)
 
@@ -1055,7 +1056,7 @@ case class Text3CosAvgAnalogy(var classifier: String, sourcePairs: Array[(String
     else evaluateAll(model)
   }
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = {
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = {
     val ier = new InstrinsicEvaluationReport().incrementTestPair()
 
     val map = model.getDictionary()
@@ -1136,7 +1137,7 @@ case class SemEvalAnalogyOrder(val classifier: String, val semevalid: String, va
     EvalScore(tp, similarity)
   }
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = {
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = {
     val ier = new InstrinsicEvaluationReport()
     generatedAnalogies.par.map(analogy => analogy.evaluateReport(model, embedParams)).toArray.foreach(testQuery => {
       ier.append(testQuery)
@@ -1225,7 +1226,7 @@ case class SemEvalAnalogy(var classifier: String, semevalid: String, wordPairs: 
     }
   }
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = {
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = {
 
     val ier = new InstrinsicEvaluationReport()
     allanalogies.par.map(analogy => analogy.evaluateReport(model, embedParams)).toArray.foreach(testQuery => {

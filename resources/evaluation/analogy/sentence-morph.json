@@ -1,0 +1,29 @@
+{
+"intrinsic":[
+{
+      "label": "morphology",
+      "classifier": "Verb Suffixes",
+      "_comment": "mek/mak is necessary for verbs",
+      "text": [
+        "gelmek",
+        "gitmek",
+        "yapmak",
+        "bilmek",
+        "anlamak",
+        "görmek",
+        "söylemek",
+        "bulmak",
+        "vermek",
+        "etmek",
+        "istemek"
+      ],
+      "morphemes":
+      [
+        "Pass+Narr+Pres+A3sg+Cop",
+        "Pass+Acquire+Imp+A2sg",
+        "Prog1+A1pl",
+        "Past+A3sg"
+      ]
+}
+]
+}

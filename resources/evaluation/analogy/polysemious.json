@@ -1,0 +1,73 @@
+{
+  "intrinsic": [
+    
+    {
+      "label": "analogy",
+      "classifier": "polysemious",
+      "text": [
+        "ya + bal = peynir + ekmek",
+        "yaş + günü = doğum + günü",
+        "kara + araba = deniz + tekne",
+        "hayır + şer = iyilik + kötülük",
+        "ocak + yemek = fırın + börek",
+        "ay + uydu = yıldız + gezegen",
+        "ay + yıl  = gün + hafta",
+        "dil + ağız = ben + ten",
+        "güç + çetin = zor + zahmetli",
+        "iç + dış = astar + kumaş",
+        "açık + koyu = siyah + beyaz",
+        "geç + gece = erken + sabah",
+        "al + bayrak = mavi + deniz",
+        "arı + süt = saf + su",
+        "bağ + sıkı = düğüm + gevşek",
+        "dolu + yaz = kar + kış", 
+   	"düş + uyku = gerçek + uyanık",
+   	"gül + çiçek = kaz + kuş",
+   	"kır + saç = al + bayrak",
+   	"koca + adam = karı + kadın",
+   	"koy + deniz = in + dağ",
+   	"kap + dolap = kalem + kalemlik",
+   	"manda + himaye = cuhhuriyet + özgür",
+   	"mantar + şişe = lastik + araba",
+   	"pike + uçak = manevra + gemi",
+   	"pazar + elma = fırın + ekmek",
+   	"ünlü + yuvarlak = sesiz + sert",
+   	"boğaz + gemi = yol + araba"
+      ]
+    },
+     
+    {
+      "label": "analogy",
+      "classifier": "polysemious",
+      "text": [
+        "haber + ver = bilgi + ver",
+        "talimat + ver = emir + ver",
+        "baktı + ki = anladı + ki",
+        "kız + vur = sev + öp",
+        "yüz + say = elma + ye",
+        "uza + git = yaylan + git",
+        "çay + taş = nehir + ak",
+	"at + basket = vur + gol",
+        "bin + çık = düş + in",
+	"ek + yetiştir = sula + büyüt",
+        "yüz + deniz = yürü + yol"
+      ]
+    },
+    {
+      "label": "similarity",
+      "classifier": "polysemious",
+      "text": [
+        "yarasa:memeli",
+        "yarar:fayda",
+        "yüz:soy",
+        "yüz:sayı",
+        "kur:para",
+        "yat:tekne",
+        "al:kırmızı",
+        "al:yanak",
+        "kaç:fırla" 
+      ]
+    }    
+    
+  ]
+}

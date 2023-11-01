@@ -1,0 +1,43 @@
+{
+  "intrinsic": [
+    {
+      "label": "similarity",
+      "classifier": "Geo Locations",
+      "textA": "ankara",
+      "targets": ["paris","türkiye","fransa","bosna"]
+    },
+    {
+      "label": "similarity",
+      "semeval": "1A",
+      "classifier": "Taxonomic",
+      "texts": ["çiçek:tomurcuk", "dikdörtgen:kare", "araba:fiat", "araba:heçbek",
+        "ayakkabı:bot", "hayvan:kedi","memeli:keçi","okul:üniversite",
+        "politikacı:bakan", "ağaç:çam", "renk:yeşil"]
+    },
+    {
+      "label": "analogy",
+      "classifier": "Capital Locations",
+      "text": [
+        "ankara + türkiye = paris + fransa",
+        "ankara + türkiye = washington + abd",
+        "tokyo + japonya = berlin + almanya",
+        "bakü + azerbeycan = berlin + almanya",
+        "brüksel + belçika = kopenhag + danirmarka",
+        "newyork + amerika = istanbul + turkiye",
+        "zagrep + hırvatistan = madrid + ispanya",
+        "edinburgh + iskoçya = bağdat + ırak"
+      ]
+    },
+    {
+      "label": "analogy",
+      "classifier": "Gender",
+      "text": [
+        "kız + kraliçe = oğlan + kral",
+        "kız + oğlan = inek + boğa",
+        "amca + teyze = kız + erkek",
+        "amca + teyze = kız + erkek",
+        "anneanne + dede = kız + oğul"
+      ]
+    }
+  ]
+}

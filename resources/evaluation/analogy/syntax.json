@@ -1,0 +1,60 @@
+{
+  "intrinsic": [
+    {
+      "label": "similarity",
+      "classifier": "Accusative",
+      "textA": "kitabı",
+      "targets": [
+        "evi",
+        "türkiye",
+        "fransa",
+        "bosna"
+      ]
+    },
+   
+    {
+      "label": "morphology",
+      "classifier": "subcategorization-frames",
+      "text": [
+        "kitap",
+        "dolap",
+        "ev"
+      ],
+      "morphemes": [
+        "Acc",
+        "Dat",
+        "Abl",
+        "Gen",
+        "Ins",
+        "Equ"
+      ]
+    },
+    {
+      "label": "morphology",
+      "classifier": "Verb Suffixes",
+      "_comment": "mek/mak is necessary for verbs",
+      "text": [
+        "gelmek",
+        "gitmek",
+        "yapmak",
+        "bilmek",
+        "anlamak",
+        "görmek",
+        "söylemek",
+        "bulmak",
+        "vermek",
+        "etmek",
+        "istemek"
+      ],
+      "morphemes":
+      [
+        "Pass+Narr+Pres+A3sg+Cop",
+        "Pass+Acquire+Imp+A2sg",
+        "Prog1+A1pl",
+        "Past+A3sg"
+      ]
+    }
+    
+    
+  ]
+}

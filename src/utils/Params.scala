@@ -51,7 +51,9 @@ class Params {
   var nthreads = 4
 
   val modelFolder = "resources/models/"
-  val textFolder = "resources/texts/"
+  val textFolder = "resources/text/"
+  val intrinsicTextFolder = "resources/text/intrinsic/"
+
   val evaluationFolder = "resources/evaluation/"
   val dictionaryFolder = "resources/dictionary/"
   val resultFolder = "resources/results/"
@@ -94,12 +96,12 @@ class Params {
     this
   }
 
-  def createModel(name:String):EmbeddingModel={
+ /* def createModel(name:String):EmbeddingModel={
     if("cbow".equals(name)) new CBOWModel(this)
     else if("skip".equals(name)) new SkipGramModel(this)
     else if("lstm".equals(name)) new SelfAttentionLSTM(this)
     else null
-  }
+  }*/
 
   def corpusFilename():String={
     textFolder + corpusID() + ".txt"

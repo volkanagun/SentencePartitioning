@@ -9,20 +9,23 @@ import org.deeplearning4j.nn.conf.layers.recurrent.LastTimeStep
 import org.deeplearning4j.nn.conf.layers.{EmbeddingSequenceLayer, LSTM, OutputLayer, RnnOutputLayer}
 import org.deeplearning4j.nn.graph.ComputationGraph
 import org.nd4j.linalg.activations.Activation
+import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.dataset.MultiDataSet
 import org.nd4j.linalg.dataset.api.MultiDataSetPreProcessor
 import org.nd4j.linalg.dataset.api.iterator.MultiDataSetIterator
+import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
+import sampling.experiments.SampleParams
 import utils.Params
 
 import scala.io.Source
 
-class ExtrinsicPOS(params: Params) extends ExtrinsicLSTM(params) {
+class ExtrinsicPOS(params: SampleParams) extends ExtrinsicLSTM(params) {
 
   var categories: Array[String] = null
 
-  override def getClassifier(): String = "POS"
+  override def getClassifier(): String = "pos"
 
   override def getTraining(): String = {
     //dataset filename
@@ -63,18 +66,43 @@ class ExtrinsicPOS(params: Params) extends ExtrinsicLSTM(params) {
       val categorySize = labels().length
 
       override def next(i: Int): MultiDataSet = {
-        val (input, output) = samples.next()
-        val tokens = input.split("\\s+")
-        val inputOutput = tokens.map(word => word.split("/"))
-        val inputLeft = inputOutput.map(_.head).take(params.evalWindowLength)
-        val inputLeftArray = inputLeft.map(ngram => {
-          update(ngram)
-        })
-        val inputLeftOneHot = onehot(inputLeftArray)
-        val inputRightOneHot = onehot(inputLeftArray.reverse)
-        val outputIndices = inputOutput.map(_.last).map(output => labels().indexOf(output))
-        val outputArray = onehot(outputIndices, categorySize)
-        new MultiDataSet(Array(inputLeftOneHot, inputRightOneHot), Array(outputArray))
+
+
+        var inputLeftStack = Array[INDArray]()
+        var inputRightStack = Array[INDArray]()
+        var outputStack = Array[INDArray]()
+        var i = 0;
+        while (i < params.batchSize && samples.hasNext) {
+          val (input, output) = samples.next()
+          val tokens = input.split("\\s+")
+          val inputOutput = tokens.map(word => word.split("/"))
+
+          val inputLeft = inputOutput.map(_.head).take(params.evalWindowLength)
+          val inputLeftArray = inputLeft.map(ngram => {
+            retrieve(ngram)
+          })
+
+          val inputLeftIndex = index(inputLeftArray)
+          val inputRightIndex = index(inputLeftArray.reverse)
+          val outputIndices = inputOutput.map(_.last)
+            .map(output => labels().indexOf(output))
+            .take(params.evalWindowLength)
+
+          val outputArray = onehot(outputIndices, categorySize)
+
+
+          inputLeftStack :+= inputLeftIndex
+          inputRightStack :+= inputRightIndex
+          outputStack :+= outputArray
+          i = i + 1
+        }
+
+        val vLeft = Nd4j.vstack(inputLeftStack: _*)
+        val vRight = Nd4j.vstack(inputRightStack: _*)
+        val vOutput = Nd4j.vstack(outputStack: _*)
+
+
+        new MultiDataSet(Array(vLeft, vRight), Array(vOutput))
       }
 
       override def setPreProcessor(multiDataSetPreProcessor: MultiDataSetPreProcessor): Unit = ???
@@ -119,14 +147,14 @@ class ExtrinsicPOS(params: Params) extends ExtrinsicLSTM(params) {
         .activation(Activation.RELU)
         .build(), "rightemb")
       .addVertex("merge", new MergeVertex(), "leftout", "rightout")
-      .addLayer("output-lstm", new LastTimeStep(new LSTM.Builder().nIn(params.hiddenLength).nOut(params.hiddenLength)
+      .addLayer("output-lstm", new LSTM.Builder().nIn(params.hiddenLength).nOut(params.hiddenLength)
         .activation(Activation.RELU)
-        .build()), "merge")
+        .build(), "merge")
       .addLayer("output",
         new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
           .activation(Activation.SOFTMAX)
           .nOut(categorySize)
-          .dataFormat(RNNFormat.NCW)
+          .dataFormat(RNNFormat.NWC)
           .build(), "output-lstm")
       .setOutputs("output")
       .setInputTypes(InputType.recurrent(params.dictionarySize),
@@ -134,6 +162,7 @@ class ExtrinsicPOS(params: Params) extends ExtrinsicLSTM(params) {
       .build()
 
     val graph = new ComputationGraph(conf)
+
     updateWeights(graph)
 
 

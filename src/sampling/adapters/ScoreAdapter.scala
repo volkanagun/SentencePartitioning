@@ -18,10 +18,9 @@ abstract class ScoreAdapter(maxSelectSize: Int) extends Serializable {
   }
 
 
-
   def filter(array: Array[TextInstance]): Array[TextInstance]
 
-  def init(array:Array[TextInstance]):this.type
+  def init(array: Array[TextInstance]): this.type
 
   def update(array: Array[(Double, TextInstance)]): Array[TextInstance] = {
 
@@ -30,9 +29,11 @@ abstract class ScoreAdapter(maxSelectSize: Int) extends Serializable {
     array.map(_._2)
   }
 
-  def isStop() = count >= maxSelectSize
+  def isStop() = {
+    count >= maxSelectSize
+  }
 
   def status(): Unit = {
-    println("Status: "+count)
+    println("Status: " + count)
   }
 }

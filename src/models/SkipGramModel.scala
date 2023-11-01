@@ -3,11 +3,12 @@ package models
 import evaluation.{EvalScore, InstrinsicEvaluationReport}
 import org.deeplearning4j.models.word2vec.Word2Vec
 import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator
+import sampling.experiments.SampleParams
 import utils.Params
 
 import java.io.File
 
-class SkipGramModel(params:Params) extends CBOWModel(params) {
+class SkipGramModel(params:SampleParams) extends CBOWModel(params) {
 
   override def train(filename: String): EmbeddingModel = {
     val iter = new LineSentenceIterator(new File(filename))
@@ -20,7 +21,7 @@ class SkipGramModel(params:Params) extends CBOWModel(params) {
         .workers(params.nthreads)
         .minWordFrequency(params.freqCutoff)
         .layerSize(params.embeddingLength)
-        .windowSize(params.windowLength)
+        .windowSize(params.modelWindowLength)
         .epochs(params.epocs)
         .batchSize(params.batchSize)
         .seed(42)
@@ -57,5 +58,5 @@ class SkipGramModel(params:Params) extends CBOWModel(params) {
 
   override def filter(group: Array[String]): Boolean = true
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = new InstrinsicEvaluationReport()
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = new InstrinsicEvaluationReport()
 }

@@ -5,17 +5,18 @@ import org.deeplearning4j.models.word2vec.Word2Vec
 import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator
 import org.deeplearning4j.text.tokenization.tokenizer.TokenPreProcess
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory
+import sampling.experiments.SampleParams
 import utils.{Params, Tokenizer}
 
 import collection.JavaConverters._
 import java.io.{File, FileInputStream, FileOutputStream, ObjectInputStream, ObjectOutputStream, PrintWriter}
 
-class CBOWModel(params:Params) extends EmbeddingModel(params) {
+class CBOWModel(params:SampleParams) extends EmbeddingModel(params) {
 
   var vectorModel:Word2Vec = null
   def defaultTokenizer(): DefaultTokenizerFactory = {
     lazy val tokenPreProcess: TokenPreProcess = new TokenPreProcess {
-      val tokenizer = new Tokenizer()
+
       override def preProcess(s: String): String = {
         tokenizer.ngramFilter(s).mkString(" ")
       }
@@ -37,7 +38,7 @@ class CBOWModel(params:Params) extends EmbeddingModel(params) {
         .workers(params.nthreads)
         .minWordFrequency(params.freqCutoff)
         .layerSize(params.embeddingLength)
-        .windowSize(params.windowLength)
+        .windowSize(params.modelWindowLength)
         .epochs(params.epocs)
         .batchSize(params.batchSize)
         .seed(42)
@@ -45,10 +46,11 @@ class CBOWModel(params:Params) extends EmbeddingModel(params) {
         .iterations(1)
         .tokenizerFactory(factory)
         .elementsLearningAlgorithm("org.deeplearning4j.models.embeddings.learning.impl.elements.CBOW")
-        .allowParallelTokenization(true)
+        .allowParallelTokenization(false)
         .build()
 
       vectorModel.fit()
+      save()
     }
 
     this
@@ -61,17 +63,17 @@ class CBOWModel(params:Params) extends EmbeddingModel(params) {
       val vocabCache = table.getVocabCache()
       val vectors = table.vectors()
       val printer = new ObjectOutputStream(new FileOutputStream(filename))
-      var i = 0;
+
       val array = vectors.asScala.toArray
       printer.writeInt(array.length)
 
-      array.foreach {ind=>{
-        val word = vocabCache.elementAtIndex(i)
+      array.zipWithIndex.foreach {indPair => {
+        val word = vocabCache.elementAtIndex(indPair._2)
         val wordStr = word.getWord
-        val wordVector = ind.toFloatVector
+        val wordVector = indPair._1.toFloatVector
 
         printer.writeObject(wordStr)
-        printer.writeObject(ind.toFloatVector)
+        printer.writeObject(wordVector)
 
         update(wordStr, wordVector)
 
@@ -114,5 +116,5 @@ class CBOWModel(params:Params) extends EmbeddingModel(params) {
 
   override def filter(group: Array[String]): Boolean = true
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = new InstrinsicEvaluationReport()
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = new InstrinsicEvaluationReport()
 }

@@ -11,17 +11,20 @@ import org.deeplearning4j.nn.graph
 import org.deeplearning4j.nn.graph.ComputationGraph
 import org.nd4j.evaluation.classification.Evaluation
 import org.nd4j.linalg.activations.Activation
+import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.dataset.MultiDataSet
 import org.nd4j.linalg.dataset.api.MultiDataSetPreProcessor
 import org.nd4j.linalg.dataset.api.iterator.MultiDataSetIterator
 import org.nd4j.linalg.factory.Nd4j
+import org.nd4j.linalg.indexing.NDArrayIndex
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
+import sampling.experiments.SampleParams
 import utils.{Params, Tokenizer}
 
 import scala.io.Source
 
-abstract class ExtrinsicLSTM(params: Params) extends SelfAttentionLSTM(params)  {
+abstract class ExtrinsicLSTM(params: SampleParams) extends SelfAttentionLSTM(params)  {
   //use ELMO
   var inputDictionary = Map[String, Int]("dummy" -> 0)
 
@@ -56,7 +59,7 @@ abstract class ExtrinsicLSTM(params: Params) extends SelfAttentionLSTM(params)  
     val evaluation:Evaluation = computationGraph.evaluate(iterator(testingFilename))
 
     //Test TP Rates
-    EvalScore(evaluation.f1(), evaluation.accuracy())
+    EvalScore(evaluation.accuracy(), evaluation.f1())
   }
 
 
@@ -64,7 +67,7 @@ abstract class ExtrinsicLSTM(params: Params) extends SelfAttentionLSTM(params)  
     evaluate()
   }
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = {
+  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = {
     val ier = new InstrinsicEvaluationReport().incrementTestPair()
     val classifier = getClassifier()
     ier.incrementQueryCount(classifier, 1d)
@@ -89,15 +92,31 @@ abstract class ExtrinsicLSTM(params: Params) extends SelfAttentionLSTM(params)  
       var samples = loadSamples(filename)
 
       override def next(i: Int): MultiDataSet = {
-        val (input, output) = samples.next()
-        val inputLeft = tokenizer.ngramFilter(input).take(params.evalWindowLength)
-        val inputLeftArray = inputLeft.map(ngram => {
-          update(ngram)
-        })
-        val inputLeftOneHot = onehot(inputLeftArray)
-        val inputRightOneHot = onehot(inputLeftArray.reverse)
-        val outputArray = onehot(labels().indexOf(output), labels.length)
-        new MultiDataSet(Array(inputLeftOneHot, inputRightOneHot), Array(outputArray))
+        var inputLeftStack = Array[INDArray]()
+        var inputRightStack = Array[INDArray]()
+        var outputStack = Array[INDArray]()
+        var i=0;
+        while(i<params.batchSize && samples.hasNext) {
+          val (input, output) = samples.next()
+          val inputLeft = tokenizer.ngramFilter(input).take(params.evalWindowLength)
+          val inputLeftArray = inputLeft.map(ngram => {
+            update(ngram)
+          })
+          val inputLeftOneIndex = index(inputLeftArray)
+          val inputRightOneIndex = index(inputLeftArray.reverse)
+          val outputArray = onehot(labels().indexOf(output), labels.length)
+
+          inputLeftStack :+= inputLeftOneIndex
+          inputRightStack :+= inputRightOneIndex
+          outputStack :+= outputArray
+          i=i + 1
+        }
+
+        val vLeft = Nd4j.vstack(inputLeftStack:_*)
+        val vRight = Nd4j.vstack(inputRightStack:_*)
+        val vOutput = Nd4j.vstack(outputStack:_*)
+
+        new MultiDataSet(Array(vLeft, vRight), Array(vOutput))
       }
 
       override def setPreProcessor(multiDataSetPreProcessor: MultiDataSetPreProcessor): Unit = ???
@@ -120,12 +139,17 @@ abstract class ExtrinsicLSTM(params: Params) extends SelfAttentionLSTM(params)  
 
   def updateWeights(graph: ComputationGraph): ComputationGraph = {
 
-    val weight = graph.getVertex("embedding").paramTable(false).get("W")
+    load()
+    graph.init()
+    val vertex = graph.getVertex("embedding")
+
+    val weight = vertex.paramTable(false).get("W")
     dictionaryIndex.foreach { case (ngram, index) => {
       val array = dictionary(ngram)
-      weight.put(index, Nd4j.create(array))
-    }
-    }
+      weight.put(Array(NDArrayIndex.point(index), NDArrayIndex.all()), Nd4j.create(array))
+    }}
+
+    //vertex.setLayerAsFrozen()
     graph
   }
 
@@ -166,6 +190,7 @@ abstract class ExtrinsicLSTM(params: Params) extends SelfAttentionLSTM(params)  
       .build()
 
     val graph = new ComputationGraph(conf)
+    graph.init()
     updateWeights(graph)
 
 

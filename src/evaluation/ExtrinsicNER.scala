@@ -1,14 +1,15 @@
 package evaluation
 
+import sampling.experiments.SampleParams
 import utils.Params
 
 import scala.io.Source
 
-class ExtrinsicNER(params:Params) extends ExtrinsicPOS(params){
+class ExtrinsicNER(params:SampleParams) extends ExtrinsicPOS(params){
 
 
 
-  override def getClassifier(): String = "NER"
+  override def getClassifier(): String = "ner"
 
   override def getTraining(): String = {
     //dataset filename

@@ -1,0 +1,1804 @@
+{
+
+   
+  "intrinsic": [
+     
+    {
+    	"label": "classification",
+	"classify": ["past-tense", "subject-noun-clause"],
+	"samples":[
+		"top almaya çıkan çocuk yolda kayboldu.",
+		"tarlaya giden mevsim işçileri ilk hasadı yaptı.",
+		"direğe tımanan adam akıma kapıldı.",
+		"yaşı gelen futbolcu sporu bıraktı.",
+		"zamana meydan okuyan ağaç öldü.",
+		"zamanla gerçekleşen deniz yükselmesi şehiri içine aldı."
+	]
+    },
+    {
+    	"label": "classification",
+	"classify": ["past-tense", "object-noun-clause"],
+	"samples": [ 
+		"ben senin Fransızca konuştuğunu bilmiyordum.",
+		"tarlada kaybolan çocuk dere kenarında bulundu.",
+		"Ahmet Can'ın söylediklerini yanlış anlamasına şaşırdı.",
+		"Sen Ayşe'nin parti vereceğini duymuş muydun?",
+		"Ayça kimin geleceğini söyledi."
+	]
+    },
+    {
+    	"label": "classification",
+    	"classify": ["past-tense", "copula", "noun-clause"],
+	"samples": [
+		"birinci görevimiz çok çalışmak idi.",
+		"karşıdaki bina bizim evimiz idi."
+	
+	]
+    },
+    {	
+    	"label": "classification",
+        "classify" : ["noun-clause", "infinite-clause"],
+	"samples" : [
+		"ben dans etmek istiyorum",
+		"Kaz dağlarına tırmanmak istiyorum.",
+		"zaman zaman çok su içmek gerekiyor.",
+		"olayı nedir ne değildir bilmek lazım.",
+		"suyun içine düşmemek şart.",
+		"komutan askeri erken kalkmaya zorladı."		
+	]
+    },
+    {
+    	"label": "classification",    
+    	"classify" : ["noun-clause","subject-control"],
+	"samples"  : [
+		"Can Amerika'ya gitmeye karar verdi.",
+		"Ali bana içkiyi bırakmaya söz verdi.",
+		"Ayhan davetimi kabul etmek ile beni çok mutlu etti.",
+		"Ayşe evleri temizlemekten bıktı.",
+		"Karşısına çıkan ilk ayrımda dinlenmeyi tercih etti."
+		]
+    },
+    {
+    	"label": "classification",    
+	"classify" : ["noun-clause", "object-control"],
+	"samples" : [
+		"Annesi sigara içmeyi yasakladı.",
+		"Çocuğu eve gitmeye ikna etti.",
+		"Eve geç gelen kocasını suçladı."
+		]
+    },
+    {
+    	"label": "classification",    
+	"classify" : ["noun-clause", "no-control","arbitrary-pro"],
+	"samples": [
+		"tenis oynamak sağlıklıdır.",
+		"sigara içmek sağlığa zararlıdır.",
+		"cumhurbaşkanı depremzedelere yardımı arttırmayı deskteliyor"	
+	]
+    },
+    {
+    	"label": "classification",    
+	"classify" : ["noun-clause", "no-control","ungrammatical"],
+	"samples": [
+		"bu fıskiyeden fıkıştırma çok güzel olur.",
+		"burada havlamak zordur.",
+		"kümeste yumurtlamak iyi değil.",
+		"teyzemin halıyı beğenmeyişi mümkün.",
+		"adamın uçmadığı mümkün."
+	]
+    },
+    {
+    	"label": "classification",
+	"classify" : ["noun-clause", "act-clause"],
+	"samples" : [
+		"evlat telefonu almayı unuttu.",
+		"çocuk kapıyı kilitleyeceğini hatırladı. ",
+		"yaşam boyu öğrenci olmayı istedi.",
+		"havaya fişek atmanın güzelliğini düşledi.",
+		"bana içkiyi bırakacağına söz verdi.",
+		"bana elimdeki telefonu satın almayı önerdi.",
+		"kafetaryada çay içmeyi teklif etti."
+	]
+    },
+    {
+    	"label": "classification",
+	"classify" : ["noun-clause", "fact-clause"],
+	"samples" : [
+		"evlat telefonu aldığını unuttu.",
+		"çocuk kapının kilitlemiş olduğunu bilemedi.",
+		"hep çalıştığına pişman oldu.",
+		"zamanın nasıl geçtiğini hatırladı.",
+		"bana sigarayı bıraktığını söyledi."
+	]
+    },
+    {
+    	"label": "classification",
+	"classify" : ["noun-clause","object-clause", "independent-clause","subordinating"],
+	"samples" : [
+		"evlat sen hiç gelmeyeceksin sandı.",
+		"biz de Paris'e gidelim istedik.",
+		"sen de biliyorsun ki o bu sınav için pek çalışmadı.",
+		"ben sana diyorum ki bunu böyle yapamazsın.",
+		"umuyorum ki dediklerimi anlamışsındır.",
+		"bu hafta sonu pikniğe gideceğiz diye düşündük.",
+		"burada duracağız diye tuvalete gitmedik."
+	]
+    },
+    {
+    	"label": "classification",    
+	"classify" : ["relative-clause"],
+	"samples" : [
+		"dün okuduğum kitap köşede duruyor.",
+		"geçen gün buraya gelen çocuk istemişti.",
+		"çocuğu gören adam hemen yardıma koştu.",
+		"peyniri yiyen kedi miyavladı."
+	]
+	
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify" : ["relative-clause","zero-copula"],
+	"samples" : [
+		"çok güzel olan kitap duruyor.",
+		"içinde süt olmayan dolabı açtı.",
+		"parası olmayan adam ekonomi sınıfından bilet aldı."
+	]	
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify" : ["relative-clause","subject-object"],
+	"samples" : [
+		"kızın çiçek verdiği adam.",
+		"yaşama tutunan çocuk."
+	]
+	
+    },
+    {
+        "label": "classification",
+	"classify" : ["relative-clause","post-positional-object"],
+	"samples" : [
+		"okulun az ilerisine yapılan bina",
+		"yanda yapılan binanın son katı"
+	]
+	
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause","genetive"],
+	"samples" : [
+		"kızı üniversiteyi bu yıl bitiren adam",
+		"zaman meydan okuyan saatin camı"
+	]
+	
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause","time-ambiguity"],
+	"samples" : [
+		"balık yiyen çocuk önemli bir bilim adamı.",
+		"yağmur duasına çıkan köylüler var.",
+		"iğne yapan hemşire elidven takar.",
+		"onun pişirdiği yemekleri çok seviyorum."
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause","past-tense-(en/an)"],
+	"samples" : [
+		"balık yiyen çocuk sınava girdi.",
+		"yağmur duasına çıkan köylüler geldi.",
+		"iğne yapan hemşire geldi.",
+		"köprüyü yapan mühendis ödüllendirilecek"
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause","past-tense-(dık)"],
+	"samples" : [
+		"balık yediğini gördü.",
+		"sigara içtiğini fark etti.",
+		"zamane çocuk köprüyü yıktığını anlayacak.",
+		"kızarttığı hamsiden yağı al"
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause","past-tense-(yecek/yacak)"],
+	"samples" : [
+		"çocuklarına bakacak kadın.",
+		"programı sunacak sanatçı.",
+		"yarın yollayacağım mektup.",
+		"dünleyeceği konferansın şablonu."
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause","infinite-clause"],
+	"samples" : [
+		"yakacak odun kalmadı.",
+		"yiyecek birşey bulamıyorum.",
+		"yatacak otel bulamamız gerekli.",
+		"kesecek bıçak yok."
+	]
+},
+{
+    	"label": "classification",
+	"classify" : ["relative-clause", "past-tense-(mış)"],
+	"samples" : [
+		"kaynamış yumurta",
+		"haşlanmış patates",
+		"çürümüş domates",
+		"eskimiş elbiseler",
+		"okumuş insanlar",
+		"kızarmış et",
+		"yeni yıkanmış ayakkabılar"	
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause", "past-tense-(mış)","copula"],
+	"samples" : [
+		"kaynamış olan yumurta",
+		"haşlanmış olan patates",
+		"çürümüş olan domates",
+		"eskimiş olan elbiseler",
+		"okumuş olan insanlar",
+		"kızarmış olan et",
+		"yeni yıkanmış olan ayakkabılar"
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause", "-Ir, -mEz","unproductive"],
+	"samples" : [
+		"kaynar kazan",
+		"çalar saat",
+		"okur yazar insanlar",
+		"kolay okunabilir kitap",
+		"oturabilir bir ev",
+		"tahammül edilmez bir insan",
+		"dayanılmaz bir acı",
+		"yıkanabilir kumaş",
+		"güler yüz"	
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause", "-mE","unproductive"],
+	"samples" : [
+		"çelikten yapılma kap",
+		"süzme yoğurt",
+		"ezme salata",
+		"yapma çiçek"
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause", "-mEsI","unproductive"],
+	"samples" : [
+		"kahrolası adam",
+		"körolası talip",
+		"yıkılası ev",
+		"öpülesi eller"
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause", "-ki","independent"],
+	"samples" : [
+		"her kim ki bu işi yapar sonuçlarına katlanır.",
+		"ne zaman ki su akar burası göl olur."
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["noun-relative-clause"],
+	"samples"  : [
+		"yan apartmanda yaşayan yaşlı kadın kedilere bakıyor.",
+		"pırıl pırıl parlayan güneşe baktı.",
+		"zamanla solan çiçek kendine geldi.",
+		"görülen adam hemen kaçtı."
+	]
+}
+,
+{
+    	"label": "classification",
+	"classify" : ["relative-clause", "indefinite-head"],
+	"samples"  : [
+		"arayan soran oldu mu?",
+		"durakta inecek var mı?",
+		"son gülen iyi güler.",
+		"dün aldığımı okuyacağım.",
+		"temizleyiciden yeni getirdiğimi giyeceğim."
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify" : ["adverbial-clause", "time"],
+	"samples"  : [
+		"adam gelince onunla uzun uzun konuştu.",
+		"abim eve gelinceye kadar ben dönerim.",
+		"kaplumbağa ancak kafasını çıkarıp risk aldığında ilerleyebiliyor.",
+		"sinemaya gidince bilet alabilirsin.",
+		"bilirken susmak, bilmezken söylemek kadar kötüdür.",
+		"ev bir kez bittikten sonra duvarcı unutulur.",
+		"abim bu tabloyu götürür götürmez satın aldı.",
+		"ablam koştukça koşuyor."
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify" : ["adverbial-clause", "manner"],
+	"samples"  : [
+		"bebek ağlayarak uyandı.",
+		"çocuk sağa sola bakmadan yürüdü.",
+		"adam koşa koşa içeri girdi."
+	]
+    },
+    {
+    	"label": "classification",    
+	"classify" : ["adverbial-clause", "purpose"],
+	"samples" : [
+		"abim sınıfı geçtiği için çok mutlu oldu.",
+		"akşam vakti geldiği için kamp ateşi yaktık.",
+		"zamanla anlayacağını düşündüğü için boşandı.",
+		"karşıya çabuk geçtiği için birşey olmadı." 
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify" : ["adverbial-clause", "reason"],
+	"samples" : [
+		"abim sınıfı geçmek için çok çalıştı.",
+		"yemek pişirmek için kamp ateşi yaktık.",
+		"ablam saat almak için çarşıya çıktı.",
+		"yaşamak için eşkiyalardan saklandı." 
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify" : ["adverbial-clause", "concession"],
+	"samples" : [
+		"abim çok çalışmasına rağmen sınıfta kaldı.",
+		"yemek yemesine rağmen çok acıktı.",
+		"ablam alarm kurmasına rağmen yetişemedi.",
+		"cümleyi ezberlemesine rağmen söyleyemedi." 
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify" : ["adverbial-clause", "contrast"],
+	"samples" : [
+		"yatacağına git çalış.",
+		"karanlığa söveceğine kalk bir mum yak.",
+		"durup durup dinleneceğine mola ver.",
+		"cümleyi ezberleyeceğine anlamaya bak." 
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify" : ["adverbial-clause", "conditional"],
+	"samples" : [
+		"eğer yağmur yağarsa pikniğe gidemeyiz.",
+		"zaman az olursa soruları çözemez.",
+		"abim desteklenmezse yapamaz.",
+		"ablam üniversiteye giderse iş bulabilir." 
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify" : ["adverbial-clause", "intesifier"],
+	"samples" : [
+		"yağmur yağdıkça yağdı.",
+		"su aktıkça aktı.",
+		"zaman dardaldıkça daraldı.",
+		"yaşam uzadıkça uzadı." 
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify": ["noun-phrase"],
+	"samples":[
+		"iki akıllı kız.",
+		"iki becerikli çocuk.",
+		"yavaş yüzen kurbağa.",
+		"yaşlı ve uzun boylu teyze.",
+		"zamane kadınları.",
+		"siyah beyaz araba.",
+		"abimin dün yıkattığım güzel halısı",
+		"çingenenin uzun kurdelesi",
+		"arabanın sol alt çamurluğu"
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify": ["noun-phrase","quantifier"],
+	"samples":[
+		"iki akıllı kız.",
+		"iki becerikli çocuk.",
+		"benim bütün güzel arkadaşlarım."
+	]
+    }	
+    ,
+    {
+    	"label": "classification",    
+	"classify": ["prepositional-phrase","dative"],
+	"samples":[
+		"okula kadar koştu.",
+		"yılbaşına kadar izin alamam.",
+		"abim ablam kadar çalışkandır.",
+		"dün sabaha dek ders çalıştı.",
+		"bu kitaba dair fazla bilgi bulamadım.",
+		"yaşına rağmen sağlığı çok iyi.",
+		"ablamın fikrine dair görüş belirtti.",
+		"öğrencilere karşı önemli sorumlulukları var.",
+		"dekana göre öğrenciler başarılı.",
+		"öğrenci hocadan daha başarılı.",
+		"dün parka doğru yürüdüm.",
+		"ilkbahara doğru doğa canlanır."
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify": ["prepositional-phrase","ablative"],
+	"samples":[
+		"saat altıdan önce çıkmalıyım.",
+		"il dışına çıkmadan çay molası verelim.",
+		"kahvaltıdan sonra işe gitti.",
+		"şelaleden sonra yazlığa varacağız.",
+		"1980'den beri köyde oturuyoruz.",
+		"yazdan bu yana görüşemedik.",
+		"bundan dolayı başarılıyım.",
+		"senden başka arkadaşı yok.",
+		"arkadaşım aynı babası gibi davranıyor.",
+		"abim herşeyi çok iyi biliyormuş gibi davranır.",
+		"aynen bu kitap gibi"
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify": ["prepositional-phrase","ile/için/hakkında/tarafından"],
+	"samples":[
+		"partiye sen de benim ile gelir misin?",
+		"ayşe kapıyı anahtar ile açtı.",
+		"il dışına tren ile gideceğiz.",
+		"adaya deniz havası için gitti.",
+		"annem yeşil kazağı abim için ördü.",
+		"öğretmeni öğrenciye derse geç kaldığı için kızdı.",
+		"klasik müzik hakkında konuşma yaptı.",
+		"milletvekilleri halk tarafından seçilir."
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify": ["adjective-phrases","intensifying"],
+	"samples":[
+		"gerçek bir kahraman.",
+		"hakiki bir halı."
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify": ["adjective-phrases","dimension"],
+	"samples":[
+		"uzun tarla.",
+		"kısa patika.",
+		"geniş araç.",
+		"büyük ev."
+	]
+    },
+    {
+    	"label": "classification",    
+	"classify": ["adjective-phrases","shape"],
+	"samples":[
+		"yuvarlak masa.",
+		"kare elbise.",
+		"yamuk burun.",
+		"yassı çanta."
+	]
+    },
+    {
+    	"label": "classification",    
+	"classify": ["adjective-phrases","physical-property"],
+	"samples":[
+		"güçlü adam.",
+		"güzel kadın.",
+		"sağlıklı köpek."
+	]
+    },
+    {
+    	"label": "classification",    
+	"classify": ["adjective-phrases","speed"],
+	"samples":[
+		"yavaş kamyon.",
+		"hızlı kadın.",
+		"çabuk adam."
+	]
+    },
+    {
+    	"label": "classification",    
+	"classify": ["adjective-phrases","value"],
+	"samples":[
+		"değerli ev.",
+		"iyi çocuk.",
+		"kötü konuşma.",
+		"değerli müşteri."
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify": ["adjective-phrases","color"],
+	"samples":[
+		"kırmızı gül.",
+		"turuncu portakal.",
+		"yeşil elbise.",
+		"siyah araba."
+	]
+    }
+    ,
+    {
+    	"label": "classification",    
+	"classify": ["adjective-phrases","difficulty"],
+	"samples":[
+		"zor sınav.",
+		"kolay yarışma."
+	]
+    }
+    ,
+    {
+        "label": "classification",
+	"classify": ["adjective-phrases","qualification"],
+	"samples":[
+		"kesin cevap.",
+		"doğru yol.",
+		"mutlak değer"
+	]
+    }
+    ,
+    {
+        "label": "classification",
+	"classify": ["adjective-phrases","origin"],
+	"samples":[
+		"ingiliz kitabı.",
+		"amerikan arabası.",
+		"fransız mutfağı."
+	]
+    }
+    ,
+
+    {
+        "label": "classification",
+	"classify": ["adverb-phrases"],
+	"samples":[
+		"hızlı hızlı koştu.",
+		"çok yorucu.",
+		"biraz daha hızlı yürü.",
+		"şüphesiz sen haklısın",
+		"sadece kızlar",
+		"tam karşıda, en üstte",
+		"çok kötü konuşur.",
+		"çok iyi giyinir."
+	]
+    }
+    ,
+
+    {
+        "label": "classification",    
+	"classify": ["intransitive-verbs"],
+	"samples":[
+		"uyu", "üşü", "yıkan", "yürü" 
+	]
+    }
+    ,
+    {
+	"label": "classification",
+	"classify": ["transitive-verbs"],
+	"samples":[
+		"ye", "iç", "ütüle", "anla", "bil" 
+	]
+    },
+    {
+        "label": "classification",
+	"classify": ["ditransitive-verbs"],
+	"samples":[
+		"daya", "sor", "gizle", "gönder", "yolla", "ver", "yerleştir" 
+	]
+    }
+    ,
+    {
+        "label": "classification",
+	"classify": ["oblique-object-verbs"],
+	"samples":[
+		"bak", "hoşlan", "nefret et" 
+	]
+    }
+    ,
+    {
+        "label": "classification",
+	"classify": ["copular-verbs"],
+	"samples":[
+		"abim geçen yıl öğrenci idi.",
+		"geçen ilk kişi oldu.",
+		"Nesrin bir Yaşar Kemal hayranıdır.",
+		"aşkın gözü kördür.",
+		"herşey senin içinmiş",
+		"bu sefer sınav soruları çok basitmiş",
+		"her insanının dilinin izi de parmak izi gibi farklıdır.",
+		"evliliğin süresi, evlilik törenine harcanan parayla ters orantılıdır.",
+		"o çok mutlu görünüyor.",
+		"köyde hava çok güzel." 
+	]
+    }
+    ,
+    {
+	"label": "classification",
+	"classify": ["copular-verbs","changed-state"],
+	"samples":[
+		"abim doktor oldu.",
+		"ablam hasta oldu.",
+		"adam yorgun düştü." 
+	]    
+    },
+    {
+    	"label": "classification",
+    	"classify": ["cordination"],
+	"samples":[
+		"abim ders çalıştı ve ablam makale okudu.",
+		"hem pasta getirdi hem de kek pişirdi.",
+		"abim işe gitti ve bütün gün çalıştı.",
+		"ya çok çalış ya da işini bırak.",
+		"ne çalıştı ne de işe gitti."
+	]
+    },
+    {
+    	"label": "classification",
+	"classify": ["cordination-conjunctions"],
+	"samples":[
+		"abimin bir kedisi ve iki köpeği var.",
+		"annen ve baban dün bize geldiler.",
+		"abim çok güzel ve akıcı konuşur.",
+		"ablam çok akıllı ve güzel.",
+		"ablam aynı bir balerin gibi yürür ve dans eder."
+	]
+    },	
+  
+    {
+      "label": "similarity",
+      "classifier": "Geo Locations",
+      "textA": "ankara",
+      "targets": [
+        "paris",
+        "türkiye",
+        "fransa",
+        "bosna"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "1A",
+      "classifier": "Taxonomic",
+      "texts": [
+        "çiçek:tomurcuk",
+        "dikdörtgen:kare",
+        "araba:fiat",
+        "araba:heçbek",
+        "ayakkabı:bot",
+        
+        "hayvan:kedi",
+        "hayvan:köpek",
+        "hayvan:yarasa",
+        "hayvan:sincap",
+        "hayvan:karınca",
+        "hayvan:keçi",
+        "hayvan:aslan",
+        "hayvan:balina",
+        "hayvan:tavşan",
+        "hayvan:inek",
+        
+        "memeli:keçi",
+        "memeli:yunus",
+        "memeli:yarasa",
+        "memeli:inek",
+        "memeli:yunus",
+        "memeli:balina",
+        "memeli:maymun",      
+        
+        "okul:üniversite",
+        "okul:lise",
+        "okul:anaokulu",
+        "okul:ortaokul",
+        "okul:ilkokul",        
+        "politikacı:bakan",
+        "politikacı:milletvekili",
+        
+        
+        "ağaç:çam",
+        "ağaç:selvi",
+        "ağaç:palmiye",
+        "ağaç:ladin",
+        
+        "çiçek:begonvil",
+        "çiçek:papatya",
+        "çiçek:lale",
+        "çiçek:gül",
+        "çiçek:nilüfer",
+        "çiçek:yasemin",
+        
+        "renk:yeşil",
+        "renk:kırmızı",
+        "renk:turuncu",
+        "renk:mavi",
+        "renk:eflatun",
+        "renk:beyaz",
+        "renk:sarı"
+        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "1B",
+      "classifier": "Functional",
+      "texts": [
+        "silah:bıçak",
+        "silah:kılıç",
+        "çember:oyuncak",
+        "beyzbol:sopa"
+        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "1C",
+      "classifier": "Singular Collective",
+      "texts": [
+        "giysi:pantolon",
+        "ilaç:merhem",
+        "renk:mavi",
+        "renk:kırmızı",
+        "internet:site",
+        "kitap:roman",
+        "ışık:lamba",
+        "et:kıyma",
+        "mobilya:dolap",
+        "içecek:süt",
+        "içecek:ayran",
+        "bilgisayar:dizüstü",
+        "baba:aile",
+        "balık:somon",
+        "sanat:resim",
+        "uzay:yıldız",
+        "çicek:gül"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "1D",
+      "classifier": "Class Individual",
+      "texts": [
+        "dağ:Everest",
+        "dağ:Alp",
+        "şehir:Ankara",        
+        "şehir:Berlin",
+        "gezegen:Mars",
+        "yıldız:güneş",
+        
+        "ülke:Türkiye",
+        "ülke:Fransa",
+        "ülke:Almanya",
+        "ülke:İngiltere"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2A",
+      "classifier": "Object:Component",
+      "texts": [
+        "araba:motor",
+        "uçak:motor"
+        "saat:akrep",
+        "kalem:uç",
+        "dolap:kapak"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2B",
+      "classifier": "Collection:Member",
+      "texts": [
+        "orman:ağaç",
+        "filo:gemi",
+        "takım:oyuncu"        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2C",
+      "classifier": "Mass:Portion",
+      "texts": [
+        "su:damla",
+        "kilometre:metre",
+        "zaman:an",
+        "madde:molekül",
+        "atom:çekirdek",
+        "pizza:dilim"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2D",
+      "classifier": "Event:Feature",
+      "texts": [
+        "düğün:gelin",
+        "maç:top",
+        "toplantı:konu"
+
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2E",
+      "classifier": "Activity:Stage",
+      "texts": [
+        "alışveriş:ödeme",
+        "yolculuk:varış",
+        "tırmanış:zirve",
+        "gezi:mola"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2F",
+      "classifier": "Item:Topological Part",
+      "texts": [
+        "oda:pencere",
+        "ev:balkon",
+        "araba:bagaj",
+        "uçak:kokpit",
+        "tren:vagon"
+        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2G",
+      "classifier": "Object:Stuff",
+      "texts": [
+        "buzul:buz",
+        "parke:tahta",
+        "tuz:sodyum",
+        "işlemci:transistör",
+        "duvar:beton",
+        "deniz:su"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2H",
+      "classifier": "Creature:Possession",
+      "texts": [
+        "miyoner:para",
+        "yazar:telif",
+        "ayı:mağara",
+        "öğretmen:tebeşir",
+        "fırıncı:ekmek",
+        "kuş:tüy",
+        "çiftçi:mahsul"        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2I",
+      "classifier": "Item:Distinctive Nonpart",
+      "texts": [
+        "tundra:ağaç",
+        "at:kanat",
+        "boşluk:madde",
+        "mükemmelliyet:hata"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "2J",
+      "classifier": "Ex-part:Ex-possesion",
+      "texts": [
+        "metal:atık",
+        "dönek:inanç",
+        "tahta:kıymık"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3A",
+      "classifier": "Synonymity",
+      "texts": [
+        "araba:oto",
+        "hızlı:çabuk",
+        "yetişkin:olgun",
+	"kırmızı:al",
+	"aksi:ters",
+	"ana:anne",
+	"anlam:mana",
+	"acemi:toy",
+	"bellek:hafıza",
+	"bilinç:şuur",
+	"cahil:bilgisiz",
+	"devir:çağ",
+	"fakir:yoksul",
+	"gıda:besin",
+	"hiddet:öfke",
+	"hadise:olay",
+	"ırk:soy",
+	"ilginç:enteresan",
+	"kafiye:uyak",
+	"kanıt:delil",
+	"mağlup:yenik",
+	"suni:yapay",
+	"sulh:barış",
+	"sınav:imtihan",
+	"şöhret:ün",
+	"şüphe:kuşku",
+	"şuur:bilinç",
+	"tanık:şahit",
+	"teklif:öneri",
+	"ülkü:ideal",
+	"vatan:yurt",
+	"yapıt:eser",
+	"yargıç:hakim",
+	"zaman:vakit"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3B",
+      "classifier": "Dimensional Similarity",
+      "texts": [
+        "meltem:bora",
+        "heves:coşkunluk",
+        "pişmek:kaynamak",
+        "yetenek:ustalık",
+        "akıntı:nehir"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3C",
+      "classifier": "Dimensional Excessive",
+      "texts": [
+        "şıklık:züppelik",
+        "ilgili:takıntılı",
+        "ince:zayıf",
+        "nemli:ıslak"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3D",
+      "classifier": "Dimensional Naughty",
+      "texts": [
+        "kopyalamak:aşırmak"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3E",
+      "classifier": "Conversion",
+      "texts": [
+        "çırak:usta",
+        "üzüm:şarap",
+        "tay:at",
+        "oğlan:adam",
+        "kız:kadın",
+        "hamile:anne"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3F",
+      "classifier": "Attribute Similarity",
+      "texts": [
+        "tırmık:çatal",
+        "kule:uç",
+        "vadi:çukur"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3G",
+      "classifier": "Coordinates",
+      "texts": [
+        "oğlan:kız",
+        "dev:cüce",
+        "kadın:adam"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "3H",
+      "classifier": "Change",
+      "texts": [
+        "müzik:ritim",
+        "maç:skor",
+        "deniz:derinlik",
+        "dağ:yükseklik",
+        "yol:mesafe"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4B",
+      "classifier": "Contradictory",
+      "texts": [
+        "canlı:ölü",
+        "hatırlamak:unutmak",
+        "suçlu:masum",
+        "ağır:hafif",
+        "ceza:ödül",
+        "cimri:cömert",
+        "dar:geniş",
+        "hayır:şer",
+        "yerli:yabancı",
+        "üretici:tüketici"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4B",
+      "classifier": "Contrary",
+      "texts": [
+        "yaşlı:genç",
+        "mutlu:üzgün",
+        "zayıf:şiman",
+        "düz:pürüzlü",
+        "uzun:kısa"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4C",
+      "classifier": "Reverse",
+      "texts": [
+        "al:ver",
+        "genleş:büzül",
+        "alçat:yükselt",
+        "doldur:boşalt",
+        "kalk:otur",
+        "gir:çık",
+        "tırman:in"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4D",
+      "classifier": "Directional",
+      "texts": [
+        "ön:arka",
+        "alt:üst",
+        "sol:sağ",
+        "doğu:batı",
+        "iç:dış",
+        "yukarı:aşağı"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4E",
+      "classifier": "Incompatible",
+      "texts": [
+        "yavaş:durağan",
+        "uyanık:umursamaz",
+        "dürüst:riyakar"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4F",
+      "classifier": "Asymmetric Contrary*",
+      "texts": [
+        "sıcak:soğuk",
+        "kuru:nemli",
+        "şişman:cılız",
+        "geniş:minik",
+        "zengin:muhtaç"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4G",
+      "classifier": "Pseudoantonym*",
+      "texts": [
+        "popüler:utangaç",
+        "doğru:kötü",
+        "inan:yalanla",
+        "ittir:çekiştir"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "4H",
+      "classifier": "Defective*",
+      "texts": [
+        "kekele:konuş",
+        "miyop:net",
+        "topalla:yürü"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5A",
+      "classifier": "Item - Attribute (Noun:Adjective)",
+      "texts": [
+        "dilenci:fakir",
+	"zengin:paralı",
+	"şampiyon:başarılı",
+	"yarışçı:hızlı",
+	"usta:becerikli",
+	"tüy:hafif",
+	"pamuk:yumuşak",
+	"tahta:sert",
+	"süre:çabuk"	
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5B",
+      "classifier": "Object Attribute:Condition (adjective:adjective)",
+      "texts": [
+        "hızlı:çabuk",
+        "yavaş:durağan"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5C",
+      "classifier": "Object:State (noun:noun)",
+      "texts": [
+        "dilenci:yoksulluk",
+        "çıkarak:acemilik",
+        "usta:ustalık",
+        "genç:gençlik",
+        "yaşlı:yaşlılık",
+        "buz:erime",
+        "su:buharlaşma",
+        "otobüs:hareket",
+        "öğrenci:çalışma",
+        "öğrenci:mezuniyet",
+        "kar:yağış"
+        
+        
+        
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5D",
+      "classifier": "Agent Attribute:State (adjective:noun)",
+      "texts": [
+        "kavgacı:kavga",
+        "suskun:sessizlik",
+        "üzgün:keder",
+        "donuk:soğuk",
+        "mutlu:memnuniyet"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5E",
+      "classifier": "Object:Typical Action (noun:verb)",
+      "texts": [
+        "kavgacı:kavga",
+        "suskun:sessizlik"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5F",
+      "classifier": "Agent/Object Attribute:Typical Action (adjective:verb)",
+      "texts": [
+        "yenebilir:ye",
+        "görünebilir:bak",
+        "alınabilir:al"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5G",
+      "classifier": "Action:Attribute",
+      "texts": [
+        "kır:kırık",
+        "sakla:saklı"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5H",
+      "classifier": "Action:Object Attribute",
+      "texts": [
+        "temizle:kirli",
+        "kokla:kokulu",
+        "iç:içilebilir"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "5I",
+      "classifier": "Action:Resultant Attribute (verb:noun/adjective)",
+      "texts": [
+        "benekle:nokta",
+        "kır:kırılmış",
+        "ısıt:sıcak",
+        "temizle:temiz",
+        "ye:doymuş"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6A",
+      "classifier": "Item:NonAttribute (noun/adjective)",
+      "texts": [
+        "ahenk:uyumsuz",
+        "kale:güçsüz",
+        "görgü:ahlaksız"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6B",
+      "classifier": "Object Attribute:Noncondition (adjective:adjective)",
+      "texts": [
+        "kırılgan:kalıpsı",
+        "avutulamaz:avunmuş",
+        "emsal:eleştirilen"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6C",
+      "classifier": "Object:Nonstate (noun:noun)",
+      "texts": [
+        "ruhsuz:cingöz",
+        "ölümsüz:ölüm",
+        "bakire:hafifmeşreplik"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6D",
+      "classifier": "Attribute:Nonstate (adjective:noun)",
+      "texts": [
+        "ödül almış:şeref",
+        "açlık:bolluk"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6E",
+      "classifier": "Object:Atypical Action (noun:verb)",
+      "texts": [
+        "münzevi:sosyalleş",
+        "münzevi:hoşgör",
+        "sahip:küçümse"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6F",
+      "classifier": "Agent/Object Attribute: A typical Action (adjective:verb)",
+      "texts": [
+        "sessiz:konuş",
+        "çarpıtmak:anla",
+        "uyuşuk:hareketlendir"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6G",
+      "classifier": "Action:Action Nonattribute*",
+      "texts": [
+        "yavaşla:hızlı",
+        "tırman:alçak",
+        "düzelt:eğik"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "6H",
+      "classifier": "Action:Object Nonattribute",
+      "texts": [
+        "süsle:sade",
+	"gör:saklı",
+	"tutun:boşuk"	
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7A",
+      "classifier": "Agent:Object",
+      "texts": [
+        "terzi:elbise",
+        "kahin:kehanet",
+        "jüri:karar",
+        "fırıncı:un",
+        "heykeltraş:taş",
+        "tesisatçı:boru",
+        "aşçı:yemek",
+        "öğretmen:ödev",
+        "mimar:bina",
+        "sanatçı:sanat",
+        "öğretmen:kitap",
+        "bahçıvan:bahçe",
+        "yazar:daktilo",
+        "yazar:kalem",
+        "şair:mısra",
+        "yazar:hikaye",
+        "sanatçı:resim",
+        "müzisyen:şarkı",
+        "şef:tarif"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7B",
+      "classifier": "Agent:Recipient",
+      "texts": [
+        "doktor:hasta",
+        "usta:çırak",
+        "hakim:davacı",
+        "öğretmen:öğrenci"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7C",
+      "classifier": "Agent:Instrument",
+      "texts": [
+        "çiftçi:traktör",
+        "orkestra şefi:çubuk",
+        "biçici:tırpan",
+        "taklitçi:kalem",
+        "kundakçı:kibrit"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7D",
+      "classifier": "Action:Object",
+      "texts": [
+        "sür:toprak",
+        "azarlamak:çekin",
+        "ele:buğday",
+        "kravat:ilmek",
+        "af:günah"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7E",
+      "classifier": "Action:Recipient",
+      "texts": [
+        "öğret:öğrenci"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7F",
+      "classifier": "Object:Recipient",
+      "texts": [
+        "miras:mirasçı",
+        "konuşma:dinleyici",
+        "gösteri:izleyici",
+        "ödül:şampiyon"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7G",
+      "classifier": "Object:Instrument",
+      "texts": [
+        "hasta:stetoskop",
+        "su:oluk",
+        "keman:yay",
+        "boru:anahtar"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "7H",
+      "classifier": "Recipient:Instrument",
+      "texts": [
+        "mirasçı:vasiyetname"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8A",
+      "classifier": "Cause:Effect",
+      "texts": [
+        "gizem:şaşkınlık",
+        "şaka:kahkaha"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8B",
+      "classifier": "Cause:Compensatory Action",
+      "texts": [
+        "açlık:ye",
+        "yorgunluk:uyu"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8C",
+      "classifier": "Enabling Agent:Object",
+      "texts": [
+        "kibrit:mum",
+        "mazot:araba",
+        "anımsatıcı:anı"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8D",
+      "classifier": "Action/Activity:Goal",
+      "texts": [
+        "yemek:doygunluk",
+        "koş:kaç",
+        "yarış:ödül",
+        "gübrele:yetiş"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8E",
+      "classifier": "Agent:Goal",
+      "texts": [
+        "hacı:türbe",
+        "avcı:av",
+        "yarışma:ödül",
+        "katil:ölüm",
+        "dağcı:zirve"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8F",
+      "classifier": "Instrument:Goal",
+      "texts": [
+        "anestezik:uyuşma",
+        "ayar:denge",
+        "kamuflaj:aldatma",
+        "silah:intikam",
+        "yanıltmaca:aldatma"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8G",
+      "classifier": "Instrument:Intended Action",
+      "texts": [
+        "silah:vur",
+        "tokmak:ez",
+        "traktör:sür",
+        "klavye:yaz",
+        "fare:tıkla",
+        "telefon:ara"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "8H",
+      "classifier": "Prevention",
+      "texts": [
+        "ilaç:haşere",
+        "sabitleyici:oynaklık",
+        "panzehir:zehir",
+        "yağmur:kuraklık"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9A",
+      "classifier": "Item:Location",
+      "texts": [
+        "cephanelik:silah",
+        "cami:imam",
+        "kalemlik:kalem",
+        "otopark:araba",
+        "üniversite:hoca",
+        "mobilyacı:mobilya",
+        "havaalanı:uçak",
+        "eczane:ilaç",
+        "manav:meyve"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9B",
+      "classifier": "Location:Process/Product",
+      "texts": [
+        "fırın:ekmek",
+        "okul:öğrenme"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9C",
+      "classifier": "Location:Action/Activity",
+      "texts": [
+        "okul:öğren",
+        "yol:sür",
+        "deniz:yüz",
+        "sinema:izle"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9D",
+      "classifier": "Location:Instrument/Associated Item",
+      "texts": [
+        "okul:kitap",
+        "çiflik:traktör",
+        "plaj:mayo"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9E",
+      "classifier": "Contiguity",
+      "texts": [
+        "kıyı:okyanus",
+        "kaldırım:yol"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9F",
+      "classifier": "Time:Action/Activity",
+      "texts": [
+        "yaz:hasat",
+        "çocukluk:oyun"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9G",
+      "classifier": "Time:Associated Item",
+      "texts": [
+        "emeklilik:maaş",
+        "bebeklik:beşik",
+        "kış:kar",
+        "sonbahar:yağmur"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9H",
+      "classifier": "Sequence",
+      "texts": [
+        "önsöz:öykü",
+        "başlangıç:gelişim",
+        "final:senfoni"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "9I",
+      "classifier": "Attachment",
+      "texts": [
+        "kemer:bel",
+        "perçin:kiriş",
+        "şapka:baş",
+        "atkı:boyun",
+        "çiçek:bahçe"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10A",
+      "classifier": "Sign:Significant",
+      "texts": [
+        "siren:tehlike",
+        "diploma:eğitim",
+        "yağmur:fırtına",
+        "kırmızı:dur",
+        "ameliyat:hastane",
+        "bayrak:millet",
+        "zil:ders"
+      
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10B",
+      "classifier": "Expression",
+      "texts": [
+        "gülümseme:samimiyet",
+        "ağıt:ıstırap",
+        "methiye:övgü",
+        "kucaklamak:sevgi",
+        "azarlama:kınama",
+        "beğenme:beğeni"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10C",
+      "classifier": "Representation",
+      "texts": [
+        "kişi:portre",
+        "kişi:profil",
+        "fon:görünüm",
+        "günlük:kişi",
+        "olay:haber"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10D",
+      "classifier": "Plan",
+      "texts": [
+        "gündem:toplantı",
+        "prosedür:diagram",
+        "tarife:kek",
+        "menü:yemek",
+        "müfredat:ders",
+        "harita:şehir",
+        "koregrafi:dans",
+        "proje:bina"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10E",
+      "classifier": "Knowledge",
+      "texts": [
+        "kuşbilim:kuşlar",
+        "psikoloji:akıl",
+        "dahiliye:böbrek",
+        "gökbilim:yıldızlar",
+        "mühendis:inşaat",
+        "pilot:uçak",
+        "şöför:otobüs",
+        "aşçı:yemek",
+        "asker:cephane"
+      ]
+    },
+    {
+      "label": "similarity",
+      "semeval": "10F",
+      "classifier": "Concealment",
+      "texts": [
+        "rumuz:ad",
+        "kamuflaj:yer",
+        "maske:yüz",
+        "gizlen:kimlik",
+        "bant:kutu"
+      ]
+    },
+    {
+      "label": "analogy",
+      "classifier": "Capital Locations",
+      "text": [
+        "ankara + türkiye = paris + fransa",
+        "ankara + türkiye = washington + abd",
+        "tokyo + japonya = berlin + almanya",
+        "bakü + azerbeycan = berlin + almanya",
+        "brüksel + belçika = kopenhag + danirmarka",
+        "newyork + amerika = istanbul + turkiye",
+        "zagrep + hırvatistan = madrid + ispanya",
+        "edinburgh + iskoçya = bağdat + ırak"
+      ]
+    },
+    {
+      "label": "analogy",
+      "classifier": "Gender",
+      "text": [
+        "kız + kraliçe = oğlan + kral",
+        "kız + oğlan = inek + boğa",
+        "amca + teyze = kız + erkek",
+        "anneanne + dede = kız + oğul"
+      ]
+    },
+    {
+      "label": "analogy",
+      "classifier": "Synonyms",
+      "filename": "resources/evaluations/synonyms-analogy-tr.txt"
+    },
+    {
+      "label": "analogy",
+      "classifier": "Antonyms",
+      "filename": "resources/evaluations/antonyms-analogy-tr.txt"
+    },
+    {
+      "label": "analogy",
+      "classifier": "Capital Locations",
+      "filename": "resources/evaluations/capitals-analogy-tr.txt"
+    },
+    {
+      "label": "morphology",
+      "classifier": "subcategorization-frames",
+      "text": [
+        "kitap",
+        "dolap",
+        "ev"
+      ],
+      "morphemes": [
+        "Acc",
+        "Dat",
+        "Abl",
+        "Gen",
+        "Ins",
+        "Equ"
+      ]
+    },
+    {
+      "label": "morphology",
+      "classifier": "Verb Suffixes",
+      "_comment": "mek/mak is necessary for verbs",
+      "text": [
+        "gelmek",
+        "gitmek",
+        "yapmak",
+        "bilmek",
+        "anlamak",
+        "görmek",
+        "söylemek",
+        "bulmak",
+        "vermek",
+        "etmek",
+        "istemek"
+      ],
+      "morphemes":
+      [
+        "Pass+Narr+Pres+A3sg+Cop",
+        "Pass+Acquire+Imp+A2sg",
+        "Prog1+A1pl",
+        "Past+A3sg"
+      ]
+    },
+    {
+      "label": "similarity",
+      "classifier": "polysemious",
+      "text": [
+        "yarasa:memeli",
+        "yarar:fayda",
+        "yüz:soy",
+        "yüz:sayı",
+        "kur:para",
+        "yat:tekne",
+        "al:kırmızı",
+        "al:yanak",
+        "kaç:fırla" 
+      ]
+    }   
+    
+  ]
+}

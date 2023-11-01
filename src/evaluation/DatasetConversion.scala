@@ -8,17 +8,22 @@ import scala.io.Source
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
 
+import java.util.Locale
+
 class DatasetConversion {
+
+  val locale = new Locale("tr")
 
   def createSentimentVocabulary(): Unit = {
     val tokenizer = new Tokenizer()
     val sentimentFilename = "resources/evaluation/sentiment/train.txt"
-    val filename = "resources/dictionaries/sentiment.txt"
+    val filename = "resources/dictionary/sentiment.txt"
     val pw = new PrintWriter(filename)
     Source.fromFile(sentimentFilename).getLines()
       .map(line => {
         line.split("\\t").head
-      }).flatMap(sentence => tokenizer.standardTokenizer(sentence)).toSet.toArray.foreach(word => {
+      }).flatMap(sentence => tokenizer.standardTokenizer(sentence)
+        .filter(word => word.head.isLower)).toSet.toArray.foreach(word => {
         pw.println(word)
       })
     pw.close()
@@ -28,27 +33,35 @@ class DatasetConversion {
   def createPOSVocabulary(): Unit = {
 
     val posFilename = "resources/evaluation/pos/train.txt"
-    val filename = "resources/dictionaries/pos.txt"
+    val filename = "resources/dictionary/pos.txt"
     val pw = new PrintWriter(filename)
     Source.fromFile(posFilename).getLines().flatMap(line => {
-        line.split("[\t\\s]+").map(token=> token.split("/").head)
-      }).toSet.toArray.foreach(word => {
-        pw.println(word)
-      })
+      line.split("[\t\\s]+").map(token => token.split("/").head)
+        .filter(word => word.trim.nonEmpty)
+        .filter(word => word.head.isLower && word.head.isLetter)
+        .map(word => word.toLowerCase(locale))
+    }).toSet.toArray.foreach(word => {
+      pw.println(word)
+    })
     pw.close()
   }
 
   def createNERVocabulary(): Unit = {
 
     val sentimentFilename = "resources/evaluation/ner/train.txt"
-    val filename = "resources/dictionaries/ner.txt"
+    val filename = "resources/dictionary/ner.txt"
     val pw = new PrintWriter(filename)
     implicit val formats = DefaultFormats
     val lines = Source.fromFile(sentimentFilename, "UTF-8").getLines()
 
     lines.flatMap(line => {
       line.split("[\\s\\t]+")
-        .map(token=> token.split("/").head)
+        .map(token => token.split("/").head)
+        .filter(word => word.trim.nonEmpty)
+        .filter(word => {
+          word.head.isLower && word.head.isLetter
+        })
+        .map(_.toLowerCase(locale))
     }).toSet.toArray.foreach(word => {
       pw.println(word)
     })
@@ -146,7 +159,11 @@ object DatasetConversion extends DatasetConversion() {
     //convertNER("resources/evaluation/ner/test.json","test")
     //convertPOS("resources/evaluation/pos/boun-train.conllu","train")
     //convertPOS("resources/evaluation/pos/boun-test.conllu","test")
-    convertSentiment("resources/evaluation/sentiment/train.csv", "train")
-    convertSentiment("resources/evaluation/sentiment/test.csv", "test")
+    //convertSentiment("resources/evaluation/sentiment/train.csv", "train")
+    //convertSentiment("resources/evaluation/sentiment/test.csv", "test")
+
+    createNERVocabulary()
+    createSentimentVocabulary()
+    createPOSVocabulary()
   }
 }
