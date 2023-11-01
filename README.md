@@ -8,6 +8,10 @@ In the second stage, a deep learning model is used to extract word embeddings fr
 The evaluations are saved to resources/results folder along with the parameters. The parameters are used for hasing the result file. So, for each set of parameters such as extraction model, embedding vector length, and selection method, there should be a unique result file.   
 
 ExperimentSPL is the main entry point for the first stage of the program. In ExperimentalSPL the parameters relevant to the selected active selection methods are used to create a dataset consists of selected sentences. 
-ExperimentSPL requires a large line by line text corpus and a large word embedding binary. Before running ExperimentSPL both files must be placed with paths resources/text/sentences/sentences-tr.txt and resources/binary/huewei.bin respectively.
+ExperimentSPL requires a large line by line text corpus and a large word embedding binary. Before running ExperimentSPL both files must be placed within paths resources/text/sentences/sentences-tr.txt and resources/binary/huewei.bin respectively. A general overview of this processing pipeline is schematized as follows.
 
 ![ExperimentSPL processing steps](https://github.com/volkanagun/ActiveSelection/blob/master/pipeline.jpg?raw=true)
+
+An important part of this processing pipeline is the construction of the static vocabulary corpus. In this step, the dictionary of the target evaluation tests are used to filter the sentences. In this respect, each target word is used to sample the corpus sentences randomly so that each word will have equal number of sentences. Note that the sampled sentences must be also distinct.     
+
+In this procesing pipeline, before the selection process the dictionaries of the target evaluation datasets must be constructed. 
