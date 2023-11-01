@@ -10,3 +10,4 @@ The evaluations are saved to resources/results folder along with the parameters.
 ExperimentSPL is the main entry point for the first stage of the program. In ExperimentalSPL the parameters relevant to the selected active selection methods are used to create a dataset consists of selected sentences. 
 ExperimentSPL requires a large line by line text corpus and a large word embedding binary. Before running ExperimentSPL both files must be placed with paths resources/text/sentences/sentences-tr.txt and resources/binary/huewei.bin respectively.
 
+![alt text](https://github.com/volkanagun/ActiveSelection/blob/master/pipeline.jpeg?raw=true)
