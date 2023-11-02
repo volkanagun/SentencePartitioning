@@ -52,7 +52,7 @@ ExperimentSPL contains all the steps for selection of the sentences. These steps
    - Average soring: The average selection scores of the previously selected sentences is used as a threshold for deciding on the selection of new candidate sentences.
    - Majority voting: The selection scores of set of selection methods are used as a majority voting schema. Only when the majority of the decisions selects the candidate sentence, then the sentence is selected.
   
-Along with these selection choices, several other parameters such as embedding size, window length of the language model, maximum dictionary size, cluster size (k-nn) are stored in [SampleParams](https://github.com/volkanagun/ActiveSelection/blob/master/src/sampling/experiments/SampleParams.scala) class. The following functions must be modified to include other scoring methods and feature extractors. 
+Along with these selection choices, several other parameters such as embedding size, window length of the language model, maximum dictionary size, cluster size (k-nn) are stored in [SampleParams](https://github.com/volkanagun/ActiveSelection/blob/master/src/sampling/experiments/SampleParams.scala) class. The following functions inside [ExperimentSPL](https://github.com/volkanagun/ActiveSelection/blob/master/src/sampling/experiments/ExperimentSPL.scala) must be modified to include other scoring methods and feature extractors. 
 
 ### Scoring function
 Must include new instance of InstanceScorer as a scoring function.
