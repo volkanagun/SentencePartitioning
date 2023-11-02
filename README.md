@@ -30,4 +30,22 @@ object DatasetConversion extends DatasetConversion() {
   }
 }
 ```
+ExperimentSPL contains all the steps for selection of the sentences. These steps include feature extraction steps, selection method, scoring technique. These steps can be itemized as follows:
 
+1. Feature extraction
+   - Tokens : Uses a standard tokenizer and use tokens as features.
+   - N-Grams: Uses a frequent n-gram dictionary to extract frequent n-grams from sentences.
+2. Selection methods
+   - VocabSelect : VocabSelect uses same amount of sentences for each word in the evaluation dataset. It selects these words randomly without using any criteria. 
+   - KMeans : K-Means is a model based selection method. It uses an average to score the candidate sentence. The parameters k is selected as 1. If the sentence is similar to the cluster, it is discarded.
+   - Least : Least sqaures method is a model based selection methods. It uses the Least squares regression to select the candidate sentence.
+   - Hopfield : Hopfield neural network model based selection method. It uses energy of the hopfields to score the candidate sentence. 
+   - Boltzmann: Hopfield neural network model based selection method. It uses energy of the Boltzman machine. Has a different neural network structure and learning algorithm comapred to Hopfield neural network. 
+   - VotedDivergence: It uses a voting schema based on ranomly constructed voters. The divergence measures are applied for voting the candidate sentence.
+   - VE: Uses next/skip word prediction based voting. Similar to VotedDivergence but includes local next word frequencies.
+   - LM: Use a language model perplexity based scoring. Different from VE, it only uses peoplexity in next word predictions.
+   - Mahalonabis: A distance metric. It uses Mahalonabis distance for embedding space of the sentences. If the similarity is high, the sentence is discarded.
+   - Euclidean: A distance metric. It uses Euclidean distance to for the selected sentences. If the similarity is high, the sentence is discarded.
+   - KL : A distance metric for distributions. It uses KL-divergence between the candidate sentence distribution from all the set and the distribution of the selected sentence. If the difference is low, the sentence is discarded. 
+   - Entropy: It uses information entropy to select the sentences. It is similar to LM but uses consequtive words.
+   
