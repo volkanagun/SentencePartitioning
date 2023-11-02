@@ -52,7 +52,13 @@ ExperimentSPL contains all the steps for selection of the sentences. These steps
    - Average soring: The average selection scores of the previously selected sentences is used as a threshold for deciding on the selection of new candidate sentences.
    - Majority voting: The selection scores of set of selection methods are used as a majority voting schema. Only when the majority of the decisions selects the candidate sentence, then the sentence is selected.
   
-Along with these selection choices, several other parameters such as embedding size, window length of the language model, maximum dictionary size, cluster size (k-nn)   are stored in SampleParams class. 
+Along with these selection choices, several other parameters such as embedding size, window length of the language model, maximum dictionary size, cluster size (k-nn) are stored in SampleParams class. The following functions must be modified to include other scoring methods and 
+feature extractors. 
 
+1. ```scala def createCriterias(sampleName: String): InstanceScorer ``` : Must include new instance of InstanceScorer as a scoring function.
+2. ```scala def createExtractor(name: String): Extractor ``` : Must include a feature extractor for modelling features. For instance for English or German a new tokenizer, stemmer, or other features can be defined as an extractor.
+3. ```scala def createAdapter(adapterName: String, scorer: InstanceScorer, k: Int, kselectSize: Int, maxSelectSize: Int, threshold: Double): ScoreAdapter ```: Adapters can be defined here. Adapters are used for decision when a scoring method is given.
+
+  
 
    
