@@ -7,6 +7,8 @@ In this stage, an active selection method uses an Z-score based online moving sc
 In the second stage, a deep learning model is used to extract word embeddings from the selected sentences. Later, these embeddings are used to evaluate the quality of the embeddings. The active selection methods are compared with the same set of embedding extraction method and intrinsic/extrinsic evaluation dataset.
 The evaluations are saved to resources/results folder along with the parameters. The parameters are used for hasing the result file. So, for each set of parameters such as extraction model, embedding vector length, and selection method, there should be a unique result file.   
 
+# ExperimentSPL
+
 ExperimentSPL is the main entry point for the first stage of the program. In ExperimentalSPL the parameters relevant to the selected active selection methods are used to create a dataset consists of selected sentences. 
 ExperimentSPL requires a large line by line text corpus and a large word embedding binary. Before running ExperimentSPL both files must be placed within paths resources/text/sentences/sentences-tr.txt and resources/binary/huewei.bin respectively. A general overview of this processing pipeline is schematized as follows.
 
@@ -30,6 +32,8 @@ object DatasetConversion extends DatasetConversion() {
   }
 }
 ```
+## Methods 
+
 ExperimentSPL contains all the steps for selection of the sentences. These steps include feature extraction steps, selection method, scoring technique. These steps can be itemized as follows:
 
 1. Feature extraction
@@ -54,17 +58,17 @@ ExperimentSPL contains all the steps for selection of the sentences. These steps
   
 Along with these selection choices, several other parameters such as embedding size, window length of the language model, maximum dictionary size, cluster size (k-nn) are stored in [SampleParams](https://github.com/volkanagun/ActiveSelection/blob/master/src/sampling/experiments/SampleParams.scala) class. The following functions inside [ExperimentSPL](https://github.com/volkanagun/ActiveSelection/blob/master/src/sampling/experiments/ExperimentSPL.scala) must be modified to include other scoring methods and feature extractors. 
 
-### Scoring function
+## Scoring function
 Must include new instance of InstanceScorer as a scoring function.
  ```scala
       def createCriterias(sampleName: String): InstanceScorer
    ```
-### Feature extractor
+## Feature extractor
 Must include a feature extractor for modelling features. For instance for English or German a new tokenizer, stemmer, or other features can be defined as an extractor.
  ```scala
 def createExtractor(name: String): Extractor 
  ``` 
-### Adapter
+## Adapter
 Adapters can be defined here. Adapters are used for decision when a scoring method is given.
 ```scala 
 def createAdapter(adapterName: String, scorer: InstanceScorer, k: Int, kselectSize: Int, maxSelectSize: Int, threshold: Double): ScoreAdapter
