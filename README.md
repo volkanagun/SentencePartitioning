@@ -74,6 +74,11 @@ Adapters can be defined here. Adapters are used for decision when a scoring meth
 def createAdapter(adapterName: String, scorer: InstanceScorer, k: Int, kselectSize: Int, maxSelectSize: Int, threshold: Double): ScoreAdapter
 ```
 
+# Evaluation
+
+How relevant the selected sentences and the selection methodology is a question that shouldbe answered through the second stage. In this stage, a deep learning model is used to construct word embeddings from selected sentences. The general overview of this stage is given in the following figure.
+
+![SamplingExperiment steps](https://github.com/volkanagun/ActiveSelection/blob/master/evaluation.jpg?raw=true)
   
 
    
