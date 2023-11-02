@@ -12,5 +12,22 @@ ExperimentSPL requires a large line by line text corpus and a large word embeddi
 
 ![ExperimentSPL processing steps](https://github.com/volkanagun/ActiveSelection/blob/master/pipeline.jpg?raw=true)
 
-An important part of this processing pipeline is the construction of the static vocabulary corpus. In this step, the dictionary of the target evaluation tests are used to filter the sentences. In this respect, each target word is used to sample the corpus sentences randomly so that each word will have equal number of sentences. Note that the sampled sentences must be also distinct. In this procesing pipeline, before the selection process the dictionaries of the target evaluation datasets must be constructed. In order to construct the static dictionaries DatasetGeneration class must be ran first.
+An important part of this processing pipeline is the construction of the static vocabulary corpus. In this step, the dictionary of the target evaluation tests are used to filter the sentences. In this respect, each target word is used to sample the corpus sentences randomly so that each word will have equal number of sentences. Note that the sampled sentences must be also distinct. In this procesing pipeline, before the selection process the dictionaries of the target evaluation datasets must be constructed. In order to construct the static dictionaries DatasetGeneration class must be ran first. The following main block represents the steps of DatasetGeneration.
+
+```
+object DatasetConversion extends DatasetConversion() {
+  def main(args: Array[String]): Unit = {
+    convertNER("resources/evaluation/ner/train.json","train")
+    convertNER("resources/evaluation/ner/test.json","test")
+    convertPOS("resources/evaluation/pos/boun-train.conllu","train")
+    convertPOS("resources/evaluation/pos/boun-test.conllu","test")
+    convertSentiment("resources/evaluation/sentiment/train.csv", "train")
+    convertSentiment("resources/evaluation/sentiment/test.csv", "test")
+
+    createNERVocabulary()
+    createSentimentVocabulary()
+    createPOSVocabulary()
+  }
+}
+```
 
