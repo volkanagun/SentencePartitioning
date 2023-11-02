@@ -14,7 +14,7 @@ ExperimentSPL requires a large line by line text corpus and a large word embeddi
 
 An important part of this processing pipeline is the construction of the static vocabulary corpus. In this step, the dictionary of the target evaluation tests are used to filter the sentences. In this respect, each target word is used to sample the corpus sentences randomly so that each word will have equal number of sentences. Note that the sampled sentences must be also distinct. In this procesing pipeline, before the selection process the dictionaries of the target evaluation datasets must be constructed. In order to construct the static dictionaries DatasetGeneration class must be ran first. The following main block represents the steps of DatasetGeneration.
 
-```
+```scala
 object DatasetConversion extends DatasetConversion() {
   def main(args: Array[String]): Unit = {
     convertNER("resources/evaluation/ner/train.json","train")
