@@ -55,11 +55,21 @@ ExperimentSPL contains all the steps for selection of the sentences. These steps
 Along with these selection choices, several other parameters such as embedding size, window length of the language model, maximum dictionary size, cluster size (k-nn) are stored in SampleParams class. The following functions must be modified to include other scoring methods and 
 feature extractors. 
 
-1. ```scala
+### Scoring function
+Must include new instance of InstanceScorer as a scoring function.
+ ```scala
       def createCriterias(sampleName: String): InstanceScorer
-   ``` : Must include new instance of InstanceScorer as a scoring function.
-3. ```scala def createExtractor(name: String): Extractor ``` : Must include a feature extractor for modelling features. For instance for English or German a new tokenizer, stemmer, or other features can be defined as an extractor.
-4. ```scala def createAdapter(adapterName: String, scorer: InstanceScorer, k: Int, kselectSize: Int, maxSelectSize: Int, threshold: Double): ScoreAdapter ```: Adapters can be defined here. Adapters are used for decision when a scoring method is given.
+   ```
+### Feature extractor
+Must include a feature extractor for modelling features. For instance for English or German a new tokenizer, stemmer, or other features can be defined as an extractor.
+ ```scala
+def createExtractor(name: String): Extractor 
+ ``` 
+### Adapter
+Adapters can be defined here. Adapters are used for decision when a scoring method is given.
+```scala 
+def createAdapter(adapterName: String, scorer: InstanceScorer, k: Int, kselectSize: Int, maxSelectSize: Int, threshold: Double): ScoreAdapter
+```
 
   
 
