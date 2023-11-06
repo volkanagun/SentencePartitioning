@@ -79,6 +79,12 @@ def createAdapter(adapterName: String, scorer: InstanceScorer, k: Int, kselectSi
 How relevant the selected sentences and the selection methodology is a question that shouldbe answered through the second stage. In this stage, a deep learning model is used to construct word embeddings from selected sentences. The general overview of this stage is given in the following figure.
 
 ![SamplingExperiment steps](https://github.com/volkanagun/ActiveSelection/blob/master/evaluation.jpg?raw=true)
+
+Word embedding extraction approaches can be diverse. In this software, Skip-Gram, CBOW and Self-Attention LSTM models are used. The extraction methods uses the sampled datasets to extract the word embeddings. The quality of the extracted word embeddings are evaluated through evaluation methods. In order to evaluate the word embeddings and sentence selection methods there must be an evaluation dataset. There are two types of evaluation datasets. These are intrinsic and extrinsic. Intrinsic evaluation tests word embeddings in analogy pairs based on cosine similarity. Extrinsic evaluation datasets uses word embeddings in a machine learning model and predicts the accurateness of the trained model on a test dataset. There are also two types extrinsic evaluation. These are sequential models, and classification models which are defined based on the type of machine learning model. Evaluation produces a score for the word embedding extraction process. The results are saved into results folder.
+
+## Extraction Models
+
+Three extraction models namely SkipGram, CBOW and Self-Attention LSTM models are applied to extract word embeddings from sampled datasets. To use custom embedding extraction models the class namely **EmbeddingModel** must be derived. The functions train(), save(), load() are used to train the word embeddings, save and load them into/from binary files. During loading and saving the **update(ngram: String, vector: Array[Float]): Int** function must be called. This function returns the indice of the ngram and stores the embedding of the n-gram.
   
 
    
