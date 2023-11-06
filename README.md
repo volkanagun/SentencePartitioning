@@ -107,7 +107,7 @@ This dataset is also a line by line dataset. Each line is pair of text and class
 
 ```
 Neşe ve Üzüntü köprünün kırılmaya başlamasıyla geri dönerler .	Notr
-i phone 5 ten sonra gene 4'' ekranı tercih ettim. telefon mükemmel. ertesi gün elime ulaştı. teşekkürler	Positive
+i phone 5 ten sonra gene 4'' ekranı tercih ettim. telefon mükemmel. ertesi gün elime ulaştı.	Positive
 Beşinci sezonda diziye yeni oyuncular katıldı .	Notr
 ```
    
