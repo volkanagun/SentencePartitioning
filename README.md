@@ -95,7 +95,6 @@ To evaluate other datasets with the current definitions, either a json dataset o
 This dataset is a line by line tokenized dataset. Each line corresponds to a sample. Each label is separeted by **//** symbol and defined for every token.
 
 ```
-Çünkü/SCONJ ben/PRON de/PART o/PRON yaşadığı/VERB çevreyi/NOUN kirleterek/VERB bozulmasına/VERB neden/NOUN olan/VERB ,/PUNCT tüm/DET uyarılara/NOUN kulağını/NOUN tıkayan/VERB soya/NOUN aitim/VERB ./PUNCT
 Kimileri/NOUN buna/PRON kader/NOUN diyordu/VERB ,/PUNCT kimileri/NOUN unut/VERB ./PUNCT
 Bu/PRON da/PART zaman/NOUN ister/VERB ,/PUNCT emek/NOUN ister/VERB ./PUNCT
 İki/NUM veli/NOUN dokunulsa/VERB ağlayacaktı/_ ağlayacak/VERB tı/AUX ./PUNCT
