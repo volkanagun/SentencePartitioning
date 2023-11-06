@@ -86,9 +86,28 @@ Word embedding extraction approaches can be diverse. In this software, Skip-Gram
 
 Three extraction models namely SkipGram, CBOW and Self-Attention LSTM models are applied to extract word embeddings from sampled datasets. To use custom embedding extraction models the class namely **EmbeddingModel** must be derived. The functions train(), save(), load() are used to train the word embeddings, save and load them into/from binary files. During loading and saving the **update(ngram: String, vector: Array[Float]): Int** function must be called. This function returns the indice of the ngram and stores the embedding of the n-gram.
 
-## Evaluation mdoels
+## Evaluation models
 
-To evaluate other datasets with the current definitions, either a json dataset or a line by line text dataset is required. JSON files are used for intrinsic evaluations. A JSON dataset for English and German can be constructed easily from the sentence-tr.json example placed inside resources/evaluation/analogy folder. For extrinsic evaluation the example datasets are placed inside resources/evaluation/ folder.
-  
+To evaluate other datasets with the current definitions, either a json dataset or a line by line text dataset is required. JSON files are used for intrinsic evaluations. A JSON dataset for English and German can be constructed easily from the sentence-tr.json example placed inside resources/evaluation/analogy folder. For extrinsic evaluation the example datasets are placed inside resources/evaluation/ folder. Extrinsic evaluation models use Self-Attention recurrent model and implements the **ExtrinsicLSTM**  class. For sequential extrinsic type, ExtrinsicPOS function is implemented. For text classification same sequential model with overriding **def loadSamples(filename: String): Iterator[(String, String)]** and **override def labels(): Array[String]**. So basically if you want to use other datasets just modify the datasets. An example sequention and classification datasets are given as follows.
 
+### Sequential dataset
+
+This dataset is a line by line tokenized dataset. Each line corresponds to a sample. Each label is separeted by **//** symbol and defined for every token.
+
+```
+Çünkü/SCONJ ben/PRON de/PART o/PRON yaşadığı/VERB çevreyi/NOUN kirleterek/VERB bozulmasına/VERB neden/NOUN olan/VERB ,/PUNCT tüm/DET uyarılara/NOUN kulağını/NOUN tıkayan/VERB soya/NOUN aitim/VERB ./PUNCT
+Kimileri/NOUN buna/PRON kader/NOUN diyordu/VERB ,/PUNCT kimileri/NOUN unut/VERB ./PUNCT
+Bu/PRON da/PART zaman/NOUN ister/VERB ,/PUNCT emek/NOUN ister/VERB ./PUNCT
+İki/NUM veli/NOUN dokunulsa/VERB ağlayacaktı/_ ağlayacak/VERB tı/AUX ./PUNCT
+```
+
+### Classification dataset
+
+This dataset is also a line by line dataset. Each line is pair of text and classification label separeted by tab (**\t**).
+
+```
+Neşe ve Üzüntü köprünün kırılmaya başlamasıyla geri dönerler .	Notr
+i phone 5 ten sonra gene 4'' ekranı tercih ettim. telefon mükemmel. ertesi gün elime ulaştı. teşekkürler	Positive
+Beşinci sezonda diziye yeni oyuncular katıldı .	Notr
+```
    
