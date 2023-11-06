@@ -103,7 +103,7 @@ Bu/PRON da/PART zaman/NOUN ister/VERB ,/PUNCT emek/NOUN ister/VERB ./PUNCT
 
 ### Classification dataset
 
-This dataset is also a line by line dataset. Each line is pair of text and classification label separeted by tab (**\t**).
+This dataset is also a line by line dataset. Each line is pair of text and classification label which are separeted by tab (**\t**).
 
 ```
 Neşe ve Üzüntü köprünün kırılmaya başlamasıyla geri dönerler .	Notr
