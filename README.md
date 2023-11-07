@@ -151,11 +151,11 @@ abstract class EmbeddingModel(val params: SampleParams) extends IntrinsicFunctio
 }
 ```
 
-In order to use a different types of tokenizers, the **forward(token:String)** method must be modified. In this setting a language dependent tokenizer extracts the frequent n-grams of a sentence. In order to extract n-grams in other languages, another tokenizer must be used here. This class stores the embeddings for each string either token or n-gram. Along with the embedding vectors, the indice of the n-gram is also stored. By using thre update and retrieve methods the indices of a n-gram sequence, can be converted to BOW or One-Hot sequences.     
+In order to use a different types of tokenizers, the **forward(token:String)** method must be modified. In this settings, a language dependent tokenizer extracts the frequent n-grams of a sentence. In order to extract n-grams in other languages, another tokenizer must be used here. Note that forward method uses averaging for token n-grams. It assumes that the embedding of a token is the average of its n-gram content. EmbeddingModel also stores the embeddings for each string either in token or n-gram form. Along with the embedding vectors, the indice of the n-grams is also stored. Through the update and retrieve methods, the indices of a n-gram sequence can be converted to BOW or One-Hot sequence.      
 
 ## Evaluation models
 
-To evaluate other datasets with the current definitions, either a json dataset or a line by line text dataset is required. JSON files are used for intrinsic evaluations. A JSON dataset for English and German can be constructed easily from the sentence-tr.json example placed inside resources/evaluation/analogy folder. For extrinsic evaluation the example datasets are placed inside resources/evaluation/ folder. Extrinsic evaluation models use Self-Attention recurrent model and implements the **ExtrinsicLSTM**  class. For sequential extrinsic type, ExtrinsicPOS function is implemented. For text classification same sequential model with overriding **def loadSamples(filename: String): Iterator[(String, String)]** and **override def labels(): Array[String]**. So basically if you want to use other datasets just modify the datasets. An example sequention and classification datasets are given as follows.
+To evaluate other datasets with the current definitions, either a json dataset or a line by line text dataset is required. JSON files are used for intrinsic evaluations. A JSON dataset for English and German can be constructed easily from the sentence-tr.json example placed inside resources/evaluation/analogy folder. For extrinsic evaluation the example datasets are placed inside resources/evaluation/ folder. Extrinsic evaluation models use Self-Attention recurrent model and implements the **ExtrinsicLSTM**  class. For sequential extrinsic type, ExtrinsicPOS function is implemented. For text classification same sequential model with overriding **def loadSamples(filename: String): Iterator[(String, String)]** and **override def labels(): Array[String]**. So basically if you want to use other datasets just modify the datasets. An example sequention and classification datasets are given as follows. 
 
 ### Sequential dataset
 
@@ -176,4 +176,62 @@ Neşe ve Üzüntü köprünün kırılmaya başlamasıyla geri dönerler .	Notr
 i phone 5 ten sonra gene 4'' ekranı tercih ettim. telefon mükemmel. ertesi gün elime ulaştı.	Positive
 Beşinci sezonda diziye yeni oyuncular katıldı .	Notr
 ```
-   
+The ExtrinsicNER class is given as follows. This class uses Self-Attention LSTM neural network model to test the accuracy of a sequential dataset. In order to modify a sequential task without changing the neural network model this class can be inherited with overriding all its methods. Note that the dataset must be in the correct form.
+
+```scala
+  
+class ExtrinsicNER(params:SampleParams) extends ExtrinsicPOS(params){
+
+  override def getClassifier(): String = "ner"
+
+  override def getTraining(): String = {
+    //dataset filename
+    "resources/evaluation/ner/train.txt"
+  }
+
+  override def getTesing(): String = {
+    //dataset filename
+    "resources/evaluation/ner/test.txt"
+  }
+
+}
+```
+
+The ExtrinsicSentiment class is given as follows. This class also uses ELMO neural network model and it changes the dataset loading methods. The loadSamples retrieves all the samples in the file. The content of the iterator is a sentence sample and label pairs. Each sample must be defined line by line as in the classification dataset. 
+
+```scala
+class ExtrinsicSentiment(params:SampleParams) extends ExtrinsicLSTM(params){
+
+  var categories :Array[String] = null
+  override def getClassifier(): String = "sentiment"
+
+  override def getTraining(): String = {
+    //dataset filename
+    "resources/evaluation/sentiment/train.txt"
+  }
+
+  override def getTesing(): String = {
+    //dataset filename
+    "resources/evaluation/sentiment/test.txt"
+  }
+
+  override def loadSamples(filename: String): Iterator[(String, String)] = {
+
+    Source.fromFile(filename).getLines().map(line=> {
+      val Array(p1, p2) = line.split("\t")
+      (p1, p2)
+    })
+  }
+
+  override def labels(): Array[String] = {
+
+    //predefined or extracted labels
+    if(categories == null){
+      categories = loadSamples(getTraining()).map(_._2).toSet.toArray
+    }
+
+    categories
+  }
+}
+
+```
