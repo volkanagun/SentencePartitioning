@@ -238,4 +238,17 @@ class ExtrinsicSentiment(params:SampleParams) extends ExtrinsicLSTM(params){
 
 # Other Languages
 
-There is no support for other languages but they can be implemented by applying custom tokenizer and a custom evaluation dataset. In order to support other languages first a frequent n-gram tokenizer must be implemented. The current tokenization is language independent but frequent n-grams are language dependent. The static vocabulary of an evaluation dataset must be constructed in selection stage. Secondly a large line by line sentence dataset of the target language must be specified by a path in SampleParams. This text dataset will be used as a primary input in selection. Thirdly, the tokenizer of the evaluation stage is only used in EmbeddingModel. This tokenizer instance can be modified in this class or a new class can be derived with an appropriate implementation of tokenize method. Finally, with the correct folder paths a new language can be used.        
+There is no support for other languages but they can be implemented by applying custom tokenizer and a custom evaluation dataset. 
+
+1. In order to support other languages first a frequent n-gram tokenizer must be implemented. The current tokenization is language independent but frequent n-grams are language dependent. The static vocabulary of an evaluation dataset must be constructed in selection stage.
+2. A large line by line sentence dataset of the target language must be specified by a path in SampleParams. This text dataset will be used as a primary input in selection.
+3. The tokenizer of the evaluation stage is only used in EmbeddingModel. This tokenizer instance can be modified in this class or a new class can be derived with an appropriate implementation of tokenize method.
+
+Finally, with the correct folder paths defined in ExperimentSPL and SamplingExperiment classes a new language can be used. The paths may include the following
+
+1. Training and testing datasets
+2. The path to main sentence dataset
+3. The name and folder of the target task
+4. The implementation must be done for conditions for the target task in ExperimentSPL and SamplingExperiment. Currently, ner, pos, and sentiment are implemented.  
+
+   
