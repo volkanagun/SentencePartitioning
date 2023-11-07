@@ -84,7 +84,74 @@ Word embedding extraction approaches can be diverse. In this software, Skip-Gram
 
 ## Extraction Models
 
-Three extraction models namely SkipGram, CBOW and Self-Attention LSTM models are applied to extract word embeddings from sampled datasets. To use custom embedding extraction models the class namely **EmbeddingModel** must be derived. The functions train(), save(), load() are used to train the word embeddings, save and load them into/from binary files. During loading and saving the **update(ngram: String, vector: Array[Float]): Int** function must be called. This function returns the indice of the ngram and stores the embedding of the n-gram.
+Three extraction models namely SkipGram, CBOW and Self-Attention LSTM models are applied to extract word embeddings from sampled datasets. To use custom embedding extraction models the class namely **EmbeddingModel** must be derived. The functions train(), save(), load() are used to train the word embeddings, save and load them into/from binary files. During loading and saving the **update(ngram: String, vector: Array[Float]): Int** function must be called. This function returns the indice of the ngram and stores the embedding of the n-gram. The following code block shows the EmbeddingModel class.
+
+```scala
+abstract class EmbeddingModel(val params: SampleParams) extends IntrinsicFunction {
+
+  var avgTime = 0d
+  var sampleCount = 0
+
+  var dictionaryIndex = Map[String, Int]("dummy" -> 0)
+  var dictionary = Map[String, Array[Float]]("dummy" -> Array.fill[Float](params.embeddingLength)(0f))
+  var computationGraph: ComputationGraph = null
+
+  lazy val tokenizer = new Tokenizer().loadBinary()
+
+  def getTrainTime(): Double = avgTime
+
+  def train(filename: String): EmbeddingModel
+
+  def save(): EmbeddingModel
+
+  def load(): EmbeddingModel
+
+
+  def getDictionary(): Map[String, Array[Float]] = dictionary
+
+  def getDictionaryIndex(): Map[Int, Array[Float]] = {
+    dictionary.map { case (ngram, vector) => dictionaryIndex(ngram) -> vector }
+  }
+
+  def update(ngram: String, vector: Array[Float]): Int = {
+    dictionary = dictionary.updated(ngram, vector)
+    update(ngram)
+  }
+
+  def update(ngram: String): Int = {
+
+    if (dictionaryIndex.size < params.dictionarySize) {
+      dictionaryIndex = dictionaryIndex.updated(ngram, dictionaryIndex.getOrElse(ngram, dictionaryIndex.size))
+    }
+    retrieve(ngram)
+
+  }
+
+  def retrieve(ngram: String): Int = {
+    dictionaryIndex.getOrElse(ngram, 0)
+  }
+
+  def tokenize(sentence: String): Array[String] = {
+    tokenizer.ngramFilter(sentence)
+  }
+
+  def forward(token: String): Array[Float] = {
+    val frequentNgrams = tokenizer.ngramStemFilter(token).filter(ngram => dictionary.contains(ngram))
+    val ngramVectors = frequentNgrams.map(ngram => dictionary(ngram))
+    average(ngramVectors)
+  }
+
+  def average(embeddings: Array[Array[Float]]): Array[Float] = {
+    var foldResult = Array.fill[Float](params.embeddingLength)(0f)
+    embeddings.foldRight[Array[Float]](foldResult) { case (a, main) => {
+      main.zip(a).map(pair => pair._1 + pair._2)
+    }
+    }
+  }
+}
+```
+
+In order to use a different types of tokenizers, the **forward(token:String)** method must be modified. In this setting a language dependent tokenizer extracts the frequent n-grams of a sentence. In order to extract n-grams in other languages, another tokenizer must be used here. This class stores the embeddings for each string either token or n-gram. Along with the embedding vectors, the indice of the n-gram is also stored. By using thre update and retrieve methods the indices of a n-gram sequence, can be converted to BOW or One-Hot sequences.     
 
 ## Evaluation models
 
