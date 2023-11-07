@@ -38,7 +38,7 @@ ExperimentSPL contains all the steps for selection of the sentences. These steps
 
 1. Feature extraction
    - Tokens : Uses a standard tokenizer and use tokens as features.
-   - N-Grams: Uses a frequent n-gram dictionary to extract frequent n-grams from sentences.
+   - N-Grams: Uses a frequent n-gram dictionary to extract frequent n-grams from sentences. This is a custom tokenizer that must be defined for each language separately.
 2. Selection methods
    - VocabSelect : VocabSelect uses same amount of sentences for each word in the evaluation dataset. It selects these words randomly without using any criteria. 
    - KMeans : K-Means is a model based selection method. It uses an average to score the candidate sentence. The parameters k is selected as 1 to 10. If the sentence is very similar to mean of any of the cluster, it is discarded.
@@ -169,7 +169,7 @@ Bu/PRON da/PART zaman/NOUN ister/VERB ,/PUNCT emek/NOUN ister/VERB ./PUNCT
 
 ### Classification dataset
 
-This dataset is also a line by line dataset. Each line is pair of text and classification label which are separeted by tab (**\t**).
+This dataset is also a line by line dataset. Each line is pair of text and classification label. They are separeted by single tab (**\t**).
 
 ```
 Neşe ve Üzüntü köprünün kırılmaya başlamasıyla geri dönerler .	Notr
@@ -197,7 +197,7 @@ class ExtrinsicNER(params:SampleParams) extends ExtrinsicPOS(params){
 }
 ```
 
-The ExtrinsicSentiment class is given as follows. This class also uses ELMO neural network model and it changes the dataset loading methods. The loadSamples retrieves all the samples in the file. The content of the iterator is a sentence sample and label pairs. Each sample must be defined line by line as in the classification dataset. 
+The ExtrinsicSentiment class is given as follows. This class uses ELMO neural network model and it changes the dataset loading methods. The loadSamples retrieves all the samples in the file. The content of the iterator is a sentence sample and label pairs. Each sample must be defined line by line as in the classification dataset. 
 
 ```scala
 class ExtrinsicSentiment(params:SampleParams) extends ExtrinsicLSTM(params){
@@ -235,3 +235,7 @@ class ExtrinsicSentiment(params:SampleParams) extends ExtrinsicLSTM(params){
 }
 
 ```
+
+# Other Languages
+
+There is no support for other languages but they can be implemented by applying custom tokenizer and a custom evaluation dataset. In order to support other languages first a frequent n-gram tokenizer must be implemented. The current tokenization is language independent but frequent n-grams are language dependent. The static vocabulary of an evaluation dataset must be constructed in selection stage. Secondly a large line by line sentence dataset of the target language must be specified by a path in SampleParams. This text dataset will be used as a primary input in selection. Thirdly, the tokenizer of the evaluation stage is only used in EmbeddingModel. This tokenizer instance can be modified in this class or a new class can be derived with an appropriate implementation of tokenize method. Finally, with the correct folder paths a new language can be used.        
