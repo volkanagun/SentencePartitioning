@@ -249,6 +249,7 @@ Finally, with the correct folder paths defined in ExperimentSPL and SamplingExpe
 1. Training and testing datasets
 2. The path to main sentence dataset
 3. The name and folder of the target task
-4. The implementation must be done for conditions for the target task in ExperimentSPL and SamplingExperiment. Currently, ner, pos, and sentiment are implemented.  
+4. The vbocabulary file of the evaluation dataset
+5. The implementation must be done for conditions for the target task in ExperimentSPL and SamplingExperiment. Currently, ner, pos, and sentiment are implemented.  
 
    
