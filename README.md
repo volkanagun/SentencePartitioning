@@ -238,7 +238,7 @@ class ExtrinsicSentiment(params:SampleParams) extends ExtrinsicLSTM(params){
 
 # Other Languages
 
-There is no support for other languages but they can be implemented by applying custom tokenizer and a custom evaluation dataset. 
+There is no support for other languages but they can be implemented by applying custom tokenizer and a custom evaluation dataset. For the language support, the implementations of the target task must be specified in ExperimentSPL and SamplingExperiment. Currently, ner, pos, and sentiment are implemented. A checklist of necessary changes are given as follows. 
 
 1. In order to support other languages first a frequent n-gram tokenizer must be implemented. The current tokenization is language independent but frequent n-grams are language dependent. The static vocabulary of an evaluation dataset must be constructed in selection stage.
 2. A large line by line sentence dataset of the target language must be specified by a path in SampleParams. This text dataset will be used as a primary input in selection.
@@ -246,10 +246,13 @@ There is no support for other languages but they can be implemented by applying 
 
 Finally, with the correct folder paths defined in ExperimentSPL and SamplingExperiment classes a new language can be used. The paths may include the following
 
-1. Training and testing datasets
-2. The path to main sentence dataset
-3. The name and folder of the target task
-4. The vocabulary file of the evaluation dataset
-5. The implementation must be done for conditions for the target task in ExperimentSPL and SamplingExperiment. Currently, ner, pos, and sentiment are implemented.  
+1. The path to main sentence dataset
+2. Training and testing datasets
+4. The name and folder of the target task
+5. The vocabulary file of the evaluation dataset
+
+Along with these changes the resources folder must include the path of these changes. A general overview of directory structure of the resources folder is given in the following screenshot.
+
+![SamplingExperiment steps](https://github.com/volkanagun/ActiveSelection/blob/master/Folders.png?raw=true)
 
    
