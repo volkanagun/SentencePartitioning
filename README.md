@@ -253,6 +253,6 @@ Finally, with the correct folder paths defined in ExperimentSPL and SamplingExpe
 
 Along with these changes the resources folder must include the path of these changes. A general overview of directory structure of the resources folder is given in the following screenshot.
 
-![SamplingExperiment steps](https://github.com/volkanagun/ActiveSelection/blob/master/Folders.png?raw=true)
+![SamplingExperiment steps](https://github.com/volkanagun/ActiveSelection/blob/master/folders.png?raw=true)
 
    
