@@ -1,14 +1,15 @@
 package models
 
 import evaluation.{EvalScore, InstrinsicEvaluationReport}
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.models.word2vec.Word2Vec
 import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator
 import sampling.experiments.SampleParams
-import utils.Params
+import utils.{Params, Tokenizer}
 
-import java.io.File
+import java.io.{File, FileOutputStream}
 
-class SkipGramModel(params:SampleParams) extends CBOWModel(params) {
+class SkipGramModel(params:SampleParams, tokenizer: Tokenizer) extends CBOWModel(params, tokenizer) {
 
   override def train(filename: String): EmbeddingModel = {
     val iter = new LineSentenceIterator(new File(filename))
@@ -16,14 +17,14 @@ class SkipGramModel(params:SampleParams) extends CBOWModel(params) {
     val fname = params.modelFilename()
 
     if (!(new File(fname).exists())) {
-      println("CBOW filename: " + fname)
+      println("SkipGram filename: " + fname)
       vectorModel = new Word2Vec.Builder()
-        .workers(params.nthreads)
+        .workers(48)
         .minWordFrequency(params.freqCutoff)
         .layerSize(params.embeddingLength)
-        .windowSize(params.modelWindowLength)
-        .epochs(params.epocs)
-        .batchSize(params.batchSize)
+        .windowSize(15)
+        .epochs(10)
+        .batchSize(16)
         .seed(42)
         .iterate(iter)
         .iterations(1)
@@ -32,15 +33,14 @@ class SkipGramModel(params:SampleParams) extends CBOWModel(params) {
         .allowParallelTokenization(true)
         .build()
 
+
       vectorModel.fit()
+      WordVectorSerializer.writeWord2Vec(vectorModel, new FileOutputStream(fname))
+      save()
     }
 
     this
   }
-
-  override def save(): EmbeddingModel = this
-
-  override def load(): SkipGramModel.this.type = this
 
   override def evaluate(model: EmbeddingModel): EvalScore = EvalScore(0d, 0d)
 
@@ -51,8 +51,6 @@ class SkipGramModel(params:SampleParams) extends CBOWModel(params) {
   override def setEmbeddings(set: Set[(String, Array[Float])]): SkipGramModel.this.type = this
 
   override def count(): Int = 0
-
-  override def universe(): Set[String] = Set()
 
   override def getClassifier(): String = "SkipGram"
 

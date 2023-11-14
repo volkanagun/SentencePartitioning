@@ -1,11 +1,11 @@
 package evaluation
 
 import sampling.experiments.SampleParams
-import utils.Params
+import utils.{Params, Tokenizer}
 
 import scala.io.Source
 
-class ExtrinsicNER(params:SampleParams) extends ExtrinsicPOS(params){
+class ExtrinsicNER(params:SampleParams, tokenizer: Tokenizer) extends ExtrinsicPOS(params, tokenizer){
 
 
 

@@ -52,7 +52,7 @@ object ExperimentSPL {
   embedParams.embeddingWindowSize = 10
 
   def createAdapter(adapterName: String, scorer: InstanceScorer, k: Int, kselectSize: Int, maxSelectSize: Int, threshold: Double): ScoreAdapter = {
-    if ("avg".equals(adapterName) && scorer.isInstanceOf[VoabSelect]) new DirectSelect(maxSelectSize)
+    if ("avg".equals(adapterName) && scorer.isInstanceOf[VocabSelect]) new DirectSelect(maxSelectSize)
     else if ("avg".equals(adapterName)) new MovingAverage(scorer, k, kselectSize, maxSelectSize, threshold)
     else {
       val criteriaScorers = Array("VotedDivergence", "Hopfield", "VE", "LM", "Mahalonabis", "Euclidean", "Entropy", "KMeans", "Boltzmann", "KL", "Least").map(createCriterias(_))
@@ -97,7 +97,7 @@ object ExperimentSPL {
       new CosineScorer(embedParams.dictionarySize, embedParams.embeddingSize)
     }
     else if (sampleName.startsWith("VocabSelect")) {
-      new VoabSelect(embedParams.dictionarySize, embedParams.secondDictionarySize)
+      new VocabSelect(embedParams.dictionarySize, embedParams.secondDictionarySize)
     }
     else if (sampleName.startsWith("Euclidean")) {
       new EuclideanScorer(embedParams.secondDictionarySize, embedParams.secondDictionarySize)
@@ -134,16 +134,30 @@ object ExperimentSPL {
     }
     else {
       val pw = new PrintWriter(f)
-      val evalDictionary = Source.fromFile(dictionaryFilename).getLines().toArray
+      val evalDictionary = Source.fromFile(dictionaryFilename).getLines()
+        .toArray
+
+      val mainSentences = Source.fromFile(sampleParams.sentenceFilename).getLines()
+        .filter(text=> selectText(text)).toArray
+
+      var set = Set[Int]()
 
       evalDictionary.zipWithIndex.par.map(wordPair => {
         val word = wordPair._1
-        println("Word search Index: "+wordPair._2 + "/" + evalDictionary.length)
-        val mainSentences = Source.fromFile(sampleParams.sentenceFilename).getLines()
-        mainSentences.filter(text => text.contains(word) && selectText(word))
-          .take(sampleParams.maxWordSamples)
-          .toArray
-      }).toArray.foreach(sentences=> sentences.foreach(sentence=>pw.println(sentence)))
+        var count = 0
+        val iter = mainSentences.iterator
+        var selectedSentences = Array[String]()
+        println("Word search Index: " + wordPair._2 + "/" + evalDictionary.length)
+        while(count < sampleParams.maxWordSamples && iter.hasNext){
+          val sentence = iter.next()
+          if(sentence.contains(word) && !set.contains(sentence.hashCode)){
+            selectedSentences = selectedSentences :+ sentence
+            set = set + sentence.hashCode
+            count = count + 1
+          }
+        }
+        selectedSentences
+      }).toArray.foreach(sentences => sentences.foreach(sentence=> pw.println(sentence)))
 
       pw.close()
 
@@ -207,9 +221,12 @@ object ExperimentSPL {
       val breaking = Breaks
 
       breaking.breakable {
-        dataset.sliding(sampleParams.batchSize, sampleParams.batchSize).foreach(sentences => {
+        dataset.filter(instance=> instance.featureSequence.exists(item=> item.length >= 2))
+          .sliding(sampleParams.batchSize, sampleParams.batchSize).foreach(sentences => {
           println(s"Computing for ${sampleParams.scorerName}")
-          //println(s"Computing for ${sampleParams.maxSelectSize}")
+
+
+
           adapter.status()
           if (adapter.isStop()) breaking.break()
           else {
@@ -279,9 +296,7 @@ object ExperimentSPL {
   }
 
   def main(args: Array[String]): Unit = {
-    //System.setProperty("org.bytedeco.openblas.load", "mkl")
     createSamples()
-    createMajority()
   }
 }
 

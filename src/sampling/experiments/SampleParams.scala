@@ -1,6 +1,7 @@
 package sampling.experiments
 
 import models.{CBOWModel, EmbeddingModel, SelfAttentionLSTM, SkipGramModel}
+import utils.Tokenizer
 
 import java.io.File
 
@@ -14,13 +15,13 @@ class SampleParams {
   var windowSize = 20
   var embeddingWindowSize = 10
   var committee = 10
-  var batchSize = 128
+  var batchSize = 32
   var nthreads = 1
   var topSelects = 1
 
   var knn = 7
   var tokenLength = 5
-  var freqcutoff= 10
+  var freqcutoff = 10
 
   var maxSentenceSize = max100million
   val max10million = 10000000
@@ -35,13 +36,14 @@ class SampleParams {
   var kmoving = 200
   var kselectSize = 10
   var maxInitSamples = 1000
-  var maxWordSamples = 10000
+  var maxWordSamples = 20
 
   var maxSentenceLength = 200
   var minSentenceLength = 50
   val textFolder = "resources/text/"
   val dictionaryFolder = "resources/dictionary/"
   val binaryFolder = "resources/binary/"
+  val embeddingsFolder = "resources/embeddings/"
   var useWords = true
   val sentenceFilename = textFolder + "/sentences/sentences-tr.txt"
 
@@ -64,49 +66,50 @@ class SampleParams {
 
   var extractorName: String = "feature"
   var scorerName: String = null
-  var adapterName:String="avg"
+  var adapterName: String = "avg"
 
 
   //Embedding extraction parameters
   var embeddingModel = "cbow"
   var embeddingLength = 100
   var hiddenLength = 100
-  var modelWindowLength:Int = 20
-  var nheads:Int = 4
-  var freqCutoff:Int = 0
+  var modelWindowLength: Int = 20
+  var nheads: Int = 4
+  var freqCutoff: Int = 0
   var epocs = 10
-  var lrate = 0.005
+  var lrate = 0.001
 
 
-
-  //Evaluation parameters
-  var evalWindowLength = 20
+  var evalBatchSize = 32
+  var evalEpocs = 1
+  var evalDictionarySize = 1000000
+  var evalUseEmbeddings = true
 
   def modelName(name: String): this.type = {
     embeddingModel = name
     this
   }
 
-  def createModel(name: String): EmbeddingModel = {
-    if (name.startsWith("cbow")) new CBOWModel(this)
-    else if (name.startsWith("skip")) new SkipGramModel(this)
-    else if (name.startsWith("lstm")) new SelfAttentionLSTM(this)
+  def createModel(name: String, tokenizer: Tokenizer): EmbeddingModel = {
+    if (name.startsWith("cbow")) new CBOWModel(this, tokenizer)
+    else if (name.startsWith("skip")) new SkipGramModel(this, tokenizer)
+    else if (name.startsWith("lstm")) new SelfAttentionLSTM(this, tokenizer)
     else null
   }
 
-  def sampledDataset():String={
-    val folder = textFolder + taskName +"/"
-    val keyFilename = folder + scorerName + "-"+ maxSelectSize + "-" + experimentKey() + ".txt"
+  def sampledDataset(): String = {
+    val folder = textFolder + taskName + "/"
+    val keyFilename = folder + scorerName + "-" + maxSelectSize + "-" + experimentKey() + ".txt"
     new File(folder).mkdirs()
     keyFilename
   }
 
-  def mainDataset():String={
-    val keyFilename = textFolder + taskName +"/" + "main.txt"
+  def mainDataset(): String = {
+    val keyFilename = textFolder + taskName + "/" + "main.txt"
     keyFilename
   }
 
-  def dictionaryFile():String={
+  def dictionaryFile(): String = {
     dictionaryFolder + taskName + ".txt"
   }
 
@@ -139,7 +142,7 @@ class SampleParams {
     keyID
   }
 
-  def copy():SampleParams={
+  def copy(): SampleParams = {
     val copyParams = new SampleParams()
     copyParams.kmoving = kmoving
     copyParams.kselectSize = kselectSize
@@ -147,7 +150,7 @@ class SampleParams {
     copyParams.embeddingSize = embeddingSize
     copyParams.hiddenSize = hiddenSize
     copyParams.dictionarySize = dictionarySize
-    copyParams.secondDictionarySize =secondDictionarySize
+    copyParams.secondDictionarySize = secondDictionarySize
     copyParams.windowSize = windowSize
     copyParams.maxSentenceSize = maxSentenceSize
 
@@ -184,20 +187,24 @@ class SampleParams {
 
   }
 
-  def evalDictionaryFile(task:String):String={
-    if("sentiment".equals(task)) "resources/texts/dictionaries/sentiment.txt"
-    else if("ner".equals(task)) "resources/texts/dictionaries/ner.txt"
-    else if("pos".equals(task)) "resources/texts/dictionaries/pos.txt"
-    else if("intrinsic".equals(task)) "resources/texts/dictionaries/intrinsic.txt"
+  def evalDictionaryFile(task: String): String = {
+    if ("sentiment".equals(task)) "resources/texts/dictionaries/sentiment.txt"
+    else if ("ner".equals(task)) "resources/texts/dictionaries/ner.txt"
+    else if ("pos".equals(task)) "resources/texts/dictionaries/pos.txt"
+    else if ("intrinsic".equals(task)) "resources/texts/dictionaries/intrinsic.txt"
     else null
   }
 
   def modelFilename(): String = {
-    modelFolder + modelID() + ".bin"
+    modelFolder + "model-" + modelID() + ".bin"
   }
 
   def dictionaryFilename(): String = {
-    binaryFolder + modelID() + ".bin"
+    binaryFolder + "dictionary-" + modelID() + ".bin"
+  }
+
+  def embeddingsFilename(): String = {
+    embeddingsFolder + "embedding-" + modelID() + ".bin"
   }
 
   def modelID(): Int = {
@@ -213,7 +220,7 @@ class SampleParams {
   }
 
   def toShortXML(): String = {
-    "<MODEL_PARAMETERS>\n" +
+    "<EMBEDDING_PARAMETERS>\n" +
       tag("MODEL", embeddingModel) +
       tag("EPOCS", epocs.toString) +
       tag("LEARNING_RATE", lrate.toString) +
@@ -223,8 +230,15 @@ class SampleParams {
       tag("HEADS", nheads.toString) +
       tag("DICTIONARY_SIZE", dictionarySize.toString) +
       tag("SELECTION_SIZE", maxSelectSize.toString) +
-      "</MODEL_PARAMETERS>\n" +
+      "</EMBEDDING_PARAMETERS>\n" +
+      "<EVAL_PARAMETERS>\n" +
+      tag("EVAL_DICTIONARY_SIZE", evalDictionarySize.toString) +
+      tag("EVAL_EPOCS", evalEpocs.toString) +
+      tag("EVAL_BATCH", evalBatchSize.toString) +
+      tag("EVAL_USE_EMBEDDINGS", evalUseEmbeddings.toString) +
+      "</EVAL_PARAMETERS>\n" +
       "<SELECTION_PARAMETERS>\n" +
+      tag("USE_EMBEDDINGS", evalUseEmbeddings.toString) +
       tag("SELECTION_METHOD", scorerName) +
       tag("ADAPTER_NAME", adapterName) +
       //tag("MAX_SENTENCES", maxSentences.toString) +

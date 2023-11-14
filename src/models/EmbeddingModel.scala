@@ -5,16 +5,18 @@ import org.deeplearning4j.nn.graph.ComputationGraph
 import sampling.experiments.SampleParams
 import utils.{Params, Tokenizer}
 
-abstract class EmbeddingModel(val params: SampleParams) extends IntrinsicFunction {
+import java.util.Locale
+
+abstract class EmbeddingModel(val params: SampleParams, val tokenizer:Tokenizer) extends IntrinsicFunction {
 
   var avgTime = 0d
   var sampleCount = 0
-
+  var locale = new Locale("tr")
   var dictionaryIndex = Map[String, Int]("dummy" -> 0)
   var dictionary = Map[String, Array[Float]]("dummy" -> Array.fill[Float](params.embeddingLength)(0f))
   var computationGraph: ComputationGraph = null
 
-  lazy val tokenizer = new Tokenizer().loadBinary()
+
 
   def getTrainTime(): Double = avgTime
 
@@ -38,7 +40,7 @@ abstract class EmbeddingModel(val params: SampleParams) extends IntrinsicFunctio
 
   def update(ngram: String): Int = {
 
-    if (dictionaryIndex.size < params.dictionarySize) {
+    if (dictionaryIndex.size < params.evalDictionarySize) {
       dictionaryIndex = dictionaryIndex.updated(ngram, dictionaryIndex.getOrElse(ngram, dictionaryIndex.size))
     }
     retrieve(ngram)
@@ -50,11 +52,19 @@ abstract class EmbeddingModel(val params: SampleParams) extends IntrinsicFunctio
   }
 
   def tokenize(sentence: String): Array[String] = {
-    tokenizer.ngramFilter(sentence)
+    val lwSentence = sentence.toLowerCase(locale)
+    val ngrams = tokenizer.ngramFilter(lwSentence)
+    val result = ngrams
+      .flatMap(ngram=> ngram.split("\\s+"))
+
+    result
   }
 
   def forward(token: String): Array[Float] = {
-    val frequentNgrams = tokenizer.ngramStemFilter(token).filter(ngram => dictionary.contains(ngram))
+    val frequentNgrams = tokenizer.ngramStemFilter(token)
+      .flatMap(ngram=> ngram.split("\\s+"))
+      .filter(ngram => dictionary.contains(ngram))
+
     val ngramVectors = frequentNgrams.map(ngram => dictionary(ngram))
     average(ngramVectors)
   }

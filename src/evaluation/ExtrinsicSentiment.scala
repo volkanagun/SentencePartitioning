@@ -13,11 +13,11 @@ import org.nd4j.linalg.api.buffer.DataType
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
 import sampling.experiments.SampleParams
-import utils.Params
+import utils.{Params, Tokenizer}
 
 import scala.io.Source
 
-class ExtrinsicSentiment(params:SampleParams) extends ExtrinsicLSTM(params){
+class ExtrinsicSentiment(params:SampleParams, tokenizer: Tokenizer) extends ExtrinsicLSTM(params, tokenizer){
 
   var categories :Array[String] = null
   override def getClassifier(): String = "sentiment"
@@ -35,7 +35,8 @@ class ExtrinsicSentiment(params:SampleParams) extends ExtrinsicLSTM(params){
   override def loadSamples(filename: String): Iterator[(String, String)] = {
 
     Source.fromFile(filename).getLines().map(line=> {
-      val Array(p1, p2) = line.split("\t")
+      val mline = line.toLowerCase(locale)
+      val Array(p1, p2) = mline.split("\t")
       (p1, p2)
     })
   }
@@ -50,6 +51,9 @@ class ExtrinsicSentiment(params:SampleParams) extends ExtrinsicLSTM(params){
     categories
   }
 
-
-
+  override def universe(): Set[String] = {
+    Source.fromFile(getTraining()).getLines()
+      .flatMap(sentence=> sentence.split("\\s+").reverse.tail)
+      .toSet
+  }
 }

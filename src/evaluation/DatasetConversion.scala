@@ -155,12 +155,12 @@ class DatasetConversion {
 
 object DatasetConversion extends DatasetConversion() {
   def main(args: Array[String]): Unit = {
-    //convertNER("resources/evaluation/ner/train.json","train")
-    //convertNER("resources/evaluation/ner/test.json","test")
-    //convertPOS("resources/evaluation/pos/boun-train.conllu","train")
-    //convertPOS("resources/evaluation/pos/boun-test.conllu","test")
-    //convertSentiment("resources/evaluation/sentiment/train.csv", "train")
-    //convertSentiment("resources/evaluation/sentiment/test.csv", "test")
+    convertNER("resources/evaluation/ner/train.json","train")
+    convertNER("resources/evaluation/ner/test.json","test")
+    convertPOS("resources/evaluation/pos/boun-train.conllu","train")
+    convertPOS("resources/evaluation/pos/boun-test.conllu","test")
+    convertSentiment("resources/evaluation/sentiment/train.csv", "train")
+    convertSentiment("resources/evaluation/sentiment/test.csv", "test")
 
     createNERVocabulary()
     createSentimentVocabulary()

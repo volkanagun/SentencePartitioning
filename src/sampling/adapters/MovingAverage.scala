@@ -15,7 +15,7 @@ class MovingAverage(val scorer:InstanceScorer, val k:Int, val kselect:Int, val s
   override def filter(array: Array[TextInstance]): Array[TextInstance] = {
     measureTime {
       val collection = array.par
-      collection.tasksupport = new ForkJoinTaskSupport(new ForkJoinPool(12))
+      collection.tasksupport = new ForkJoinTaskSupport(new ForkJoinPool(4))
       val instances = collection.map(instance => (scorer.score(instance), instance))
         .filter(pair => !pair._1.isNaN && !pair._1.isInfinite).toArray
 

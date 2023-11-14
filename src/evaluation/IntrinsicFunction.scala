@@ -284,6 +284,8 @@ class InstrinsicEvaluationReport extends Serializable {
     pw.println(printXMLTag("TRUE_COUNT", truepositives))
     pw.println(printXMLTag("TRUE_RATE", truepositives / testpairCount))
     pw.println(printXMLTag("SIMILARITY", similarity / testpairCount));
+    pw.println(printXMLTag("F1-MEASURE", similarity / testpairCount));
+    pw.println(printXMLTag("ACCURACY", truepositives / testpairCount));
 
 
     val skippedClassifiers = classifierSkipCount.map { case (name, count) => (name, classifierQueryCount(name) == count) }

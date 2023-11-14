@@ -24,7 +24,7 @@ import utils.{Params, Tokenizer}
 
 import scala.io.Source
 
-abstract class ExtrinsicLSTM(params: SampleParams) extends SelfAttentionLSTM(params)  {
+abstract class ExtrinsicLSTM(params: SampleParams, tokenizer: Tokenizer) extends SelfAttentionLSTM(params, tokenizer)  {
   //use ELMO
   var inputDictionary = Map[String, Int]("dummy" -> 0)
 
@@ -41,7 +41,9 @@ abstract class ExtrinsicLSTM(params: SampleParams) extends SelfAttentionLSTM(par
 
   override def universe(): Set[String] = {
     Source.fromFile(getTraining()).getLines().flatMap(sentence=>{
-      tokenizer.ngramFilter(sentence)
+     val tokens = sentence.split("\\s+")
+       .map(token=> token.split("\\/").head)
+     tokens
     }).toSet
   }
 
@@ -96,9 +98,11 @@ abstract class ExtrinsicLSTM(params: SampleParams) extends SelfAttentionLSTM(par
         var inputRightStack = Array[INDArray]()
         var outputStack = Array[INDArray]()
         var i=0;
-        while(i<params.batchSize && samples.hasNext) {
+        while(i < params.batchSize && samples.hasNext) {
           val (input, output) = samples.next()
-          val inputLeft = tokenizer.ngramFilter(input).take(params.evalWindowLength)
+          val inputLeft = tokenize(input)
+            .take(params.modelWindowLength)
+
           val inputLeftArray = inputLeft.map(ngram => {
             update(ngram)
           })
@@ -141,15 +145,20 @@ abstract class ExtrinsicLSTM(params: SampleParams) extends SelfAttentionLSTM(par
 
     load()
     graph.init()
-    val vertex = graph.getVertex("embedding")
 
-    val weight = vertex.paramTable(false).get("W")
-    dictionaryIndex.foreach { case (ngram, index) => {
-      val array = dictionary(ngram)
-      weight.put(Array(NDArrayIndex.point(index), NDArrayIndex.all()), Nd4j.create(array))
-    }}
+    if(params.evalUseEmbeddings) {
+      val vertex = graph.getVertex("embedding")
+      val weight = vertex.paramTable(false).get("W")
+      dictionaryIndex.foreach { case (ngram, index) => {
+        val array = dictionary(ngram)
+        weight.put(Array(NDArrayIndex.point(index), NDArrayIndex.all()), Nd4j.create(array))
+      }}
 
-    //vertex.setLayerAsFrozen()
+      //Use exiting weights and also new weights together
+      //They can not be updated as well.
+      vertex.setLayerAsFrozen()
+    }
+
     graph
   }
 
@@ -163,8 +172,8 @@ abstract class ExtrinsicLSTM(params: SampleParams) extends SelfAttentionLSTM(par
       .allowDisconnected(true)
       .addInputs("left", "right")
       .addVertex("stack", new org.deeplearning4j.nn.conf.graph.StackVertex(), "left", "right")
-      .addLayer("embedding", new EmbeddingSequenceLayer.Builder().inputLength(params.evalWindowLength)
-        .nIn(params.dictionarySize).nOut(params.embeddingLength).build(),
+      .addLayer("embedding", new EmbeddingSequenceLayer.Builder().inputLength(params.modelWindowLength)
+        .nIn(params.evalDictionarySize).nOut(params.embeddingLength).build(),
         "stack")
       .addVertex("leftemb", new org.deeplearning4j.nn.conf.graph.UnstackVertex(0, 2), "embedding")
       .addVertex("rightemb", new org.deeplearning4j.nn.conf.graph.UnstackVertex(0, 2), "embedding")
@@ -185,8 +194,8 @@ abstract class ExtrinsicLSTM(params: SampleParams) extends SelfAttentionLSTM(par
           .nOut(labels().length)
           .build(), "output-lstm")
       .setOutputs("output")
-      .setInputTypes(InputType.recurrent(params.dictionarySize),
-        InputType.recurrent(params.dictionarySize))
+      .setInputTypes(InputType.recurrent(params.evalDictionarySize),
+        InputType.recurrent(params.evalDictionarySize))
       .build()
 
     val graph = new ComputationGraph(conf)

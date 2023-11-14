@@ -1,31 +1,35 @@
 package models
 
 import evaluation.{EvalScore, InstrinsicEvaluationReport}
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.models.word2vec.Word2Vec
 import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator
+import org.deeplearning4j.text.tokenization.tokenizer
 import org.deeplearning4j.text.tokenization.tokenizer.TokenPreProcess
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory
+import org.deeplearning4j.util.ModelSerializer
 import sampling.experiments.SampleParams
 import utils.{Params, Tokenizer}
 
 import collection.JavaConverters._
-import java.io.{File, FileInputStream, FileOutputStream, ObjectInputStream, ObjectOutputStream, PrintWriter}
+import java.io.{File, FileInputStream, FileOutputStream, InputStream, ObjectInputStream, ObjectOutputStream}
 
-class CBOWModel(params:SampleParams) extends EmbeddingModel(params) {
+class CBOWModel(params:SampleParams, tokenizer: Tokenizer) extends EmbeddingModel(params, tokenizer) {
 
   var vectorModel:Word2Vec = null
   def defaultTokenizer(): DefaultTokenizerFactory = {
-    lazy val tokenPreProcess: TokenPreProcess = new TokenPreProcess {
+   val tokenizerFactory = new DefaultTokenizerFactory(){
+     override def create(toTokenize: String): org.deeplearning4j.text.tokenization.tokenizer.Tokenizer = {
+       val ngrams = tokenize(toTokenize).mkString(" ")
+       super.create(ngrams)
+     }
 
-      override def preProcess(s: String): String = {
-        tokenizer.ngramFilter(s).mkString(" ")
-      }
+     override def create(toTokenize: InputStream): org.deeplearning4j.text.tokenization.tokenizer.Tokenizer = {
+       throw new UnsupportedOperationException("Stream tokenizer is unsupported")
+     }
+   }
 
-    }
-
-    val factory = new DefaultTokenizerFactory()
-    factory.setTokenPreProcessor(tokenPreProcess)
-    factory
+    tokenizerFactory
   }
   override def train(filename: String): EmbeddingModel = {
     val iter = new LineSentenceIterator(new File(filename))
@@ -33,12 +37,13 @@ class CBOWModel(params:SampleParams) extends EmbeddingModel(params) {
     val fname = params.modelFilename()
 
     if (!(new File(fname).exists())) {
-      println("CBOW filename: " + fname)
+      println("Training for CBOW filename: " + fname)
+
       vectorModel = new Word2Vec.Builder()
-        .workers(params.nthreads)
+        .workers(48)
         .minWordFrequency(params.freqCutoff)
         .layerSize(params.embeddingLength)
-        .windowSize(params.modelWindowLength)
+        .windowSize(params.windowSize)
         .epochs(params.epocs)
         .batchSize(params.batchSize)
         .seed(42)
@@ -46,19 +51,19 @@ class CBOWModel(params:SampleParams) extends EmbeddingModel(params) {
         .iterations(1)
         .tokenizerFactory(factory)
         .elementsLearningAlgorithm("org.deeplearning4j.models.embeddings.learning.impl.elements.CBOW")
-        .allowParallelTokenization(false)
+        .allowParallelTokenization(true)
         .build()
 
       vectorModel.fit()
+      WordVectorSerializer.writeWord2Vec(vectorModel, new FileOutputStream(fname))
       save()
     }
-
     this
   }
 
   override def save(): EmbeddingModel = {
     if(vectorModel!=null){
-      val filename = params.dictionaryFilename()
+      val filename = params.embeddingsFilename()
       val table = vectorModel.getLookupTable()
       val vocabCache = table.getVocabCache()
       val vectors = table.vectors()
@@ -86,7 +91,7 @@ class CBOWModel(params:SampleParams) extends EmbeddingModel(params) {
   }
 
   override def load(): EmbeddingModel = {
-    val filename = params.dictionaryFilename()
+    val filename = params.embeddingsFilename()
     if(new File(filename).exists()) {
       val reader = new ObjectInputStream(new FileInputStream(filename))
       val size = reader.readInt()

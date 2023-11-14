@@ -1,7 +1,7 @@
 package evaluation
 
 import org.deeplearning4j.nn.api.layers.RecurrentLayer
-import org.deeplearning4j.nn.conf.{NeuralNetConfiguration, RNNFormat}
+import org.deeplearning4j.nn.conf.{NeuralNetConfiguration, RNNFormat, WorkspaceMode}
 import org.deeplearning4j.nn.conf.graph.MergeVertex
 import org.deeplearning4j.nn.conf.inputs.InputType
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode
@@ -17,13 +17,16 @@ import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
 import sampling.experiments.SampleParams
-import utils.Params
+import utils.{Params, Tokenizer}
 
+import java.util.Locale
 import scala.io.Source
+import scala.util.Random
 
-class ExtrinsicPOS(params: SampleParams) extends ExtrinsicLSTM(params) {
+class ExtrinsicPOS(params: SampleParams, tokenizer: Tokenizer) extends ExtrinsicLSTM(params, tokenizer) {
 
   var categories: Array[String] = null
+
 
   override def getClassifier(): String = "pos"
 
@@ -38,9 +41,12 @@ class ExtrinsicPOS(params: SampleParams) extends ExtrinsicLSTM(params) {
   }
 
   override def loadSamples(filename: String): Iterator[(String, String)] = {
-    Source.fromFile(filename).getLines().map(line => {
+
+    val rnd = new Random()
+    val array = Source.fromFile(filename).getLines().toSeq
+    rnd.shuffle(array).iterator.map(line => {
       val input = line.split("\t").head
-      (input, input)
+      (input.toLowerCase(locale), input.toLowerCase(locale))
     })
   }
 
@@ -49,9 +55,10 @@ class ExtrinsicPOS(params: SampleParams) extends ExtrinsicLSTM(params) {
     //predefined or extracted labels
     if (categories == null) {
       println("Finding category labels")
-      categories = Source.fromFile(getTraining()).getLines()
+      categories = Source.fromFile(getTraining()).getLines().map(line=> line.toLowerCase(locale))
         .flatMap(item => item.split("\\s").map(_.split("/").last).distinct)
         .toSet.toArray
+      categories ="NONE" +: categories
       categories
     }
     else {
@@ -66,27 +73,27 @@ class ExtrinsicPOS(params: SampleParams) extends ExtrinsicLSTM(params) {
       val categorySize = labels().length
 
       override def next(i: Int): MultiDataSet = {
-
-
         var inputLeftStack = Array[INDArray]()
         var inputRightStack = Array[INDArray]()
         var outputStack = Array[INDArray]()
         var i = 0;
-        while (i < params.batchSize && samples.hasNext) {
+        while (i < params.evalBatchSize && samples.hasNext) {
           val (input, output) = samples.next()
           val tokens = input.split("\\s+")
-          val inputOutput = tokens.map(word => word.split("/"))
+          val inputOutput = tokens.map(word => word.split("/")).take(params.modelWindowLength)
 
-          val inputLeft = inputOutput.map(_.head).take(params.evalWindowLength)
-          val inputLeftArray = inputLeft.map(ngram => {
-            retrieve(ngram)
+          val inputLeft = inputOutput.map(_.head)
+
+          val inputLeftArray = inputLeft.map(token => {
+            val embeddings = forward(token)
+            embeddings
           })
 
-          val inputLeftIndex = index(inputLeftArray)
-          val inputRightIndex = index(inputLeftArray.reverse)
-          val outputIndices = inputOutput.map(_.last)
+          val inputLeftIndex = vectorize(inputLeftArray)
+          val inputRightIndex = vectorize(inputLeftArray.reverse)
+          val outputElements = inputOutput.map(_.last)
+          val outputIndices = outputElements
             .map(output => labels().indexOf(output))
-            .take(params.evalWindowLength)
 
           val outputArray = onehot(outputIndices, categorySize)
 
@@ -127,18 +134,19 @@ class ExtrinsicPOS(params: SampleParams) extends ExtrinsicLSTM(params) {
 
     val categorySize = labels().length
     val conf = new NeuralNetConfiguration.Builder()
-      .cudnnAlgoMode(AlgoMode.NO_WORKSPACE)
+      .cudnnAlgoMode(AlgoMode.PREFER_FASTEST)
       .updater(new Adam.Builder().learningRate(params.lrate).build())
-      .dropOut(0.5)
+      .dropOut(0.2)
       .graphBuilder()
       .allowDisconnected(true)
-      .addInputs("left", "right")
+      .addInputs("leftemb", "rightemb")
+      /*.addInputs("left", "right")
       .addVertex("stack", new org.deeplearning4j.nn.conf.graph.StackVertex(), "left", "right")
-      .addLayer("embedding", new EmbeddingSequenceLayer.Builder().inputLength(params.evalWindowLength)
-        .nIn(params.dictionarySize).nOut(params.embeddingLength).build(),
+      .addLayer("embedding", new EmbeddingSequenceLayer.Builder().inputLength(params.modelWindowLength)
+        .nIn(params.evalDictionarySize).nOut(params.embeddingLength).build(),
         "stack")
       .addVertex("leftemb", new org.deeplearning4j.nn.conf.graph.UnstackVertex(0, 2), "embedding")
-      .addVertex("rightemb", new org.deeplearning4j.nn.conf.graph.UnstackVertex(0, 2), "embedding")
+      .addVertex("rightemb", new org.deeplearning4j.nn.conf.graph.UnstackVertex(0, 2), "embedding")*/
       //can use any label for this
       .addLayer("leftout", new LSTM.Builder().nIn(params.embeddingLength).nOut(params.hiddenLength)
         .activation(Activation.RELU)
@@ -154,17 +162,19 @@ class ExtrinsicPOS(params: SampleParams) extends ExtrinsicLSTM(params) {
         new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
           .activation(Activation.SOFTMAX)
           .nOut(categorySize)
-          .dataFormat(RNNFormat.NWC)
+          //.dataFormat(RNNFormat.NWC)
           .build(), "output-lstm")
       .setOutputs("output")
-      .setInputTypes(InputType.recurrent(params.dictionarySize),
-        InputType.recurrent(params.dictionarySize))
+      .setInputTypes(InputType.recurrent(params.embeddingLength),
+        InputType.recurrent(params.embeddingLength))
       .build()
 
+    conf.setTrainingWorkspaceMode(WorkspaceMode.ENABLED)
+    conf.setInferenceWorkspaceMode(WorkspaceMode.ENABLED)
     val graph = new ComputationGraph(conf)
 
-    updateWeights(graph)
+    //updateWeights(graph)
 
-
+    graph
   }
 }
