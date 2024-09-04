@@ -1,20 +1,17 @@
 package models
 
 import evaluation.{EvalScore, InstrinsicEvaluationReport}
+import experiments.Params
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.models.word2vec.Word2Vec
 import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator
-import org.deeplearning4j.text.tokenization.tokenizer
-import org.deeplearning4j.text.tokenization.tokenizer.TokenPreProcess
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory
-import org.deeplearning4j.util.ModelSerializer
-import sampling.experiments.SampleParams
-import utils.{Params, Tokenizer}
+import utils.Tokenizer
 
-import collection.JavaConverters._
-import java.io.{File, FileInputStream, FileOutputStream, InputStream, ObjectInputStream, ObjectOutputStream}
+import java.io._
+import scala.collection.JavaConverters._
 
-class CBOWModel(params:SampleParams, tokenizer: Tokenizer) extends EmbeddingModel(params, tokenizer) {
+class CBOWModel(params:Params, tokenizer: Tokenizer) extends EmbeddingModel(params, tokenizer) {
 
   var vectorModel:Word2Vec = null
   def defaultTokenizer(): DefaultTokenizerFactory = {
@@ -35,15 +32,14 @@ class CBOWModel(params:SampleParams, tokenizer: Tokenizer) extends EmbeddingMode
     val iter = new LineSentenceIterator(new File(filename))
     val factory = defaultTokenizer()
     val fname = params.modelFilename()
-
-    if (!(new File(fname).exists())) {
+    if (!(new File(fname).exists()) || params.forceTrain) {
       println("Training for CBOW filename: " + fname)
 
       vectorModel = new Word2Vec.Builder()
         .workers(48)
         .minWordFrequency(params.freqCutoff)
         .layerSize(params.embeddingLength)
-        .windowSize(params.windowSize)
+        .windowSize(params.embeddingWindowLength)
         .epochs(params.epocs)
         .batchSize(params.batchSize)
         .seed(42)
@@ -58,11 +54,15 @@ class CBOWModel(params:SampleParams, tokenizer: Tokenizer) extends EmbeddingMode
       WordVectorSerializer.writeWord2Vec(vectorModel, new FileOutputStream(fname))
       save()
     }
+    else{
+      load()
+    }
     this
   }
 
   override def save(): EmbeddingModel = {
     if(vectorModel!=null){
+      println("Saving vector model...")
       val filename = params.embeddingsFilename()
       val table = vectorModel.getLookupTable()
       val vocabCache = table.getVocabCache()
@@ -93,6 +93,7 @@ class CBOWModel(params:SampleParams, tokenizer: Tokenizer) extends EmbeddingMode
   override def load(): EmbeddingModel = {
     val filename = params.embeddingsFilename()
     if(new File(filename).exists()) {
+      println("Loading embedding filename: "+ filename)
       val reader = new ObjectInputStream(new FileInputStream(filename))
       val size = reader.readInt()
       for (i <- 0 until size) {
@@ -121,5 +122,5 @@ class CBOWModel(params:SampleParams, tokenizer: Tokenizer) extends EmbeddingMode
 
   override def filter(group: Array[String]): Boolean = true
 
-  override def evaluateReport(model: EmbeddingModel, embedParams: SampleParams): InstrinsicEvaluationReport = new InstrinsicEvaluationReport()
+  override def evaluateReport(model: EmbeddingModel, embedParams: Params): InstrinsicEvaluationReport = new InstrinsicEvaluationReport()
 }

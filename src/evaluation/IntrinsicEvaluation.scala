@@ -1,12 +1,10 @@
 package evaluation
 
+import experiments.Params
 import models.EmbeddingModel
 import org.json4s.DefaultFormats
 import org.json4s.JsonAST.JValue
 import org.json4s.jackson.JsonMethods._
-import sampling.experiments.SampleParams
-import utils.Params
-
 import java.io.{File, PrintWriter}
 import java.util.concurrent.ForkJoinPool
 import scala.collection.parallel.CollectionConverters.ArrayIsParallelizable
@@ -63,7 +61,7 @@ class IntrinsicEvaluation(val reportFilename: String) extends IntrinsicFunction 
   }
 
 
-  override def evaluateReport(model: EmbeddingModel, params:SampleParams): InstrinsicEvaluationReport = {
+  override def evaluateReport(model: EmbeddingModel, params:Params): InstrinsicEvaluationReport = {
     val ier = new InstrinsicEvaluationReport()
     println(s"Total Evaluation Functions: ${functions.map(_.count()).sum}")
     val parFunctions= functions.par

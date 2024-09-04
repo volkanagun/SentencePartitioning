@@ -1,7 +1,5 @@
 package utils
 
-import utils.Tokenizer.tokenize
-
 import java.io._
 import java.util.Locale
 import java.util.concurrent.ForkJoinPool
@@ -206,7 +204,7 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
     this
   }
 
-  def saveZip():Tokenizer={
+  def saveZip(): Tokenizer = {
     val baos = new FileOutputStream(zipFilename);
     val gzipOut = new GZIPOutputStream(baos);
     val objectOut = new ObjectOutputStream(gzipOut);
@@ -258,7 +256,11 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
     }
   }
 
-  def loadZip():Tokenizer={
+  def exists():Boolean={
+    new File(zipFilename).exists()
+  }
+
+  def loadZip(): Tokenizer = {
     println("Loading ZIP")
     val baos = new FileInputStream(zipFilename);
     val gzipOut = new GZIPInputStream(baos);
@@ -377,7 +379,7 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
       .flatMap(combinations => combinations.map(token => token.split("[\\s\\#]")))
       .flatMap(sequence => sequence.sliding(ngrams))
       .foreach(combinations => {
-        Range(1, ngrams).foreach(len=>{
+        Range(1, ngrams).foreach(len => {
           combinations.sliding(len, 1).foreach(item => {
             val str = item.mkString(" ")
             frequency = frequency.updated(str, frequency.getOrElse(str, 0d) + 1d)
@@ -490,24 +492,21 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
 
   def ngramFilter(sentence: Array[String], top: Int = 1): Array[String] = {
 
-    val arrays = sentence.flatMap(token => {
+    val result = sentence.map(token => {
       val candidates = ngramStemPartition(token)
         .map(_.trim)
         .filter(_.nonEmpty)
 
       val sorted = candidates.sortBy(item => {
-         val frequencySum = item.split("[\\#\\s]+").map(subngram=> {
-            frequencyBin.getOrElse(subngram, 0d)
-         }).sum
-         frequencySum
-        }).reverse
-        .take(top)
+          val subngram = item.split("[\\#\\s]+").head
+          val frequencySum = subngram.length * frequencyBin.getOrElse(subngram, 0d)
+          frequencySum
+        }).reverse.head
 
-      val flatten = sorted.flatMap(item=> {item.split("[\\#\\s]+")})
-      flatten
-    })
+      sorted
+    }).mkString(" ")
 
-    arrays
+    Array(result)
   }
 
   def ngramFilterExperimental(sentence: Array[String], top: Int = 3): Array[String] = {
@@ -533,7 +532,7 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
 
   def ngramStemFilter(token: String): Array[String] = {
     val result = ngramFilter(Array(token))
-    if(result.isEmpty) Array(token)
+    if (result.isEmpty) Array(token)
     else result
   }
 
@@ -549,23 +548,23 @@ object Tokenizer {
 
   val sentenceFilename = "resources/text/sentences/sentences-tr.txt";
   val locale = new Locale("tr")
-  val windowSize = 2
+  val lmWindowSize = 2
 
 
   def freqStemConstruct(): Unit = {
 
-    val maxSize = 10000
-    val epocs = 1
+    val maxSize = 1000
+    val epocs = 5
     val cutOff = 3
-    val mainFreqDictionary = new Tokenizer(windowSize = windowSize)
+    val mainFreqDictionary = new Tokenizer(windowSize = lmWindowSize)
       .load()
 
     for (i <- 0 until epocs) {
-      val array = Range(0, 1).toArray.par
-      array.tasksupport = new ForkJoinTaskSupport(new ForkJoinPool(16))
+      val array = Range(0, 12).toArray.par
+      array.tasksupport = new ForkJoinTaskSupport(new ForkJoinPool(12))
       array.map(_ => {
-        new Tokenizer(windowSize = windowSize)
-          .freqStemConstruct(sentenceFilename, windowSize, maxSize)
+        new Tokenizer(windowSize = lmWindowSize)
+          .freqStemConstruct(sentenceFilename, lmWindowSize, maxSize)
       }).toArray.foldRight[Tokenizer](mainFreqDictionary) {
         case (freq, main) => main.merge(freq)
       }.build(cutOff).saveZip()
@@ -613,7 +612,7 @@ object Tokenizer {
   }
 
   def zip(): Unit = {
-    val tokenizer = new Tokenizer(windowSize = windowSize).load()
+    val tokenizer = new Tokenizer(windowSize = lmWindowSize).load()
     tokenizer.saveZip()
   }
 
