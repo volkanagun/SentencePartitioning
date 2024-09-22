@@ -22,7 +22,7 @@ The most important parameters are
 * lmTopSplit: number of candidate splits for each token. It defines the top most frequent or likely splits.
 
 ## Directory
-![Directory folders](https://github.com/volkanagun/SentenceSelection/blob/master/directories.jpg?raw=true)
+![Directory folders](https://github.com/volkanagun/SentenceSelection/blob/master/Directories.png?raw=true)
 
 ## Training
 
