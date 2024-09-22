@@ -2,7 +2,13 @@
 
 The project is maven project. The intellij is used as an ide. It requires JDK11 and Scala 2.13.8 in order to compile. 
 
-In this library, the effects of word partitioning in the quality of the word embeddings extracted for POS tagging, NER, sentiment analysis and analogy tasks. Rather than giving the full parameteric details of the experimental setups, a short hand usage of the partitioning approach is presented in the following sections. In this respect two n-gram partitioning approaches namely RankLM and SyllableLM is given. RankLM uses contextual ranking for partitioning word embeddings into useful n-grams whereas SyllableLM partitions the words into valid syllables. Both approaches produces multiple word splits separeted by \# symbol.
+In this library, the effects of word partitioning in the quality of the word embeddings extracted for POS tagging, NER, sentiment analysis and analogy tasks. Rather than giving the full parameteric details of the experimental setups, a short hand usage of the partitioning approach is presented in the following sections. In this respect two n-gram partitioning approaches is given below. 
+
+* RankLM : It uses contextual ranking for partitioning word embeddings into useful n-grams
+* SyllableLM: It partitions the words into valid syllables.
+
+
+Both approaches produces multiple word splits separeted by \# symbol.
 
 
 # Quick Details
