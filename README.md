@@ -22,188 +22,66 @@ The most important parameters are
 * lmTopSplit: number of candidate splits for each token. It defines the top most frequent or likely splits.
 
 ## Directory
-![Directory folders](https://github.com/volkanagun/SentencePartitioning/blob/master/Directories.png?raw=true)
+![Directory folders](https://github.com/volkanagun/SentencePartitioning/blob/master/directory.png?raw=true)
+
+The folders above is the main folders and they are not totally required to run the project. 
+
+* results: It stores the evaluation results for a selected task, embedding extraction method and n-gram partitioning profile.
+* transducers: It stores the two level finite state machines for a specific task and n-gram partitioning profile.
+* text/sentences: It contains the line by line sentence file. If you want to use your sentence file you must update the sentencesFile in Parameters.
+* dictionary: It contains the lemma lexicon.txt file. If you have your own lemmatizer you must override the training in the [AbstractLM](https://github.com/volkanagun/SentencePartitioning/blob/master/src/transducer/AbstractLM.scala) class.
+* binary: It contains meta files that contains the lemma dictionary, tokenizer specific files. These are not required for training but the existance of the folder is required.
+* embeddings: It is the text or binary of the embedding files where they are stored as token:vector format.
+* evaluation: It stores all the results in the experimental evaluation. So it is not required for quick runs.
 
 ## Training
 
-There are two improtant functions to be calledduring training. These are given in the following code segment.
+There are two improtant functions to be called during training. These are given in the following code segment.
 
 ```scala
+  def trainModel() : RankLM = {
+    val parameters = createParams()
+    val rankLM = new RankLM(parameters)
+      .initialize()
+      .loadTrain()
+    
+    rankLM.asInstanceOf[RankLM]
 
-
-## Inference
-# Evaluation
-## Extraction Models
-
-Three extraction models namely SkipGram, CBOW and Self-Attention LSTM models are applied to extract word embeddings from sampled datasets. To use custom embedding extraction models the class namely **EmbeddingModel** must be derived. The functions train(), save(), load() are used to train the word embeddings, save and load them into/from binary files. During loading and saving the **update(ngram: String, vector: Array[Float]): Int** function must be called. This function returns the indice of the ngram and stores the embedding of the n-gram. The following code block shows the EmbeddingModel class.
+  }
+```
+Initialize function uses a weighted trie for training frequent sub-ngrams for tokens given by the lemma dictionary and text files. The dictionary  contains three filenames. These are given as follows.
 
 ```scala
-abstract class EmbeddingModel(val params: SampleParams) extends IntrinsicFunction {
+class LMDictionary {
 
-  var avgTime = 0d
-  var sampleCount = 0
-
-  var dictionaryIndex = Map[String, Int]("dummy" -> 0)
-  var dictionary = Map[String, Array[Float]]("dummy" -> Array.fill[Float](params.embeddingLength)(0f))
-  var computationGraph: ComputationGraph = null
-
-  lazy val tokenizer = new Tokenizer().loadBinary()
-
-  def getTrainTime(): Double = avgTime
-
-  def train(filename: String): EmbeddingModel
-
-  def save(): EmbeddingModel
-
-  def load(): EmbeddingModel
-
-
-  def getDictionary(): Map[String, Array[Float]] = dictionary
-
-  def getDictionaryIndex(): Map[Int, Array[Float]] = {
-    dictionary.map { case (ngram, vector) => dictionaryIndex(ngram) -> vector }
-  }
-
-  def update(ngram: String, vector: Array[Float]): Int = {
-    dictionary = dictionary.updated(ngram, vector)
-    update(ngram)
-  }
-
-  def update(ngram: String): Int = {
-
-    if (dictionaryIndex.size < params.dictionarySize) {
-      dictionaryIndex = dictionaryIndex.updated(ngram, dictionaryIndex.getOrElse(ngram, dictionaryIndex.size))
-    }
-    retrieve(ngram)
-
-  }
-
-  def retrieve(ngram: String): Int = {
-    dictionaryIndex.getOrElse(ngram, 0)
-  }
-
-  def tokenize(sentence: String): Array[String] = {
-    tokenizer.ngramFilter(sentence)
-  }
-
-  def forward(token: String): Array[Float] = {
-    val frequentNgrams = tokenizer.ngramStemFilter(token).filter(ngram => dictionary.contains(ngram))
-    val ngramVectors = frequentNgrams.map(ngram => dictionary(ngram))
-    average(ngramVectors)
-  }
-
-  def average(embeddings: Array[Array[Float]]): Array[Float] = {
-    var foldResult = Array.fill[Float](params.embeddingLength)(0f)
-    embeddings.foldRight[Array[Float]](foldResult) { case (a, main) => {
-      main.zip(a).map(pair => pair._1 + pair._2)
-    }
-    }
-  }
-}
-```
-
-In order to use a different types of tokenizers, the **forward(token:String)** method must be modified. In this settings, a language dependent tokenizer extracts the frequent n-grams of a sentence. In order to extract n-grams in other languages, another tokenizer must be used here. Note that forward method uses averaging for token n-grams. It assumes that the embedding of a token is the average of its n-gram content. EmbeddingModel also stores the embeddings for each string either in token or n-gram form. Along with the embedding vectors, the indice of the n-grams is also stored. Through the update and retrieve methods, the indices of a n-gram sequence can be converted to BOW or One-Hot sequence.      
-
-## Evaluation models
-
-To evaluate other datasets with the current definitions, either a json dataset or a line by line text dataset is required. JSON files are used for intrinsic evaluations. A JSON dataset for English and German can be constructed easily from the sentence-tr.json example placed inside resources/evaluation/analogy folder. For extrinsic evaluation the example datasets are placed inside resources/evaluation/ folder. Extrinsic evaluation models use Self-Attention recurrent model and implements the **ExtrinsicLSTM**  class. For sequential extrinsic type, ExtrinsicPOS function is implemented. For text classification same sequential model with overriding **def loadSamples(filename: String): Iterator[(String, String)]** and **override def labels(): Array[String]**. So basically if you want to use other datasets just modify the datasets. An example sequention and classification datasets are given as follows. 
-
-### Sequential dataset
-
-This dataset is a line by line tokenized dataset. Each line corresponds to a sample. Each label is separeted by **//** symbol and defined for every token.
+  val binaryFilename = "resources/binary/ranking.bin"
+  var dictionaryTextFilename = "resources/dictionary/lexicon.txt"
+  val sentenceFilename = "resources/text/sentences/sentences-tr.txt"
+  val split = "#"
+  var dictionaryTrie = new LMNode(0)
 
 ```
-Kimileri/NOUN buna/PRON kader/NOUN diyordu/VERB ,/PUNCT kimileri/NOUN unut/VERB ./PUNCT
-Bu/PRON da/PART zaman/NOUN ister/VERB ,/PUNCT emek/NOUN ister/VERB ./PUNCT
-İki/NUM veli/NOUN dokunulsa/VERB ağlayacaktı/_ ağlayacak/VERB tı/AUX ./PUNCT
-```
-
-### Classification dataset
-
-This dataset is also a line by line dataset. Each line is pair of text and classification label. They are separeted by single tab (**\t**).
-
-```
-Neşe ve Üzüntü köprünün kırılmaya başlamasıyla geri dönerler .	Notr
-i phone 5 ten sonra gene 4'' ekranı tercih ettim. telefon mükemmel. ertesi gün elime ulaştı.	Positive
-Beşinci sezonda diziye yeni oyuncular katıldı .	Notr
-```
-The ExtrinsicNER class is given as follows. This class uses Self-Attention LSTM neural network model to test the accuracy of a sequential dataset. In order to modify a sequential task without changing the neural network model this class can be inherited with overriding all its methods. Note that the dataset must be in the correct form.
+These files are used to initialize the lemma and other inflectional forms of the words in the text file. Parameters are used to limit the level of training because sentences-tr file can be huge. In order to train your own language words, the lemma dictionary as well as the initialization methods must be changed.
 
 ```scala
-  
-class ExtrinsicNER(params:SampleParams) extends ExtrinsicPOS(params){
+def fromDictionary(params: Params): LMDictionary = {
 
-  override def getClassifier(): String = "ner"
+    if (params.lmTrainDictionary) {
+      println("Constructing dictionary from text lexicon...")
+      Source.fromFile(dictionaryTextFilename).getLines()
+        .map(line => line.split("\t").head.toLowerCase(locale)
+          .replaceAll("[\\~\\&\\_]", "")
+          .replaceAll("([au])([bcçdfgğhjklmnprsştvyz])E$", "$1$2a")
+          .replaceAll("([eü])([bcçdfgğhjklmnprsştvyz])E$", "$1$2e").toLowerCase(locale).trim)
+        .foreach(token => {
+          dictionaryTrie.add(Array(token, "END"))
+        })
 
-  override def getTraining(): String = {
-    //dataset filename
-    "resources/evaluation/ner/train.txt"
-  }
-
-  override def getTesing(): String = {
-    //dataset filename
-    "resources/evaluation/ner/test.txt"
-  }
-
-}
-```
-
-The ExtrinsicSentiment class is given as follows. This class uses ELMO neural network model and it changes the dataset loading methods. The loadSamples retrieves all the samples in the file. The content of the iterator is a sentence sample and label pairs. Each sample must be defined line by line as in the classification dataset. 
-
-```scala
-class ExtrinsicSentiment(params:SampleParams) extends ExtrinsicLSTM(params){
-
-  var categories :Array[String] = null
-  override def getClassifier(): String = "sentiment"
-
-  override def getTraining(): String = {
-    //dataset filename
-    "resources/evaluation/sentiment/train.txt"
-  }
-
-  override def getTesing(): String = {
-    //dataset filename
-    "resources/evaluation/sentiment/test.txt"
-  }
-
-  override def loadSamples(filename: String): Iterator[(String, String)] = {
-
-    Source.fromFile(filename).getLines().map(line=> {
-      val Array(p1, p2) = line.split("\t")
-      (p1, p2)
-    })
-  }
-
-  override def labels(): Array[String] = {
-
-    //predefined or extracted labels
-    if(categories == null){
-      categories = loadSamples(getTraining()).map(_._2).toSet.toArray
+      println("Constructing dictionary from text lexicon finished")
     }
 
-    categories
+    this
   }
-}
-
 ```
 
-# Other Languages
-
-There is no support for other languages but they can be implemented by applying custom tokenizer and a custom evaluation dataset. For the language support, the implementations of the target task must be specified in ExperimentSPL and SamplingExperiment. Currently, ner, pos, and sentiment are implemented. A checklist of necessary changes are given as follows. 
-
-1. In order to support other languages first a frequent n-gram tokenizer must be implemented. The current tokenization is language independent but frequent n-grams are language dependent. The static vocabulary of an evaluation dataset must be constructed in selection stage.
-2. A large line by line sentence dataset of the target language must be specified by a path in SampleParams. This text dataset will be used as a primary input in selection.
-3. The tokenizer of the evaluation stage is only used in EmbeddingModel. This tokenizer instance can be modified in this class or a new class can be derived with an appropriate implementation of tokenize method.
-
-Finally, with the correct folder paths defined in ExperimentSPL and SamplingExperiment classes a new language can be used. The paths may include the following
-
-1. The path to main sentence dataset
-2. Training and testing datasets
-4. The name and folder of the target task
-5. The vocabulary file of the evaluation dataset
-
-Along with these changes the resources folder must include the path of these changes. A general overview of directory structure of the resources folder is given in the following screenshot.
-
-![SamplingExperiment steps](https://github.com/volkanagun/ActiveSelection/blob/master/folders.png?raw=true)
-
-   
+To change the fromDictionary training, you must obtain the lemmas of the words for the target language. 
