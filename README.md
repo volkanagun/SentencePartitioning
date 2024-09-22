@@ -2,34 +2,18 @@
 
 The project is maven project. The intellij is used as an ide. It requires JDK11 and Scala 2.13.8 in order to compile. 
 
-In this library, the effects of word partitioning in the quality of the word embeddings extracted for POS tagging, NER, sentiment analysis and analogy tasks.   
+In this library, the effects of word partitioning in the quality of the word embeddings extracted for POS tagging, NER, sentiment analysis and analogy tasks. Rather than giving the full parameteric details of the experimental setups, a short hand usage of the partitioning approach is presented in the following sections. In this respect two n-gram partitioning approaches namely RankLM and SyllableLM is given. RankLM uses contextual ranking for partitioning word embeddings into useful n-grams whereas SyllableLM partitions the words into valid syllables. Both approaches produces multiple word splits separeted by \# symbol.
 
-# Experiment
+
+
+# Quick Details
+
+The API provided here contains an AbstractLM class where the partitioning is trained and applied for new sentences through train and sentenceSplit methods. The training is done on a sentence corpus which is placed in resources/text/sentences folder. Sentence corpus is a line by line folder which also can be tokenized by space split. There is also a regex-based tokenizer provided to tokenize the sentences in the sentence corpus. In order to train the partitioning finite state model and parameters must defined. These  the corpus
 
 
 ## Methods 
 
-ExperimentSPL contains all the steps for selection of the sentences. These steps include feature extraction steps, selection method, scoring technique. These steps can be itemized as follows:
 
-1. Feature extraction
-   - Tokens : Uses a standard tokenizer and use tokens as features.
-   - N-Grams: Uses a frequent n-gram dictionary to extract frequent n-grams from sentences. This is a custom tokenizer that must be defined for each language separately.
-2. Selection methods
-   - VocabSelect : VocabSelect uses same amount of sentences for each word in the evaluation dataset. It selects these words randomly without using any criteria. 
-   - KMeans : K-Means is a model based selection method. It uses an average to score the candidate sentence. The parameters k is selected as 1 to 10. If the sentence is very similar to mean of any of the cluster, it is discarded.
-   - Least : Least sqaures method is a model based selection methods. It uses the Least squares regression to select the candidate sentence.
-   - Hopfield : Hopfield neural network model based selection method. It uses energy of the hopfields to score the candidate sentence. 
-   - Boltzmann: Hopfield neural network model based selection method. It uses energy of the Boltzman machine. Has a different neural network structure and learning algorithm comapred to Hopfield neural network. 
-   - VotedDivergence: It uses a voting schema based on ranomly constructed voters. The divergence measures are applied for voting the candidate sentence.
-   - VE: Uses next/skip word prediction based voting. Similar to VotedDivergence but includes local next word frequencies.
-   - LM: Use a language model perplexity based scoring. Different from VE, it only uses peoplexity in next word predictions.
-   - Mahalonabis: A distance metric. It uses Mahalonabis distance for embedding space of the sentences. If the similarity is high, the sentence is discarded.
-   - Euclidean: A distance metric. It uses Euclidean distance to for the selected sentences. If the similarity is high, the sentence is discarded.
-   - KL : A distance metric for distributions. It uses KL-divergence between the candidate sentence distribution from all the set and the distribution of the selected sentence. If the difference is low, the sentence is discarded. 
-   - Entropy: It uses information entropy to select the sentences. It is similar to LM but uses consequtive words.
-3. Scoring methods:
-   - Average soring: The average selection scores of the previously selected sentences is used as a threshold for deciding on the selection of new candidate sentences.
-   - Majority voting: The selection scores of set of selection methods are used as a majority voting schema. Only when the majority of the decisions selects the candidate sentence, then the sentence is selected.
   
 Along with these selection choices, several other parameters such as embedding size, window length of the language model, maximum dictionary size, cluster size (k-nn) are stored in [SampleParams](https://github.com/volkanagun/ActiveSelection/blob/master/src/sampling/experiments/SampleParams.scala) class. The following functions inside [ExperimentSPL](https://github.com/volkanagun/ActiveSelection/blob/master/src/sampling/experiments/ExperimentSPL.scala) must be modified to include other scoring methods and feature extractors. 
 
