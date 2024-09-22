@@ -84,4 +84,14 @@ def fromDictionary(params: Params): LMDictionary = {
   }
 ```
 
-To change the fromDictionary training, you must obtain the lemmas of the words for the target language. 
+To change the fromDictionary training, you must obtain the lemmas of the words for the target language. These words must be assed by ``` dictionaryTrie.add(Array(word, "END")) method. 
+
+## Inference
+
+In the inference rankLM sentenceSplit method takes the tokenized sentences to predict the most likely sequence. It returns single sentence sequence which is partitioned into its n-grams.
+
+
+
+
+
+
