@@ -5,42 +5,22 @@ The project is maven project. The intellij is used as an ide. It requires JDK11 
 In this library, the effects of word partitioning in the quality of the word embeddings extracted for POS tagging, NER, sentiment analysis and analogy tasks. Rather than giving the full parameteric details of the experimental setups, a short hand usage of the partitioning approach is presented in the following sections. In this respect two n-gram partitioning approaches namely RankLM and SyllableLM is given. RankLM uses contextual ranking for partitioning word embeddings into useful n-grams whereas SyllableLM partitions the words into valid syllables. Both approaches produces multiple word splits separeted by \# symbol.
 
 
-
 # Quick Details
 
-The API provided here contains an AbstractLM class where the partitioning is trained and applied for new sentences through train and sentenceSplit methods. The training is done on a sentence corpus which is placed in resources/text/sentences folder. Sentence corpus is a line by line folder which also can be tokenized by space split. There is also a regex-based tokenizer provided to tokenize the sentences in the sentence corpus. In order to train the partitioning finite state model and parameters must defined. These  the corpus
+The API provided here contains an AbstractLM class where the partitioning is trained and applied for new sentences through train and sentenceSplit methods. The training is done on a sentence corpus which is placed in resources/text/sentences folder. Sentence corpus is a line by line folder which also can be tokenized by space split. There is also a regex-based tokenizer provided to tokenize the sentences in the sentence corpus. To train the partitioning finite state model, the parameters must be defined. The parameters are determined in [Params](https://github.com/volkanagun/SentencePartitioning/blob/master/src/experiments/Params.scala). The language model definitions starts with lm-prefix in Params variables. 
 
+The most important parameters are 
+* lmWindowLength: defines the token window size for inference.
+* lmEpocs:  number of training epocs. When defined with lmMaxSentence, the total training sentence size becomes lmEopcs*lmMaxSentence.
+* lmMaxSentence: number of training sentences in each epoc.
+* lmTopSplit: number of candidate splits for each token. It defines the top most frequent or likely splits.
 
-## Methods 
-
-
-  
-Along with these selection choices, several other parameters such as embedding size, window length of the language model, maximum dictionary size, cluster size (k-nn) are stored in [SampleParams](https://github.com/volkanagun/ActiveSelection/blob/master/src/sampling/experiments/SampleParams.scala) class. The following functions inside [ExperimentSPL](https://github.com/volkanagun/ActiveSelection/blob/master/src/sampling/experiments/ExperimentSPL.scala) must be modified to include other scoring methods and feature extractors. 
-
-## Scoring function
-Must include new instance of InstanceScorer as a scoring function.
- ```scala
-      def createCriterias(sampleName: String): InstanceScorer
-   ```
-## Feature extractor
-Must include a feature extractor for modelling features. For instance for English or German a new tokenizer, stemmer, or other features can be defined as an extractor.
- ```scala
-def createExtractor(name: String): Extractor 
- ``` 
-## Adapter
-Adapters can be defined here. Adapters are used for decision when a scoring method is given.
-```scala 
-def createAdapter(adapterName: String, scorer: InstanceScorer, k: Int, kselectSize: Int, maxSelectSize: Int, threshold: Double): ScoreAdapter
-```
-
-# Evaluation
-
-How relevant the selected sentences and the selection methodology is a question that shouldbe answered through the second stage. In this stage, a deep learning model is used to construct word embeddings from selected sentences. The general overview of this stage is given in the following figure.
-
+## Directory
 ![SamplingExperiment steps](https://github.com/volkanagun/ActiveSelection/blob/master/evaluation.jpg?raw=true)
 
-Word embedding extraction approaches can be diverse. In this software, Skip-Gram, CBOW and Self-Attention LSTM models are used. The extraction methods uses the sampled datasets to extract the word embeddings. The quality of the extracted word embeddings are evaluated through evaluation methods. In order to evaluate the word embeddings and sentence selection methods there must be an evaluation dataset. There are two types of evaluation datasets. These are intrinsic and extrinsic. Intrinsic evaluation tests word embeddings in analogy pairs based on cosine similarity. Extrinsic evaluation datasets uses word embeddings in a machine learning model and predicts the accurateness of the trained model on a test dataset. Extrinsic evaluation requires a training phase,however intrinsic evaluation just uses the extracted word embeddings. There are also two types extrinsic evaluation. These are sequential models, and classification models which are defined based on the type of machine learning model. Evaluation produces a score for the word embedding extraction process. The results are saved into results folder.
-
+## Training
+## Inference
+# Evaluation
 ## Extraction Models
 
 Three extraction models namely SkipGram, CBOW and Self-Attention LSTM models are applied to extract word embeddings from sampled datasets. To use custom embedding extraction models the class namely **EmbeddingModel** must be derived. The functions train(), save(), load() are used to train the word embeddings, save and load them into/from binary files. During loading and saving the **update(ngram: String, vector: Array[Float]): Int** function must be called. This function returns the indice of the ngram and stores the embedding of the n-gram. The following code block shows the EmbeddingModel class.
