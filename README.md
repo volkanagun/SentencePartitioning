@@ -1,8 +1,8 @@
 # SentencePartitioning
 
-The project is maven project. The intellij is used as an ide. It requires JDK11 and Scala 2.13.8 in order to compile. 
+The project is a maven project. The intellij is used as an IDE. It requires JDK11 and Scala 2.13.8 in order to compile. 
 
-In this library, the effects of word partitioning in the quality of the word embeddings extracted for POS tagging, NER, sentiment analysis and analogy tasks. Rather than giving the full parameteric details of the experimental setups, a short hand usage of the partitioning approach is presented in the following sections. In this respect two n-gram partitioning approaches is given below. 
+In this library, the effects of word partitioning is measured for the quality of the word embeddings extracted for POS tagging, NER, sentiment analysis and analogy tasks. Rather than giving the full parameteric details of the experimental setups, a short hand usage of the partitioning approach is presented in the following sections. In this respect two n-gram partitioning approaches is given below. 
 
 * RankLM : It uses contextual ranking for partitioning word embeddings into useful n-grams
 * SyllableLM: It partitions the words into valid syllables.
@@ -13,7 +13,7 @@ Both approaches produces multiple word splits separeted by \# symbol.
 
 # Quick Details
 
-The API provided here contains an AbstractLM class where the partitioning is trained and applied for new sentences through train and sentenceSplit methods. The training is done on a sentence corpus which is placed in resources/text/sentences folder. Sentence corpus is a line by line folder which also can be tokenized by space split. There is also a regex-based tokenizer provided to tokenize the sentences in the sentence corpus. To train the partitioning finite state model, the parameters must be defined. The parameters are determined in [Params](https://github.com/volkanagun/SentencePartitioning/blob/master/src/experiments/Params.scala). The language model definitions starts with lm-prefix in Params variables. 
+The API provided here contains an [AbstractLM](https://github.com/volkanagun/SentencePartitioning/blob/master/src/transducer/AbstractLM.scala) class where the partitioning is trained and applied for new sentences through train and sentenceSplit methods. The training is done on a sentence corpus which is placed in resources/text/sentences folder. Sentence corpus is a line by line folder which also can be tokenized by space (\s) split. There is also a regex-based tokenizer provided to tokenize the sentences in the sentence corpus. To train the partitioning finite state model, the parameters must be defined. The parameters are determined in [Params](https://github.com/volkanagun/SentencePartitioning/blob/master/src/experiments/Params.scala). The language model definitions starts with "lm" prefix in Params variables. 
 
 The most important parameters are 
 * lmWindowLength: defines the token window size for inference.
@@ -22,7 +22,7 @@ The most important parameters are
 * lmTopSplit: number of candidate splits for each token. It defines the top most frequent or likely splits.
 
 ## Directory
-![SamplingExperiment steps](https://github.com/volkanagun/ActiveSelection/blob/master/evaluation.jpg?raw=true)
+![Directory folders](https://github.com/volkanagun/ActiveSelection/blob/master/evaluation.jpg?raw=true)
 
 ## Training
 ## Inference
