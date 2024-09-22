@@ -22,9 +22,15 @@ The most important parameters are
 * lmTopSplit: number of candidate splits for each token. It defines the top most frequent or likely splits.
 
 ## Directory
-![Directory folders](https://github.com/volkanagun/ActiveSelection/blob/master/evaluation.jpg?raw=true)
+![Directory folders](https://github.com/volkanagun/ActiveSelection/blob/master/directories.jpg?raw=true)
 
 ## Training
+
+There are two improtant functions to be calledduring training. These are given in the following code segment.
+
+```scala
+
+
 ## Inference
 # Evaluation
 ## Extraction Models
