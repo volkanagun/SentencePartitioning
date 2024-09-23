@@ -17,14 +17,19 @@ import scala.util.control.Breaks
 
 class LMDataset {
 
+  case class KeyPair(w1: String, w2: String) {
+    override def hashCode(): Int = w1.hashCode * 7 + w2.hashCode
+
+    override def equals(obj: Any): Boolean = {
+      val other = obj.asInstanceOf[KeyPair]
+      other.hashCode() == hashCode()
+    }
+  }
+
+
   val mainFilename = "resources/text/sentences/sentences-april-v2-tr.txt"
-  val experimentLM = new LMExperiment()
   val tokenizer = new Tokenizer()
 
-  def train(): LMDataset = {
-    experimentLM.train()
-    this
-  }
 
   def constructNER(): Unit = {
     construct("resources/evaluation/ner/train.txt", "resources/text/ner/main.txt")
@@ -56,14 +61,19 @@ class LMDataset {
     !text.split("\\s+").exists(word => word.length > length)
   }
 
-  def construct(params: Params, taskName: String): Unit = {
-    println(s"Constructing corpus for ${taskName} and ${params.lmWindowLength}")
+  def construct(lm:AbstractLM, taskName: String): Unit = {
+
+    val params = lm.getParams
     val fname = new File(params.corpusFilename(taskName))
     val stats = new LMStats()
 
+    println(s"Constructing corpus for ${taskName} and ${params.lmWindowLength}")
+    println(s"Corpus filename: ${fname}")
+
+
     if (!fname.exists() || params.lmForceTrain) {
       val corpusPrint = new PrintWriter(params.corpusFilename(taskName))
-      val fn = partition(params)
+      val sentenceSplit = (sentence:String) => lm.splitSentence(tokenizer.standardTokenizer(sentence))
 
       var index = 0
       var count = 0
@@ -74,9 +84,9 @@ class LMDataset {
           .take(params.corpusMaxSentence)
           .map(_._1).toArray.sliding(params.lmThreads, params.lmThreads).foreach(sentences => {
             stats.start()
-            val partitionedSentences = sentences.par.map(fn)
+            val partitionedSentences = sentences.par.map(sentenceSplit)
             stats.end()
-            val tokenCount =  sentences.map(_.split("[\\s\\p{Punct}]").length).sum
+            val tokenCount = sentences.map(_.split("[\\s\\p{Punct}]").length).sum
             val sentenceCount = sentences.length
             stats.incTokenCount(tokenCount)
             stats.incSentenceCount(sentenceCount)
@@ -99,6 +109,7 @@ class LMDataset {
     params.setStats(stats)
   }
 
+/*
 
   def construct(): LMDataset = {
     val tasks = new Params().tasks
@@ -106,12 +117,22 @@ class LMDataset {
     tasks.foreach(task => construct(task))
     this
   }
-
+*/
+/*
   def constructParallel(): LMDataset = {
     val tasks = new Params().tasks
     tasks.foreach(task => constructParallel(task))
     this
+  }*/
+/*
+
+  def densityParallel(): LMDataset = {
+    val tasks = new Params().tasks
+    tasks.foreach(task => densityParallel(task))
+    this
   }
+*/
+/*
 
   def construct(taskName: String): LMDataset = {
     val p = new Params()
@@ -119,7 +140,7 @@ class LMDataset {
     val models = p.adapters
     models.foreach(modelName => {
       ranges.foreach(windowSize => {
-        val p = experimentLM.init(modelName, windowSize)
+        val p = Params(modelName, windowSize)
         construct(p, taskName)
       })
     })
@@ -132,12 +153,27 @@ class LMDataset {
     val models = p.adapters
     models.foreach(modelName => {
       ranges.par.foreach(windowSize => {
-        val p = experimentLM.init(modelName, windowSize)
+        val p = Params(modelName, windowSize)
         construct(p, adapterName)
       })
     })
     this
   }
+*/
+/*
+  def densityParallel(adapterName: String): LMDataset = {
+    val p = new Params()
+    val ranges = p.windows
+    val models = p.adapters
+    models.foreach(modelName => {
+      ranges.par.foreach(windowSize => {
+        val p = Params(modelName, windowSize)
+        densityScores(p, adapterName)
+      })
+    })
+    this
+  }*/
+/*
 
   def partition(params: Params): (String => Array[String]) = {
     if ("lm-syllable".equals(params.adapterName)) partitionSlide(params)
@@ -161,32 +197,13 @@ class LMDataset {
     else null;
 
   }
+*/
 
-  def makeToken(token: String, lm: AbstractLM): String = {
-    token.replaceAll(lm.lm.transducer.split, "")
-  }
-
-
-  def executeTask(task: Callable[Array[String]], time: Long): Array[String] = {
-    val executor = Executors.newSingleThreadExecutor()
-    val future = executor.submit(task)
-    var words = Array[String]()
-    try {
-      words = future.get(time, TimeUnit.SECONDS)
-    }
-    catch {
-      case _: Exception => println("Error in 50 seconds...")
-    }
-    finally {
-      executor.shutdown()
-    }
-
-    words
-  }
+/*
 
   def partitionSlide(params: Params): (String => Array[String]) = {
 
-    val lm = experimentLM.model(params, params.adapterName)
+    val lm = params.model(params, params.adapterName)
     val fn = (sentence: String) => {
 
       val sequence = tokenizer.standardTokenizer(sentence)
@@ -195,31 +212,25 @@ class LMDataset {
           val tokens = pairs._1
           val task = new Callable[Array[String]]() {
             def call(): Array[String] = {
-              lm.findMinSplitSentence(tokens)
-                .head.split(lm.splitSpace)
+              lm.splitSentence(tokens)
             }
           }
           (pairs._2, task.call())
         }).toArray.sortBy(_._1)
         .flatMap(_._2)
-
-
     }
 
 
     fn
-  }
-
+  }*/
+/*
   def partitionEfficient(params: Params): (String => Array[String]) = {
 
-    val lm = experimentLM.model(params, params.adapterName)
+    val lm = params.model(params, params.adapterName)
     val fn = (sentence: String) => {
       val sequence = tokenizer.standardTokenizer(sentence)
-      sequence.sliding(lm.params.lmWindowLength, lm.params.lmWindowLength).zipWithIndex.toArray.flatMap(pairs => {
-        val tokens = pairs._1
-        val result = lm.findMinSplitEfficient(tokens).head
-        result.split(lm.split)
-      })
+      val result = lm.splitSentence(sequence)
+      result
     }
 
 
@@ -227,23 +238,55 @@ class LMDataset {
   }
 
   def partitionFunction(params: Params): (String => Array[Array[String]]) = {
-    val lm = experimentLM.model(params.adapterName, params.lmWindowLength)
+    val lm = params.modelDefault(params.adapterName, params.lmWindowLength)
     val fn = (sentence: String) => {
       val sequence = tokenizer.standardTokenizer(sentence)
-      val newSentence = lm.findMinSplitSentence(sequence).head
-      val words = newSentence.split("\\s+").map(token => token.split(lm.lm.seqTransducer.split))
+      val newSentence = lm.splitSentence(sequence)
+      val words = newSentence.map(token => token.split(lm.lm.seqTransducer.split))
       words
     }
 
     fn
-  }
-}
+  }*/
 
-object LMDataset extends LMDataset() {
+  def densityScores(params: Params, taskName: String): Unit = {
+    val densityFile = new File(params.densityFilename(taskName))
+    val corpusFile = new File(params.corpusFilename(taskName))
+    val rnd = new Random(7)
+    if (corpusFile.exists()) {
 
-  def main(args: Array[String]): Unit = {
-    //constructNER()
-    //train()
-    constructParallel()
+
+      val tokens = Source.fromFile(corpusFile).getLines()
+        .toArray
+        .map(line => line.split("\\s+"))
+
+      val samples = rnd.shuffle(tokens.toSeq)
+        .take(10000)
+
+      println("Constructing density file:" + densityFile.getPath)
+      val pairs = samples.map(sentence => {
+        sentence.flatMap(token => {
+          sentence.map(other => KeyPair(token, other))
+      })}).flatten.groupBy(pair => pair).view.mapValues(pairs => pairs.length.toDouble).toMap
+
+      val totalEdges = pairs.map(_._2).sum
+
+      val distinctTokens = samples.flatMap(items => items).toSet.size
+      val totalTokens = samples.flatMap(items => items).length
+      val totalSentences = samples.length
+      val graphDensity = 2 * totalEdges / (distinctTokens * (distinctTokens - 1))
+
+      val pw = new PrintWriter(densityFile)
+      pw.println("Window size: " + params.lmWindowLength + ", Task: " + taskName + ", Model: " + params.adapterName)
+      pw.println("Distinct token size: " + distinctTokens)
+      pw.println("Average distinct token size: " + distinctTokens.toDouble/totalSentences)
+      pw.println("Total token size: " + totalTokens)
+      pw.println("Total sentences: " + totalSentences)
+      pw.println("Average sentence size: " + totalTokens.toDouble / totalSentences)
+      pw.println("Total edge size: " + totalEdges)
+
+      pw.println("Graph density: " + graphDensity)
+      pw.close()
+    }
   }
 }

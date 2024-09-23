@@ -33,9 +33,9 @@ object TransducerOp {
     val result2 = transducer.search("halk")
     val result3 = transducer.search("halkdan")
     val result4 = transducer.search("halka")*/
-    val result0 = transducer.multipleSearch(input0)
+    val result0 = transducer.tokenSearch(input0)
     val result1 = transducer.longestSearch("almanlar")
-    val result5 = transducer.multipleSearch(input5)
+    val result5 = transducer.tokenSearch(input5)
 
     /*println("halklar:" + result1)
     println("halk:" + result2)
@@ -78,7 +78,7 @@ object TransducerOp {
 
   def fromText(transducer: Transducer, filename: => String, params: Params): Transducer = {
 
-    if (params.lmTrainDictionary) {
+    if (params.lmTrainDictionary || transducer.isEmpty()) {
       println("Constructing dictionary from text")
       val wordTokenizer = new WordTokenizer()
       val ranges = Range(0, params.lmEpocs).toArray
@@ -229,7 +229,7 @@ object TransducerOp {
 
   def fromDictionary(transducer: Transducer, modelFilename: => String, filename: => String, params: Params): Transducer = {
 
-    if (params.lmTrainDictionary) {
+    if (params.lmTrainDictionary || transducer.isEmpty()) {
       println("Constructing dictionary from text lexicon...")
       Source.fromFile(filename).getLines()
         .map(line => line.split("\t").head.toLowerCase(locale)
@@ -302,8 +302,9 @@ object TransducerOp {
     val item3 = split + consonants + consonants + split
     val item4 = split + consonants + consonants + split
     val item5 = consonants + split + vowels
+    val item6 = split + vowels + consonants + vowels
 
-    Array(item1, item2, item3, item4, item5)
+    Array(item1, item2, item3, item4, item5, item6)
 
   }
 
@@ -338,7 +339,7 @@ object TransducerOp {
     for (i <- 0 until params.lmEpocs) {
       println("Epocs: " + i)
       transducerLM = train(transducerLM, filename, params, index)
-      transducerLM.prune().normalize()
+      transducerLM.prune(params.lmPrune).normalize()
       saveLM(modelFilename, transducerLM)
       index += params.lmMaxSentence
     }
@@ -354,7 +355,7 @@ object TransducerOp {
     for (i <- 0 until params.lmEpocs) {
       println("Epocs: " + i)
       transducerLM = trainCombinatoric(transducerLM, filename, params, start)
-      transducerLM.prune().normalize()
+      transducerLM.prune(params.lmPrune).normalize()
       saveLM(modelFilename, transducerLM)
       start += params.lmMaxSentence
     }
@@ -369,7 +370,7 @@ object TransducerOp {
     for (i <- 0 until params.lmEpocs) {
       println("Epocs: " + i)
       transducerLM = trainParallel(transducerLM, filename, params, index)
-      transducerLM.prune().normalize()
+      transducerLM.prune(params.lmPrune).normalize()
       saveLM(modelFilename, transducerLM)
       index += params.lmMaxSentence
     }
@@ -385,7 +386,7 @@ object TransducerOp {
       println("Epocs: " + i + " for " + params.adapterName)
       transducerLM = trainSlideParallelCombinatoric(transducerLM, filename, params, start)
       //transducerLM = trainSlideEfficientCombinatoric(transducerLM, filename, params, start)
-      transducerLM.prune().normalize()
+      transducerLM.prune(params.lmPrune).normalize()
       saveLM(modelFilename, transducerLM)
       start += params.lmMaxSentence
     }
@@ -401,7 +402,7 @@ object TransducerOp {
       println("Epocs: " + i + " for " + params.adapterName)
       //transducerLM = trainSkipEfficientCombinatoric(transducerLM, filename, params, index)
       transducerLM = trainSkipParallelCombinatoric(transducerLM, filename, params, index)
-      transducerLM.prune().normalize()
+      transducerLM.prune(params.lmPrune).normalize()
       saveLM(modelFilename, transducerLM)
       index += params.lmMaxSentence
     }
@@ -420,7 +421,7 @@ object TransducerOp {
       println("Epocs: " + i + " for " + params.adapterName)
       val start = i * params.lmMaxSentence
       transducerLM = trainSkipCombinatoric(transducerLM, partitionFunc, filename, params, start)
-      transducerLM.prune().normalize()
+      transducerLM.prune(params.lmPrune).normalize()
       saveLM(modelFilename, transducerLM)
     }
 
@@ -435,7 +436,7 @@ object TransducerOp {
       println("Epocs: " + i + " for " + params.adapterName)
       start += params.lmMaxSentence
       newLM = train(newLM, filename, params, start)
-      newLM.prune().normalize()
+      newLM.prune(params.lmPrune).normalize()
       saveLM(modelFilename, newLM)
     }
 
@@ -452,7 +453,7 @@ object TransducerOp {
       println("Epoc: " + i + " for " + params.adapterName)
       start += params.lmMaxSentence
       newLM = trainCombinatoric(newLM, filename, params, start)
-      newLM.prune().normalize()
+      newLM.prune(params.lmPrune).normalize()
       saveLM(modelFilename, newLM)
     }
 
@@ -474,7 +475,7 @@ object TransducerOp {
       System.gc()
     })
 
-    transducerLM.prune().normalize()
+    transducerLM.prune(params.lmPrune).normalize()
     saveLM(modelFilename, transducerLM)
     transducerLM
   }
@@ -498,7 +499,7 @@ object TransducerOp {
     })
 
     transducerLM
-      .prune()
+      .prune(params.lmPrune)
       .normalize()
 
 
@@ -529,7 +530,7 @@ object TransducerOp {
     })
 
     transducerLM
-      .prune()
+      .prune(params.lmPrune)
       .normalize()
 
     saveLM(modelFilename, transducerLM)
@@ -588,7 +589,7 @@ object TransducerOp {
     })
 
     transducerLM
-      .prune()
+      .prune(params.lmPrune)
       .normalize()
 
     saveLM(modelFilename, transducerLM)
@@ -612,7 +613,7 @@ object TransducerOp {
       })
     })
 
-    transducerLM
+    transducerLM.prune(params.lmPrune)
       .normalize()
 
     saveLM(modelFilename, transducerLM)
@@ -640,7 +641,7 @@ object TransducerOp {
         }
       }
 
-    transducerLM.prune().normalize()
+    transducerLM.prune(params.lmPrune).normalize()
   }
 
   def trainCombinatoric(transducer: Transducer, filename: => String, params: Params, start: Int): TransducerLM = {
@@ -666,7 +667,7 @@ object TransducerOp {
         }
       }
 
-    transducerLM.prune().normalize()
+    transducerLM.prune(params.lmPrune).normalize()
   }
 
   def train(transducerLM: TransducerLM, filename: => String, params: Params, start: Int): TransducerLM = {
@@ -685,7 +686,7 @@ object TransducerOp {
         }
       }
 
-    transducerLM.prune().normalize()
+    transducerLM.prune(params.lmPrune).normalize()
 
   }
 
@@ -707,7 +708,7 @@ object TransducerOp {
         }
       }
 
-    transducerLM.prune().normalize()
+    transducerLM.prune(params.lmPrune).normalize()
 
   }
 
@@ -754,31 +755,6 @@ object TransducerOp {
     transducerLM
   }
 
-  /*
-    def trainSlideEfficientCombinatoric(transducerLM: TransducerLM, filename: String, params: Params, start: Int): TransducerLM = {
-
-      Source.fromFile(filename).getLines()
-        .filter(sentence => sentence.length < params.lmMaxSentenceLength)
-        .zipWithIndex.filter(_._2 >= start).take(params.lmMaxSentence).map(_._1)
-        .toArray
-        .foreach(line => {
-          println(line)
-          line.split("[\\s\\p{Punct}]+")
-            .map(_.toLowerCase(locale))
-            .filter(item => item.matches("\\p{L}+"))
-            .filter(item => item.length < params.lmTokenLength)
-            .sliding(params.lmWindowLength, 1)
-            .toArray.par
-            .map(seq => {
-              val crrLM = transducerLM.copy()
-              crrLM.countCombinatoric(seq, params.lmTopSplit, params.lmSlideLength)
-              crrLM
-            }).toArray.foreach(crrLM=> transducerLM.merge(crrLM))
-        })
-
-      transducerLM
-    }
-  */
   def trainSkipParallelCombinatoric(transducerLM: TransducerLM, filename: => String, params: Params, start: Int): TransducerLM = {
 
     var cnt = 0;
@@ -844,29 +820,6 @@ object TransducerOp {
     transducerLM
   }
 
-  /*def trainSkipEfficientCombinatoric(transducerLM: TransducerLM, filename: => String, params: Params, start: Int): TransducerLM = {
-
-    var cnt = 0;
-    val random = new Random()
-
-    Source.fromFile(filename).getLines().filter(line => line.length < params.lmMaxSentenceLength)
-      .zipWithIndex.filter(_._2 >= start)
-      .map(_._1).take(params.lmMaxSentence)
-      .toArray.par.map(line=>{
-        val crrLM = transducerLM.copy()
-        line.split("[\\s\\p{Punct}]+")
-          .map(_.toLowerCase(locale))
-          .filter(item => item.matches("\\p{L}+"))
-          .filter(item => item.length < params.lmTokenLength)
-          .sliding(params.lmWindowLength, 1)
-          .toArray.foreach(seq=>{
-            crrLM.countCombinatoric(seq, params.lmTopSplit, params.lmSlideLength, params.lmSkip)
-          })
-         crrLM
-      }).toArray.foreach(crrLM => transducerLM.merge(crrLM))
-
-    transducerLM
-  }*/
 
   def trainSkipCombinatoric(transducerLM: TransducerLM, partitionFunc: (Array[String]) => Array[Array[String]], filename: => String, params: Params, start: Int): TransducerLM = {
 
@@ -918,9 +871,6 @@ object TransducerOp {
     transducerLM
   }
 
-  def prune(transducerLM: TransducerLM): TransducerLM = {
-    prune(transducerLM)
-  }
 
   def loadLM(filename: String): TransducerLM = {
     if (!new File(filename).exists()) {

@@ -23,7 +23,7 @@ class IntrinsicEvaluation(val reportFilename: String) extends IntrinsicFunction 
   override def setDictionary(set: Set[String], model:EmbeddingModel): this.type = {
 
     println("Evaluating embeddings of the dictionary words")
-    testWords = set
+    testWords = set.map(_.trim).filter(_.nonEmpty)
     testEmbeddings = testWords.toArray.par.map(target => (target, model.forward(target))).toArray.toSet
 
     functions.foreach(ier=> ier.setWords(testWords).setEmbeddings(testEmbeddings))

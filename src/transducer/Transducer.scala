@@ -114,7 +114,7 @@ case class State(var i: Long, var stateMap: Map[String, Target] = Map()) extends
 
 
   def copy(): State = {
-    State(i, stateMap.map(pair => (pair._1 -> pair._2.copy())))
+   State(i, stateMap.map(pair => (pair._1 -> pair._2.copy())))
   }
 
   def mergeBy(ostate: State): State = {
@@ -241,9 +241,19 @@ class Transducer extends Serializable {
   var sep = "%%"
   var boundary = "$"
   var skip = "@"
+  var skipBack = "-@"
 
-  var map = Map[Long, State]()
+  var map = Map[Long, State](0L -> State(0L))
   var finished = HashSet[Long]()
+
+
+  def isEmpty():Boolean={
+    map.size == 1 || map.isEmpty
+  }
+
+  def partition(d: Int): String = {
+    if (d > 5) "dist" else if (d > 2) "neig" else "loc"
+  }
 
   def copy(): Transducer = {
     val cpTrans = new Transducer()
@@ -349,28 +359,6 @@ class Transducer extends Serializable {
   }
 
 
-  def addOutput(i: Long, j: Long, output: String): State = {
-    addPrefix(i, j, 1.0, Array(epsilon, output))
-  }
-
-  def addOutput(i: Long, j: Long, input: String, output: String): State = {
-    addPrefix(i, j, 1.0, Array(input + sep + output, output))
-  }
-
-  def addOutput(output: Array[String], label: Array[String]): Unit = {
-    var ii = 0L
-    var j = 1L
-
-    output.zip(label).foreach(pair => {
-      val next = addOutput(ii, j, pair._1, pair._2)
-      ii = next.i
-      j = ii + 1
-    })
-
-    finished = finished + hashLong(output.mkString(""))
-  }
-
-
 
   def addSkipEfficient(input: Array[Array[String]], distance: Int): Unit = {
     var ii = 0L
@@ -388,11 +376,12 @@ class Transducer extends Serializable {
           var k = Math.max(0, crrIndex - distance)
           while (k > 0 &&  k < crrIndex) {
             val skipCombination = input(k)
-            val skipDistance = crrIndex - k
+            val skipDistance = partition(crrIndex - k)
+
             skipCombination.foreach(skipngram => {
               skipngram.split(split).foreach(skipSplit=>{
-                val skipSymbol = skipSplit + skip + skipDistance
-                addSkip(ii, next.i, 1.0, Array(skipSymbol, epsilon))
+                val skipForward = skipSplit + skip + skipDistance
+                addSkip(ii, next.i, 1.0, Array(skipForward, epsilon))
               })
             })
 
@@ -404,9 +393,6 @@ class Transducer extends Serializable {
 
       })
     })
-
-
-
   }
 
   def addSkip(input: Array[String], distance: Int): Unit = {
@@ -417,8 +403,9 @@ class Transducer extends Serializable {
       input.zipWithIndex.foreach(pair => {
         val next = addPrefix(ii, j, 1.0, Array(pair._1, epsilon))
         for (k <- Math.max(0, pair._2 - distance) until pair._2) {
-          val crr = input(k) + skip + (pair._2 - k)
-          addSkip(ii, next.i, 1.0, Array(crr, epsilon))
+          val skipForward = input(k) + skip + partition(pair._2 - k)
+          addSkip(ii, next.i, 1.0, Array(skipForward, epsilon))
+
         }
         ii = next.i
         j = ii + 1
@@ -428,28 +415,6 @@ class Transducer extends Serializable {
     }
   }
 
-  def addSparseSkip(input: Array[String], distance: Int, count: Int = 5): Unit = {
-    var ii = 0L
-    var j = 1L
-    val random = new Random()
-    synchronized {
-      input.zipWithIndex.foreach(pair => {
-        val next = addPrefix(ii, j, 1.0, Array(pair._1, epsilon))
-        val seq: Seq[Int] = Range(Math.max(0, pair._2 - distance), pair._2)
-        val skips = random.shuffle(seq).take(count)
-        skips.foreach { k => {
-          val crr = input(k) + skip + (pair._2 - k)
-          addSkip(ii, next.i, 1.0, Array(crr, epsilon))
-        }
-        }
-
-        ii = next.i
-        j = ii + 1
-      })
-
-      //finished = finished ++ input.map(item => hashLong(item))
-    }
-  }
 
   def addSkip(i: Long, j: Long, weight: Double, input: Array[String]): State = {
     val key = input(0)
@@ -570,6 +535,7 @@ class Transducer extends Serializable {
   def hasTransition(i: Long, input: String): Boolean = {
     (map(i).has(input))
   }
+/*
 
   def totalCount(i: Long): Double = {
     (map(i).stateMap.toArray.map(_._2.count()).sum)
@@ -578,6 +544,7 @@ class Transducer extends Serializable {
   def normCount(i: Long): Double = {
     (map(i).stateMap.toArray.map(_._2.count()).sum)
   }
+*/
 
   def nextTransition(i: Long, input: String, label: String): Option[Target] = {
 
@@ -658,13 +625,12 @@ class Transducer extends Serializable {
     total / norm
   }
 
-
-  def rankingSearch(input: Array[String], distance: Int, iter: Int): Double = {
+  def rankingForward(crrMap:Map[Long, Double], input:Array[String], windowDistance:Int, iter:Int):Map[Long, Double]={
     var current = map(0L)
     var i = 0;
-
+    var scoreMap = crrMap
     var scores = Range(0, input.length)
-    var scoreMap = Map[Long, Double](0L -> 1d)
+
     var count = 0;
     while (count < iter) {
 
@@ -672,7 +638,7 @@ class Transducer extends Serializable {
 
         val (j, sum) = loglikelihood(current.i, input(i))
         var jsum = 0.85f * scoreMap(current.i) + 0.15f * sum;
-        val min = Math.max(0, i - distance)
+        val min = Math.max(0, i - windowDistance)
         for (k <- min until i) {
           val d = i - k
           val key = input(k) + skip + d
@@ -688,6 +654,47 @@ class Transducer extends Serializable {
       count += 1
     }
 
+    scoreMap
+  }
+
+
+  def rankingBackward(crrMap:Map[Long, Double], input:Array[String], windowDistance:Int, iter:Int):Map[Long, Double]={
+    var current = map(0L)
+    var i = 0;
+    var scoreMap = crrMap
+    var scores = Range(0, input.length)
+
+    var count = 0;
+    while (count < iter) {
+
+      scores.foreach(i => {
+
+        val (j, sum) = loglikelihood(current.i, input(i))
+        var jsum = 0.85f * scoreMap(current.i) + 0.15f * sum;
+        val min = Math.max(0, i - windowDistance)
+        for (k <- min until i) {
+          val d = i - k
+          val key = input(k) + skipBack + d
+          val (_, sumSkip) = loglikelihood(j, key, current.i)
+          jsum += 0.85f * scoreMap(current.i) + 0.15f * sumSkip;
+        }
+
+        jsum = jsum / iter
+        scoreMap = scoreMap.updated(j, jsum)
+        current = map.getOrElse(j, map(0))
+      })
+
+      count += 1
+    }
+
+    scoreMap
+  }
+
+
+  def rankingSearch(input: Array[String], distance: Int, iter: Int): Double = {
+    var scoreMap = Map[Long, Double](0L -> 1d)
+    scoreMap = rankingForward(scoreMap, input, distance, iter)
+    scoreMap = rankingBackward(scoreMap, input, distance, iter)
     val splitNorm = input.length * input.length
     scoreMap.map(_._2).sum / splitNorm
   }
@@ -795,14 +802,14 @@ class Transducer extends Serializable {
   }
 
 
-  def multipleEfficientSearch(input: String, top: Int, sample:Int = 1): Array[String] = {
-    val search = multipleEntropy(input).take(top)
+  def tokenEntropySplit(input: String, top: Int, sample:Int = 1): Array[String] = {
+    val search = tokenSplitEntropy(input).take(top)
     val result = Random.shuffle(search.toSeq).take(sample).toArray
     result
   }
 
-  def multipleSplitSearch(input: String, top: Int, sample:Int): Array[String] = {
-    val search = multipleSearch(input.toCharArray.map(_.toString))
+  def tokenSplit(input: String, top: Int, sample:Int): Array[String] = {
+    val search = tokenSearch(input.toCharArray.map(_.toString))
       .sortBy(_.entropy())
       .reverse.take(top)
       .map(_.sequence)
@@ -812,22 +819,22 @@ class Transducer extends Serializable {
     result
   }
 
-  def multipleSplitSearch(input: String, top: Int): Array[String] = {
-    val search = multipleSearch(input.toCharArray.map(_.toString))
+  def tokenSplit(input: String, top: Int): Array[String] = {
+    val search = tokenSearch(input.toCharArray.map(_.toString))
     val result = search.sortBy(_.score)(Ordering[Double].reverse).take(top)
       .map(_.sequence)
     result
   }
 
   def multipleSplitSearch(input: Array[String], top: Int): Array[String] = {
-    val search = multipleSearch(input)
+    val search = tokenSearch(input)
     val result = search.sortBy(_.score)(Ordering[Double].reverse).take(top)
       .map(_.sequence)
     result
   }
 
   def suffixSplitSearch(input: String, top: Int): Array[String] = {
-    val search = multipleSearch(input.toCharArray.map(_.toString))
+    val search = tokenSearch(input.toCharArray.map(_.toString))
     val result = search.sortBy(_.score)(Ordering[Double].reverse).take(top)
       .map(_.sequence)
     val suffixation = result.map(token => {
@@ -838,8 +845,8 @@ class Transducer extends Serializable {
     suffixation
   }
 
-  def multipleEntropy(input: String): Array[String] = {
-    val found = multipleSearch(input.toCharArray.map(_.toString)).map(item => {
+  def tokenSplitEntropy(input: String): Array[String] = {
+    val found = tokenSearch(input.toCharArray.map(_.toString)).map(item => {
         val sequence = item.sequence
         val score = item.score
         val sp = sequence.split(split).filter(item => item.nonEmpty)
@@ -851,7 +858,7 @@ class Transducer extends Serializable {
     found
   }
 
-  def multipleSearch(input: Array[String], iin: Int = 0, currentin: State = map(0), arrin: Array[Score] = Array(Score("", 0d))): Array[Score] = {
+  def tokenSearch(input: Array[String], iin: Int = 0, currentin: State = map(0), arrin: Array[Score] = Array(Score("", 0d))): Array[Score] = {
     val jjn = iin + 1
     val nexti = next(currentin.i, input(iin))
     var result = Array[Score]()
@@ -860,11 +867,10 @@ class Transducer extends Serializable {
       val weighti = weight(currentin.i, input(iin))
       val crr = input.slice(0, jjn).mkString
       val nonmarked = append(arrin, input(iin), weighti)
-      result = result ++ multipleSearch(input, jjn, nexti.get, nonmarked)
+      result = result ++ tokenSearch(input, jjn, nexti.get, nonmarked)
       if (end(crr)) {
         val marking = append(arrin, input(iin) + marker, weighti)
-        //result = result ++ multipleSearch(input, jjn, nexti.get, marking)
-        result = result ++ multipleSearch(input, jjn, map(0), marking)
+        result = result ++ tokenSearch(input, jjn, map(0), marking)
       }
     }
     else if (!nexti.isDefined && jjn < input.length) {
@@ -872,7 +878,7 @@ class Transducer extends Serializable {
       val njjn = 0
 
       val marking = append(arrin, input(iin), 0d)
-      result = result ++ multipleSearch(ninput, njjn, map(0), marking)
+      result = result ++ tokenSearch(ninput, njjn, map(0), marking)
     }
     else {
       result = append(arrin, input(iin) + boundary, 1d)
@@ -970,16 +976,4 @@ class Transducer extends Serializable {
     str
   }
 
-  def test(): Unit = {
-    println(multipleSplitSearch("akdeniz", 100).mkString("\n"))
-    println(multipleSplitSearch("akdenizden", 100).mkString("\n"))
-    println(multipleSplitSearch("akdenizdekiler", 100).mkString("\n"))
-    println(multipleSplitSearch("akdenizdeki", 100).mkString("\n"))
-  }
-}
-
-object Transducer {
-  def main(args: Array[String]): Unit = {
-    val transducer = new Transducer()
-  }
 }

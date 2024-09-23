@@ -25,6 +25,25 @@
         </dependency>
 
 
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.11</version> <!-- Adjust as needed -->
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.bytedeco/mkl-platform -->
+
+
+        <!-- https://mvnrepository.com/artifact/org.scalanlp/breeze -->
+        <dependency>
+            <groupId>org.scalanlp</groupId>
+            <artifactId>breeze_2.13</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.deeplearning4j/deeplearning4j-nlp -->
+
+
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-native-platform</artifactId>
@@ -44,7 +63,7 @@
 
         <dependency>
             <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-core</artifactId>
+            <artifactId>deeplearning4j-ui</artifactId>
             <version>${nd4j.version}</version>
             <exclusions>
                 <exclusion>  <!-- declare the exclusion here -->
@@ -55,32 +74,17 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.11</version> <!-- Adjust as needed -->
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>${nd4j.version}</version>
+            <exclusions>
+                <exclusion>  <!-- declare the exclusion here -->
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.bytedeco/mkl-platform -->
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>mkl-platform</artifactId>
-            <version>2019.5-1.5.2</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>mkl-platform-redist</artifactId>
-            <version>2019.5-1.5.2</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.scalanlp/breeze -->
-        <dependency>
-            <groupId>org.scalanlp</groupId>
-            <artifactId>breeze_2.13</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.deeplearning4j/deeplearning4j-nlp -->
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-nlp</artifactId>
@@ -93,40 +97,25 @@
             </exclusions>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.jblas/jblas -->
         <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-ui</artifactId>
-            <version>${nd4j.version}</version>
-            <exclusions>
-                <exclusion>  <!-- declare the exclusion here -->
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.jblas</groupId>
+            <artifactId>jblas</artifactId>
+            <version>1.2.4</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-core</artifactId>
-            <version>${nd4j.version}</version>
-            <exclusions>
-                <exclusion>  <!-- declare the exclusion here -->
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-ui</artifactId>
-            <version>${nd4j.version}</version>
-            <exclusions>
-                <exclusion>  <!-- declare the exclusion here -->
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>mkl-platform</artifactId>
+            <version>2019.5-1.5.2</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>mkl-platform-redist</artifactId>
+            <version>2019.5-1.5.2</version>
         </dependency>
 
         <dependency>
@@ -209,7 +198,7 @@
                         </descriptorRefs>
                         <archive>
                             <manifest>
-                                <mainClass>nn.experiments.MainExperiment</mainClass>
+                                <mainClass>nn.experiments.NNExperiment</mainClass>
                             </manifest>
                         </archive>
                     </configuration>

@@ -58,7 +58,7 @@ class SentenceHMM() extends SequenceHMM() {
 
     transducerLM = new TransducerLM(TransducerOp.fromSyllables())
     val infer: (String => Array[String]) = (input: String) => {
-      transducerLM.transducer.multipleSplitSearch(input, topSplit)
+      transducerLM.transducer.tokenSplit(input, topSplit)
         .flatMap(seq => seq.split(transducerLM.transducer.split)).map(_.trim)
         .filter(_.nonEmpty)
     }

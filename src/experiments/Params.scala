@@ -1,12 +1,13 @@
 package experiments
 
-import models.{CBOWModel, EmbeddingModel, SelfAttentionLSTM, SkipGramModel}
+import models.{CBOWModel, EmbeddingModel, FastTextModel, GloveModel, SelfAttentionLSTM, SkipGramModel}
+import transducer.{AbstractLM, FrequentLM, LMSubWord, LemmaLM, NGramLM, RankLM, SkipLM, SyllableLM, WordLM}
 import utils.Tokenizer
 
 class Params {
 
-  val adapters = Array("lm-rank-efficient", "lm-rank", "lm-lemma", /* "frequent-ngram",*/ "lm-ngram", "lm-syllable", "lm-skip").reverse
-  val windows = Array(2, 4, 6).reverse
+  val adapters = Array("lm-subword", "lm-rank", "lm-lemma", /*"frequent-ngram",*/ "lm-ngram", "lm-syllable", "lm-skip").reverse
+  val windows = Array(2, 3, 4).reverse
   val tasks = Array("ner", "pos", "sentiment", "intrinsic")
   val selectionSizes = Array(500000)
 
@@ -29,8 +30,8 @@ class Params {
 
 
   var evalWindowLength: Int = 200
-  val evalUseEmbeddings: Boolean = true
-  val evalDictionarySize = 500000
+  var evalUseEmbeddings: Boolean = true
+  var evalDictionarySize = 500000
   var evalBatchSize = 24
   var evalEpocs = 15
 
@@ -57,7 +58,7 @@ class Params {
   var lmTrainDictionary = true
   var lmepocs = 1
   var lmrange = 10000
-  var lmEpocs: Int = 50
+  var lmEpocs: Int = 5
   var corpusEpocs: Int = 100
   var corpusMaxSentence: Int = 2400
 
@@ -69,7 +70,7 @@ class Params {
   var lmCandidateCount = 3
   var lmStemLength = 7
   var lmSkip = 20
-  var lmSample = 1
+  var lmSample = 10
   var lmTopSplit = 10
   var lmTopSyllableSplit = 200
   var lmIterations = 10
@@ -84,13 +85,14 @@ class Params {
 
   val modelFolder = "resources/models/"
   val textFolder = "resources/text/"
-  val sentencesFile = "resources/text/sentences/sentences-tr.txt"
+  var sentencesFile = "resources/text/sentences/sentences-tr.txt"
   val embeddingFolder = "resources/embeddings/"
   val intrinsicTextFolder = "resources/text/intrinsic/"
 
   val evaluationFolder = "resources/evaluation/"
   val dictionaryFolder = "resources/dictionary/"
   val resultFolder = "resources/results/"
+  val fastTextBin = "resources/binary/cc.tr.300.vec"
 
   var stats: LMStats = new LMStats()
 
@@ -112,6 +114,7 @@ class Params {
     params.adapterName = adapterName
 
     params.epocs = epocs
+    params.batchSize = batchSize
     params.lrate = lrate
     params.hiddenLength = hiddenLength
     params.nheads = nheads
@@ -127,6 +130,12 @@ class Params {
     params.minSentenceLength = minSentenceLength
     params.maxSentenceLength = maxSentenceLength
     params.nthreads = nthreads
+
+    params.evalEpocs = evalEpocs
+    params.evalDictionarySize = evalDictionarySize
+    params.evalWindowLength = evalWindowLength
+    params.evalBatchSize = evalBatchSize
+    params.evalUseEmbeddings = evalUseEmbeddings
 
     params.lmEpocs = lmEpocs
     params.lmThreads = lmThreads
@@ -155,12 +164,55 @@ class Params {
     params
   }
 
+  def modelDefault(name:String, window:Int):AbstractLM={
+    val params = Params(name, window)
+    model(params, name)
+  }
 
-  def createModel(name: String, tokenizer: Tokenizer): EmbeddingModel = {
-    if (name.startsWith("cbow")) new CBOWModel(this, tokenizer)
-    else if (name.startsWith("skip")) new SkipGramModel(this, tokenizer)
-    else if (name.startsWith("self-attention")) new SelfAttentionLSTM(this, tokenizer)
+
+  def model(params: Params, name: String): AbstractLM = {
+
+    val lm = if ("lm-skip".equals(name)) {
+      new SkipLM(params)
+    }
+    else if ("lm-rank".equals(name)) {
+      new RankLM(params)
+    }
+    else if ("lm-subword".equals(name)) {
+      new LMSubWord(params)
+    }
+    else if ("lm-ngram".equals(name)) {
+      new NGramLM(params)
+    }
+    else if ("lm-syllable".equals(name)) {
+      new SyllableLM(params)
+    }
+    else if ("lm-lemma".equals(name)) {
+      new LemmaLM(params)
+    }
+    else if ("frequent-ngram".equals(name)) {
+      new FrequentLM(params)
+    }
+    else if ("lm-word".equals(name)) {
+      new WordLM(params)
+    }
+    else {
+      null
+    }
+    if(lm.exists()) lm.load()
+    else lm
+  }
+
+
+  def createModel(name: String, tokenizer: Tokenizer,  lm:AbstractLM): EmbeddingModel = {
+    val embeddingModel = if (name.contains("cbow")) new CBOWModel(this, tokenizer, lm)
+    else if (name.contains("skip")) new SkipGramModel(this, tokenizer, lm)
+    else if (name.contains("self")) new SelfAttentionLSTM(this, tokenizer, lm)
+    else if (name.contains("fast")) new FastTextModel(this, tokenizer, lm)
+    else if (name.contains("glove")) new GloveModel(this, tokenizer, lm)
     else null
+
+    embeddingModel
   }
 
   def modelName(name: String): this.type = {
@@ -168,13 +220,16 @@ class Params {
     this
   }
 
+  def densityFilename(classifier:String):String={
+    textFolder + "/" + classifier + "/" + lmID() + ".density"
+  }
 
   def embeddingsFilename(): String = {
     embeddingFolder + modelID() + ".bin"
   }
 
-  def corpusFilename(classifier: String): String = {
-    textFolder + "/" + classifier + "/" + lmID() + ".txt"
+  def corpusFilename(task: String): String = {
+    textFolder + "/" + task + "/"+ lmID() + ".txt"
   }
 
   def mainCorpusFilename(classifier: String): String = {
@@ -195,7 +250,10 @@ class Params {
   }
 
   def dictionaryFilename(): String = {
-    dictionaryFolder + modelID() + ".bin"
+    modelFolder + modelID() + ".bin"
+  }
+  def dictionaryZipFilename(): String = {
+    modelFolder + modelID() + ".zip"
   }
 
   def modelID(): Int = {
@@ -285,4 +343,59 @@ class Params {
       partitionTag() +
       languageTag()
   }
+}
+
+object Params{
+
+  def apply(name: String, window: Int): Params = {
+    val params = new Params()
+    params.adapterName = name
+
+    params.lmMaxSentence = 240
+    params.lmMaxSentenceLength = 200
+    params.lmTokenLength = 25
+    params.lmrange = 2000
+    params.lmEpocs = 1000
+    params.lmTrainDictionary = true
+    params.lmPrune = 100
+    params.lmThreads = 48
+
+    params.corpusEpocs = 100
+    params.corpusMaxSentence = 2400
+
+    params.lmWindowLength = window
+    params.lmTopSplit = 3
+    params.lmSkip = window
+    params.lmSlideLength = window
+    params.lmForceTrain = false
+
+
+
+    params
+  }
+
+ def apply(name: String): Params = {
+    val params = new Params()
+    params.adapterName = name
+
+    params.lmMaxSentence = 240
+    params.lmMaxSentenceLength = 200
+    params.lmTokenLength = 25
+    params.lmrange = 2000
+    params.lmEpocs = 1000
+    params.lmTrainDictionary = true
+    params.lmPrune = 100
+    params.lmThreads = 48
+
+    params.corpusEpocs = 100
+    params.corpusMaxSentence = 2400
+    params.lmTopSplit = 3
+    params.lmForceTrain = false
+
+
+
+    params
+  }
+
+
 }

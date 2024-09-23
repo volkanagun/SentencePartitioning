@@ -1,5 +1,7 @@
 package utils
 
+import experiments.Params
+
 import java.io._
 import java.util.Locale
 import java.util.concurrent.ForkJoinPool
@@ -55,7 +57,7 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
     masked
   }
 
-  def freqConstruct(filename: String): Tokenizer = {
+  def freqConstruct(filename: String, dictionaryFilename:String): Tokenizer = {
 
     Source.fromFile(filename).getLines().foreach(sentence => {
       val tokens = standardTokenizer(sentence)
@@ -72,7 +74,7 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
 
     frequency = frequency.filter { case (item, count) => count > 2 }
 
-    save()
+    save(dictionaryFilename)
   }
 
   def freqConstructBySentence(sentence: String, cutoff: Int = 2): Tokenizer = {
@@ -90,11 +92,10 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
 
     frequency = frequency.filter { case (item, count) => count > cutoff }
 
-    save()
-
+    this
   }
 
-  def freqDictionaryConstruct(filename: String): Tokenizer = {
+  def freqDictionaryConstruct(filename: String, dictionaryFilename:String): Tokenizer = {
     val dictionaryItems = Source.fromFile(filename).getLines()
       .map(line => line.split("\\s?\\:\\s?")).map(items => items(0).trim
         .toLowerCase(locale)).map(item => item.replaceAll("(mak|mek)$", ""))
@@ -126,7 +127,7 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
       frequency = frequency.updated(phrase, frequency.getOrElse(phrase, Double.MaxValue / 4.0))
     })
 
-    save()
+    save(dictionaryFilename)
   }
 
   def freqStemConstruct(filename: String, windowSize: Int = windowSize, maxSize: Int = 1000000): Tokenizer = {
@@ -148,6 +149,19 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
         val newSentence = " " + sentence + " "
         freqConstruct(newSentence, windowSize)
       })
+
+    this
+  }
+
+  def freqStemConstructByIndex(index: Int, filename: String, windowSize: Int = windowSize, maxSize: Int = 1000000): Tokenizer = {
+
+    val main = Source.fromFile(filename).getLines().filter(_.length < 80).zipWithIndex.filter(pair => pair._2 >= index)
+      .take(maxSize).map(_._1)
+
+    main.foreach(sentence => {
+      val newSentence = " " + sentence + " "
+      freqConstruct(newSentence, windowSize)
+    })
 
     this
   }
@@ -180,9 +194,9 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
     this
   }
 
-  def save(): Tokenizer = {
+  def save(filename:String): Tokenizer = {
     println("Saving tokenizer....")
-    val outputStream = new ObjectOutputStream(new FileOutputStream(txtFilename))
+    val outputStream = new ObjectOutputStream(new FileOutputStream(filename))
     val array1 = frequency.toArray
     outputStream.writeInt(array1.size)
 
@@ -204,8 +218,9 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
     this
   }
 
-  def saveZip(): Tokenizer = {
-    val baos = new FileOutputStream(zipFilename);
+  def saveZip(filename:String): Tokenizer = {
+
+    val baos = new FileOutputStream(filename);
     val gzipOut = new GZIPOutputStream(baos);
     val objectOut = new ObjectOutputStream(gzipOut);
     objectOut.writeObject(frequency);
@@ -216,12 +231,13 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
   }
 
 
-  def load(): Tokenizer = {
+  def load(dictionaryFilename:String): Tokenizer = {
 
-    println("Loading tokenizer ...")
 
-    if (new File(txtFilename).exists()) {
-      val inputStream = new ObjectInputStream(new FileInputStream(txtFilename))
+
+    if (new File(dictionaryFilename).exists()) {
+      println("Loading tokenizer from "+dictionaryFilename)
+      val inputStream = new ObjectInputStream(new FileInputStream(dictionaryFilename))
       val size1 = inputStream.readInt()
       var array1 = Array[(String, Double)]()
       println("Reading frequency: " + size1)
@@ -256,19 +272,21 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
     }
   }
 
-  def exists():Boolean={
+  def exists(zipFilename:String): Boolean = {
     new File(zipFilename).exists()
   }
 
-  def loadZip(): Tokenizer = {
-    println("Loading ZIP")
-    val baos = new FileInputStream(zipFilename);
-    val gzipOut = new GZIPInputStream(baos);
-    val objectOut = new ObjectInputStream(gzipOut);
-    frequency = objectOut.readObject().asInstanceOf[Map[String, Double]];
-    frequencyBin = objectOut.readObject().asInstanceOf[Map[String, Double]];
-    countSum = objectOut.readObject().asInstanceOf[Long]
-    objectOut.close();
+  def loadZip(zipFilename:String): Tokenizer = {
+    println("Loading ZIP from "+zipFilename)
+    if(exists(zipFilename)) {
+      val baos = new FileInputStream(zipFilename);
+      val gzipOut = new GZIPInputStream(baos);
+      val objectOut = new ObjectInputStream(gzipOut);
+      frequency = objectOut.readObject().asInstanceOf[Map[String, Double]];
+      frequencyBin = objectOut.readObject().asInstanceOf[Map[String, Double]];
+      countSum = objectOut.readObject().asInstanceOf[Long]
+      objectOut.close();
+    }
     this
   }
 
@@ -492,16 +510,16 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
 
   def ngramFilter(sentence: Array[String], top: Int = 1): Array[String] = {
 
-    val result = sentence.map(token => {
+    val result = sentence.flatMap(token => {
       val candidates = ngramStemPartition(token)
         .map(_.trim)
         .filter(_.nonEmpty)
 
       val sorted = candidates.sortBy(item => {
-          val subngram = item.split("[\\#\\s]+").head
-          val frequencySum = subngram.length * frequencyBin.getOrElse(subngram, 0d)
-          frequencySum
-        }).reverse.head
+        val subngram = item.split("[\\#\\s]+").head
+        val frequencySum = subngram.length * frequencyBin.getOrElse(subngram, 0d)
+        frequencySum
+      }).reverse.head.split("[\\#\\s]")
 
       sorted
     }).mkString(" ")
@@ -509,44 +527,28 @@ class Tokenizer(val modelFilename: String = "/resources/binary/dictionary", wind
     Array(result)
   }
 
-  def ngramFilterExperimental(sentence: Array[String], top: Int = 3): Array[String] = {
+  def ngramTokenFilter(token: String): Array[String] = {
+    val stemSlice = Range(1, token.length).toArray
+    val suffixSlice = Range(3, 7)
 
-    val arrays = sentence.flatMap(token => {
-      val candidates = ngramStemPartition(token).flatMap(token => token.split("[\\#\\s]+"))
-        .map(_.trim)
-        .filter(_.nonEmpty)
-
-      val sorted = candidates.sortBy(item => frequencyBin.getOrElse(item, 0d)).reverse
-        .take(top)
-      val scores = sorted.map(item => (item, candidates.filter(other => other.contains(item)).length))
-        .sortBy(_._2).reverse.map(_._1).take(top).toSet
-
-      if (scores.isEmpty) Array(token)
-      else {
-        candidates.filter(candidate => scores.contains(candidate))
-      }
+    stemSlice.flatMap(max=>{
+      val stem = token.substring(0, max)
+      val rest = token.substring(max)
+      val array = suffixSlice.flatMap(slice=> {
+        rest.sliding(slice, 1).toArray[String]
+      }).toArray
+      val result = stem +: array
+      result
     })
-
-    arrays
   }
-
-  def ngramStemFilter(token: String): Array[String] = {
-    val result = ngramFilter(Array(token))
-    if (result.isEmpty) Array(token)
-    else result
-  }
-
-  def ngramTokenize(sentence: String): Array[String] = {
-    val result = ngramStemCombinations(standardTokenizer(sentence))
-    result
-  }
-
 
 }
 
 object Tokenizer {
 
   val sentenceFilename = "resources/text/sentences/sentences-tr.txt";
+  val dictionaryFilename = "resources/text/dictionary/dictionary.txt";
+  val dictionaryZipFilename = "resources/text/dictionary/dictionary.zip";
   val locale = new Locale("tr")
   val lmWindowSize = 2
 
@@ -557,7 +559,7 @@ object Tokenizer {
     val epocs = 5
     val cutOff = 3
     val mainFreqDictionary = new Tokenizer(windowSize = lmWindowSize)
-      .load()
+      .load(dictionaryFilename)
 
     for (i <- 0 until epocs) {
       val array = Range(0, 12).toArray.par
@@ -567,28 +569,48 @@ object Tokenizer {
           .freqStemConstruct(sentenceFilename, lmWindowSize, maxSize)
       }).toArray.foldRight[Tokenizer](mainFreqDictionary) {
         case (freq, main) => main.merge(freq)
-      }.build(cutOff).saveZip()
+      }.build(cutOff).saveZip(dictionaryZipFilename)
     }
+  }
+
+  def freqStemConstruct(sentenceFilename: String, params: Params, zipFilename:String): Unit = {
+
+    println("Training tokenizer with n-gram filter")
+    val maxSize = params.lmMaxSentence
+    val epocs = params.lmEpocs
+    val cutOff = 3
+    val mainFreqDictionary = new Tokenizer(windowSize = lmWindowSize)
+      .load(dictionaryFilename)
+    Range(0, epocs).sliding(params.lmThreads, params.lmThreads)
+      .toArray
+      .foreach(sequence => {
+        sequence.toArray.par.map(index => {
+          new Tokenizer(windowSize = lmWindowSize)
+            .freqStemConstructByIndex(index, sentenceFilename, lmWindowSize, maxSize)
+        }).toArray.foldRight[Tokenizer](mainFreqDictionary) {
+          case (freq, main) => main.merge(freq)
+        }.build(cutOff).saveZip(zipFilename)
+      })
 
 
   }
 
   def tokenize(sentence: String): Array[String] = {
-    val tokenizer = new Tokenizer().load()
+    val tokenizer = new Tokenizer().load(dictionaryFilename)
     tokenizer.standardTokenizer(sentence)
   }
 
   def tokenizeNgram(sentence: String): Array[Array[String]] = {
-    val tokenizer = new Tokenizer().load()
+    val tokenizer = new Tokenizer().load(dictionaryFilename)
     tokenizer.freqStemTokenizer(sentence)
   }
 
   def saveBinary(): Unit = {
-    new Tokenizer().load().build().save()
+    new Tokenizer().load(dictionaryFilename).build().save(dictionaryFilename)
   }
 
   def loadBinary(): Tokenizer = {
-    new Tokenizer().load()
+    new Tokenizer().load(dictionaryFilename)
   }
 
   def test(): Unit = {
@@ -600,7 +622,7 @@ object Tokenizer {
     val sen5 = " belki aşırı iyimserim, ama niçin olmasın ? "
     val sen6 = " su zengini bir ülke miyiz biz değiliz . "
 
-    val tokenizer = new Tokenizer(windowSize = 1).load().build()
+    val tokenizer = new Tokenizer(windowSize = 1).load(dictionaryFilename).build()
     val array = Array(sen1, sen2, sen3, sen4, sen5, sen6)
 
 
@@ -612,15 +634,15 @@ object Tokenizer {
   }
 
   def zip(): Unit = {
-    val tokenizer = new Tokenizer(windowSize = lmWindowSize).load()
-    tokenizer.saveZip()
+    val tokenizer = new Tokenizer(windowSize = lmWindowSize).load(dictionaryFilename)
+    tokenizer.saveZip(dictionaryZipFilename)
   }
 
   def main(args: Array[String]): Unit = {
 
 
     //test()
-    freqStemConstruct()
+
 
   }
 }

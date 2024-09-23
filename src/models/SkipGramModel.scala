@@ -5,11 +5,12 @@ import experiments.Params
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.models.word2vec.Word2Vec
 import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator
+import transducer.AbstractLM
 import utils.Tokenizer
 
 import java.io.{File, FileOutputStream}
 
-class SkipGramModel(params:Params, tokenizer: Tokenizer) extends CBOWModel(params, tokenizer) {
+class SkipGramModel(params:Params, tokenizer: Tokenizer,  lm:AbstractLM) extends CBOWModel(params, tokenizer, lm) {
 
   override def train(filename: String): EmbeddingModel = {
     val iter = new LineSentenceIterator(new File(filename))
@@ -18,13 +19,13 @@ class SkipGramModel(params:Params, tokenizer: Tokenizer) extends CBOWModel(param
 
     if (!(new File(fname).exists())|| params.forceTrain) {
       println("SkipGram filename: " + fname)
-
+      val windowLength = 5
 
       vectorModel = new Word2Vec.Builder()
-        .workers(48)
-        .minWordFrequency(params.freqCutoff)
+        .workers(24)
+        .minWordFrequency(3)
         .layerSize(params.embeddingLength)
-        .windowSize(params.embeddingWindowLength)
+        .windowSize(windowLength)
         .epochs(params.epocs)
         .batchSize(params.batchSize)
         .seed(42)
@@ -33,6 +34,9 @@ class SkipGramModel(params:Params, tokenizer: Tokenizer) extends CBOWModel(param
         .tokenizerFactory(factory)
         .elementsLearningAlgorithm("org.deeplearning4j.models.embeddings.learning.impl.elements.SkipGram")
         .allowParallelTokenization(true)
+        .useHierarchicSoftmax(true)
+        .sampling(0.3)
+        .negativeSample(5)
         .build()
 
       vectorModel.fit()

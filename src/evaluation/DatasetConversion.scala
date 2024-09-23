@@ -58,7 +58,7 @@ class DatasetConversion {
 
     lines.flatMap(line => {
       line.split("[\\s\\t]+")
-        .map(token => token.split("/").head)
+        .map(token => token.split("\\/").head)
         .filter(word => word.trim.nonEmpty)
         .filter(word => {
           word.head.isLower && word.head.isLetter
@@ -164,8 +164,10 @@ object DatasetConversion extends DatasetConversion() {
     convertSentiment("resources/evaluation/sentiment/train.csv", "train")
     convertSentiment("resources/evaluation/sentiment/test.csv", "test")
 */
-    //createNERVocabulary()
+    createNERVocabulary()
     createSentimentVocabulary()
-    //createPOSVocabulary()
+    createPOSVocabulary()
+
+
   }
 }

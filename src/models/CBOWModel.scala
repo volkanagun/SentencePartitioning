@@ -6,12 +6,13 @@ import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.models.word2vec.Word2Vec
 import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory
+import transducer.AbstractLM
 import utils.Tokenizer
 
 import java.io._
 import scala.collection.JavaConverters._
 
-class CBOWModel(params:Params, tokenizer: Tokenizer) extends EmbeddingModel(params, tokenizer) {
+class CBOWModel(params:Params, tokenizer: Tokenizer, lm:AbstractLM) extends EmbeddingModel(params, tokenizer, lm) {
 
   var vectorModel:Word2Vec = null
   def defaultTokenizer(): DefaultTokenizerFactory = {
@@ -32,7 +33,8 @@ class CBOWModel(params:Params, tokenizer: Tokenizer) extends EmbeddingModel(para
     val iter = new LineSentenceIterator(new File(filename))
     val factory = defaultTokenizer()
     val fname = params.modelFilename()
-    if (!(new File(fname).exists()) || params.forceTrain) {
+    val embeddingFile = params.embeddingsFilename()
+    if (!(new File(fname).exists()) || !(new File(embeddingFile).exists()) || params.forceTrain) {
       println("Training for CBOW filename: " + fname)
 
       vectorModel = new Word2Vec.Builder()
@@ -57,6 +59,7 @@ class CBOWModel(params:Params, tokenizer: Tokenizer) extends EmbeddingModel(para
     else{
       load()
     }
+
     this
   }
 
@@ -92,6 +95,21 @@ class CBOWModel(params:Params, tokenizer: Tokenizer) extends EmbeddingModel(para
 
   override def load(): EmbeddingModel = {
     val filename = params.embeddingsFilename()
+    if(new File(filename).exists()) {
+      println("Loading embedding filename: "+ filename)
+      val reader = new ObjectInputStream(new FileInputStream(filename))
+      val size = reader.readInt()
+      for (i <- 0 until size) {
+        val wordStr = reader.readObject().asInstanceOf[String]
+        val wordVector = reader.readObject().asInstanceOf[Array[Float]]
+        update(wordStr, wordVector)
+      }
+      reader.close()
+    }
+    this
+  }
+
+  def load(filename:String): EmbeddingModel = {
     if(new File(filename).exists()) {
       println("Loading embedding filename: "+ filename)
       val reader = new ObjectInputStream(new FileInputStream(filename))

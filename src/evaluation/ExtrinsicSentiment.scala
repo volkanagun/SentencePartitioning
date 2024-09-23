@@ -1,12 +1,15 @@
 package evaluation
 
 import experiments.Params
+import models.EmbeddingModel
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration
 import org.deeplearning4j.nn.conf.inputs.InputType
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode
 import org.deeplearning4j.nn.conf.layers.{DenseLayer, EmbeddingSequenceLayer, GlobalPoolingLayer, LSTM, OutputLayer, PoolingType, SelfAttentionLayer}
 import org.deeplearning4j.nn.graph.ComputationGraph
 import org.deeplearning4j.nn.weights.WeightInit
+import org.deeplearning4j.optimize.listeners.PerformanceListener
+import org.deeplearning4j.util.ModelSerializer
 import org.nd4j.linalg.activations.Activation
 import org.nd4j.linalg.api.buffer.DataType
 import org.nd4j.linalg.api.ndarray.INDArray
@@ -16,14 +19,17 @@ import org.nd4j.linalg.dataset.api.iterator.MultiDataSetIterator
 import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
+import transducer.AbstractLM
 import utils.Tokenizer
 
+import java.io.File
 import scala.io.Source
 
-class ExtrinsicSentiment(params:Params, tokenizer: Tokenizer) extends ExtrinsicPOS(params, tokenizer){
+class ExtrinsicSentiment(params: Params, tokenizer: Tokenizer, lm: AbstractLM) extends ExtrinsicPOS(params, tokenizer, lm) {
 
   var trainingSize = 10000
   var maxWindowSize = 100
+
   override def getClassifier(): String = "sentiment"
 
   override def getTraining(): String = {
@@ -38,7 +44,7 @@ class ExtrinsicSentiment(params:Params, tokenizer: Tokenizer) extends ExtrinsicP
 
   override def loadSamples(filename: String): Iterator[(String, String)] = {
 
-    Source.fromFile(filename).getLines().filter(l=> l.contains("\t")).take(trainingSize).map(line=> {
+    Source.fromFile(filename).getLines().filter(l => l.contains("\t")).take(trainingSize).map(line => {
       val mline = line.toLowerCase(locale)
       val array = mline.split("\t")
       val sentence = array.take(array.length - 1).mkString(" ")
@@ -51,24 +57,24 @@ class ExtrinsicSentiment(params:Params, tokenizer: Tokenizer) extends ExtrinsicP
   override def labels(): Array[String] = {
 
     //predefined or extracted labels
-    if(categories == null){
+    if (categories == null) {
       val allsamples = loadSamples(getTraining()).toArray
       categories = allsamples.map(_._2).toSet.toArray
       maxWindowSize = params.evalWindowLength //allsamples.map(_._1.split("\\s+").length).max
 
-      println("Max window Size: "+maxWindowSize)
-      println("Category Size: "+categories.length)
+      println("Max window Size: " + maxWindowSize)
+      println("Category Size: " + categories.length)
     }
 
     categories
   }
 
-  def padBegining(array:Array[String], maxSize:Int):Array[String]={
+  def padBegining(array: Array[String], maxSize: Int): Array[String] = {
     val newArray = array.take(maxSize)
     val padSize = maxSize - newArray.length
     var padArray = newArray
-    for(i<-0 until padSize){
-      padArray ="zero"+:padArray
+    for (i <- 0 until padSize) {
+      padArray = "zero" +: padArray
     }
     padArray
   }
@@ -80,6 +86,7 @@ class ExtrinsicSentiment(params:Params, tokenizer: Tokenizer) extends ExtrinsicP
 
       var lines = loadSamples(filename)
       val labelArray = labels()
+
       override def next(i: Int): MultiDataSet = {
         var cnt = 0
         var trainStack = Array[INDArray]()
@@ -91,7 +98,8 @@ class ExtrinsicSentiment(params:Params, tokenizer: Tokenizer) extends ExtrinsicP
         while (cnt < params.evalBatchSize && hasNext) {
           val (sentence, label) = lines.next()
           val tokens = padBegining(sentence.split("[\\s\\p{Punct}]+"), maxWindowSize)
-          val sentenceVector = vectorize(tokens.map(token=> forward(token)), maxWindowSize)
+            .map(_.trim).filter(_.nonEmpty)
+          val sentenceVector = vectorize(tokens.map(token => forward(token)), maxWindowSize)
           val outputVector = onehot(labelArray.indexOf(label), labelArray.length)
 
           trainStack = trainStack :+ sentenceVector
@@ -128,10 +136,12 @@ class ExtrinsicSentiment(params:Params, tokenizer: Tokenizer) extends ExtrinsicP
   }
 
   override def universe(): Set[String] = {
-    Source.fromFile(getTraining()).getLines().filter(l=> l.contains("\t"))
+    Source.fromFile(getTraining()).getLines().filter(l => l.contains("\t"))
       .take(trainingSize)
-      .flatMap(sentence=> sentence.split("\t").head.split("\\s+"))
-      .toSet
+      .flatMap(line => {
+        val sentence = line.split("\t").head
+        tokenizer.standardTokenizer(sentence)
+      }).toSet
   }
 
 
@@ -162,5 +172,56 @@ class ExtrinsicSentiment(params:Params, tokenizer: Tokenizer) extends ExtrinsicP
     new ComputationGraph(conf)
   }
 
+  override def train(filename: String): EmbeddingModel = {
+
+    var i = 0
+    val fname = params.modelEvaluationFilename()
+    val modelFile = new File(fname)
+    println("Self-Attention LSTM filename: " + fname)
+    if (!(modelFile.exists()) || params.forceTrain) {
+
+
+      val size = Source.fromFile(filename).getLines().size
+
+      load()
+
+      computationGraph = model()
+
+      //val statsStorage = new InMemoryStatsStorage()
+      //val uiServer = UIServer.getInstance()
+      //uiServer.attach(statsStorage)
+
+      computationGraph.addListeners(new PerformanceListener(1, true))
+
+      val multiDataSetIterator = iterator(filename)
+
+      var start = System.currentTimeMillis()
+      var isTrained = false
+      sampleCount = 0
+      while (i < params.evalEpocs) {
+
+        println("Epoc : " + i)
+
+        computationGraph.fit(multiDataSetIterator)
+        multiDataSetIterator.reset()
+
+        i = i + 1
+        sampleCount += size
+        //System.gc()
+      }
+      val passedTime = System.currentTimeMillis() - start
+      avgTime = passedTime / (sampleCount)
+      println("Saving model...")
+      ModelSerializer.writeModel(computationGraph, modelFile, true)
+      //uiServer.stop()
+      System.gc()
+      save()
+    }
+    else {
+      computationGraph = ModelSerializer.restoreComputationGraph(modelFile)
+    }
+    this
+
+  }
 
 }

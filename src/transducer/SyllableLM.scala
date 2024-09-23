@@ -21,31 +21,29 @@ class SyllableLM(override val params:Params)  extends AbstractLM(params) {
   var notAcceptRules = TransducerOp.syllableNotAccept().map(_.r)
 
 
+  val syllableSplit: (String => Array[String]) = (input: String) => {
+    val result = lm.transducer.tokenSplit(input, params.lmTopSplit)
+      .filter(_.nonEmpty).filter(syllables=>{
+        !notAcceptRules.exists(regex=> regex.findAllIn(syllables).nonEmpty)
+      })
+
+    if(result.isEmpty) result :+ input
+    else result
+  }
+
   override def initialize(): SyllableLM.this.type = {
     lm = new TransducerLM(TransducerOp.fromSyllables())
-    val infer: (String => Array[String]) = (input: String) => {
-      lm.transducer.multipleSplitSearch(input, params.lmTopSplit)
-        .flatMap(seq => seq.split(lm.transducer.split)).map(_.trim)
-        .filter(_.nonEmpty).filter(syllables=>{
-          !notAcceptRules.exists(regex=> regex.matches(syllables))
-        })
-    }
+
 
     val seqTransducer = lm.seqTransducer
-    TransducerOp.fromDictionaryByInfer(infer, seqTransducer, dictionaryTextFilename, params)
-    TransducerOp.fromTextByInfer(infer, seqTransducer, textFilename, params)
+    TransducerOp.fromDictionaryByInfer(syllableSplit, seqTransducer, dictionaryTextFilename, params)
+    TransducerOp.fromTextByInfer(syllableSplit, seqTransducer, textFilename, params)
 
     TransducerOp.saveLM(modelFilename, lm)
 
     this
   }
 
-  override def subsequence(sentence: Array[String]): String = {
-    findMinSplitSentence(sentence)
-      .flatMap(item => item.split(lm.transducer.split)
-        .filter(_.nonEmpty))
-      .mkString(" ")
-  }
 
   def accept(item:String):Boolean={
     !notAcceptRules.exists(r=> r.findAllIn(item).nonEmpty)
@@ -92,14 +90,8 @@ class SyllableLM(override val params:Params)  extends AbstractLM(params) {
     this
   }
 
-  override def findMinSplit(token: String): Array[String] = lm.inferMinSplit(token, params.lmTopSplit)
-
-  override def findMinSplitEfficient(sentence: Array[String]): Array[String] = lm.inferMinEfficientSplit(sentence, notAcceptRules, params.lmTopSyllableSplit, params.lmTopSplit)
-
-  override def findMinSplitSentence(sentence: Array[String]): Array[String] = lm.inferMinTokenSplit(sentence, notAcceptRules, params.lmTopSyllableSplit, params.lmTopSplit)
-  override def findLikelihoodSentence(sentence: Array[String]): Array[String] = lm.inferMinTokenSplit(sentence, notAcceptRules, params.lmTopSyllableSplit, params.lmTopSplit)
-  override def findMultiSplitSentence(sentence: Array[String]): Array[String] = lm.inferMultiTokenSplit(sentence, params.lmTopSplit)
-  override def findMinSlideSplitSentence(sentence: Array[String]): Array[String] = lm.inferSlideMinTokenSplit(sentence, params.lmSlideLength, params.lmTopSplit)
+  override def splitSentence(sentence: Array[String]): Array[String] = lm.slideSplit(syllableSplit, sentence, params.lmSlideLength, params.lmTopSplit)
+  override def splitToken(token: String): Array[String] = syllableSplit(token).take(params.lmTopSplit)
 
   override def normalize(): AbstractLM = {
     lm.normalize()
@@ -154,38 +146,4 @@ class SyllableLM(override val params:Params)  extends AbstractLM(params) {
     TransducerOp.saveLM(modelFilename, lm)
     this
   }
-}
-
-object SyllableLM{
-
-  def apply(windowSize:Int, topSplit:Int):SyllableLM = {
-    val params = new Params()
-    params.lmWindowLength = windowSize
-    params.lmTopSplit = topSplit
-    val syllableLM = new SyllableLM(params)
-      .load()
-    //syllableLM.test()
-    syllableLM
-  }
-
-  def testSmall(): Unit ={
-
-    val params = new Params()
-    params.lmTrainDictionary = true
-    params.lmEpocs = 100
-    params.lmMaxSentence = 10000
-
-    val syllableLM = new SyllableLM(params)
-      .load()
-      .initialize()
-    //syllableLM.loadTrain()
-
-    syllableLM.findLikelihoodSentence(Array("ihlal")).foreach(result => println(result.mkString("")))
-
-  }
-
-  def main(args: Array[String]): Unit = {
-    testSmall()
-  }
-
 }

@@ -11,35 +11,23 @@ import scala.collection.parallel.CollectionConverters.ArrayIsParallelizable
 import scala.io.Source
 import scala.util.Random
 
-class LMRankEfficient(params: Params) extends RankLM(params) {
+class LMSubWord(params: Params) extends SkipLM(params) {
 
-  override val modelFilename = s"${parent}/resources/transducers/rank-efficient${params.lmID()}.bin"
+  override val modelFilename = s"${parent}/resources/transducers/subword${params.lmID()}.bin"
 
   override def getModelFilename(): String = modelFilename
 
-
-/*
-  override def partition(sentence: Array[String]): Array[Array[String]] = {
-    var spanList = Array[WordSpan]()
-    var start = 0
-    for (i <- 0 until sentence.length) {
-      spanList = spanList :+ new WordSpan(start, start + sentence(i).length)
-        .setValue(sentence(i))
-      start = start + sentence(i).length + 1
-    }
-    val text = sentence.mkString(" ")
-    val lemmaList = wordLemmatizer.lemmatize(spanList, text)
-    val random = new Random(17)
-    val lemmaString = lemmaList.map(wordGroup => {
-      val splittings = wordGroup.lemmaSplitList(lm.transducer.marker).distinct
-      val sampled = random.shuffle(splittings.toSeq).take(params.lmSample).toArray
-      sampled
-    })
-    lemmaString
+  override def splitSentence(sentence: Array[String]): Array[String] = {
+    lm.pageSlideEfficientRank(sentence, params.lmWindowLength, params.lmSkip, params.lmTopSplit, params.lmIterations)
   }
-*/
 
+  override def splitToken(token: String): Array[String] = {
+    lm.tokenEntropySplit(token, params.lmTopSplit, params.lmSample)
+  }
 
+  override def exists(): Boolean = {
+    new File(getModelFilename()).exists()
+  }
 
   override def loadTrain(): this.type = {
     if (exists()) {
@@ -57,6 +45,17 @@ class LMRankEfficient(params: Params) extends RankLM(params) {
     this
 
   }
+  override def load(transducer: Transducer): SkipLM = {
+    if (exists()) {
+      println("Loading filename: " + getModelFilename())
+      lm = TransducerOp.loadLM(getModelFilename(), transducer)
+    }
+    else {
+      println(s"SkipLM model: ${getModelFilename()} not found")
+      lm = new TransducerLM(transducer)
+    }
 
+    this
+  }
 
 }

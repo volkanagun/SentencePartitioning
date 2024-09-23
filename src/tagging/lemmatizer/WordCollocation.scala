@@ -69,8 +69,8 @@ class WordCollocation(val lemmatizer: WordLemmatizer, val window: Int) extends T
         else {
           result = result :+ w1
         }
-      }
-      }
+      }}
+
       array = result
     })
 
@@ -175,7 +175,7 @@ object WordCollocation {
     var set = Set[String]()
     sentences.take(100000).sliding(njobs, njobs).zipWithIndex.foreach(pair => {
       val seq = pair._1
-      println("ZipIndex: " + pair._2)
+      println("Index: " + pair._2)
       seq.sliding(nthreads, nthreads).toArray.par.map(seq => seq.flatMap(s => wordCollocation.extract(s)))
         .toArray.foreach(collocation => {
         set = set ++ collocation

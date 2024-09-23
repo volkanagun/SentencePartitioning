@@ -21,12 +21,13 @@ import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.indexing.NDArrayIndex
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
+import transducer.AbstractLM
 import utils.Tokenizer
 
 import java.io.File
 import scala.io.Source
 
-abstract class ExtrinsicLSTM(params: Params, tokenizer: Tokenizer) extends SelfAttentionLSTM(params, tokenizer) {
+abstract class ExtrinsicLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM) extends SelfAttentionLSTM(params, tokenizer, lm) {
   //use ELMO
   var inputDictionary = Map[String, Int]("dummy" -> 0)
 
@@ -124,7 +125,9 @@ abstract class ExtrinsicLSTM(params: Params, tokenizer: Tokenizer) extends SelfA
 
   }
 
-  override def save(): EmbeddingModel = this
+  override def save(): EmbeddingModel = {
+    this
+  }
 
   override def evaluate(model: EmbeddingModel): EvalScore = {
     evaluate()

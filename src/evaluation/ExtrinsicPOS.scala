@@ -17,13 +17,14 @@ import org.nd4j.linalg.dataset.api.iterator.MultiDataSetIterator
 import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
+import transducer.AbstractLM
 import utils.Tokenizer
 
 import java.util.Locale
 import scala.io.Source
 import scala.util.Random
 
-class ExtrinsicPOS(params: Params, tokenizer: Tokenizer) extends ExtrinsicLSTM(params, tokenizer) {
+class ExtrinsicPOS(params: Params, tokenizer: Tokenizer,  lm:AbstractLM) extends ExtrinsicLSTM(params, tokenizer, lm) {
 
   var categories: Array[String] = null
 
@@ -82,13 +83,13 @@ class ExtrinsicPOS(params: Params, tokenizer: Tokenizer) extends ExtrinsicLSTM(p
           val inputOutput = tokens.map(word => word.split("/")).take(params.embeddingWindowLength)
           val inputLeft = inputOutput.map(_.head)
 
-          val inputLeftArray = inputLeft.map(token => {
+          val inputForwardArray = inputLeft.map(_.trim).filter(_.nonEmpty).map(token => {
             val embeddings = forward(token)
             embeddings
           })
 
-          val inputLeftIndex = vectorize(inputLeftArray)
-          val inputRightIndex = vectorize(inputLeftArray.reverse)
+          val inputLeftIndex = vectorize(inputForwardArray)
+          val inputRightIndex = vectorize(inputForwardArray.reverse)
           val outputElements = inputOutput.map(_.last)
           val outputIndices = outputElements
             .map(output => labels().indexOf(output))

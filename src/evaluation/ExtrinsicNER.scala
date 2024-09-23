@@ -6,12 +6,13 @@ import org.nd4j.linalg.dataset.MultiDataSet
 import org.nd4j.linalg.dataset.api.MultiDataSetPreProcessor
 import org.nd4j.linalg.dataset.api.iterator.MultiDataSetIterator
 import org.nd4j.linalg.factory.Nd4j
+import transducer.AbstractLM
 import utils.Tokenizer
 
 import scala.io.Source
 import scala.util.Random
 
-class ExtrinsicNER(params:Params, tokenizer: Tokenizer) extends ExtrinsicPOS(params, tokenizer){
+class ExtrinsicNER(params:Params, tokenizer: Tokenizer,  lm:AbstractLM) extends ExtrinsicPOS(params, tokenizer, lm){
 
 
 

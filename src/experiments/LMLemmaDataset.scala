@@ -85,7 +85,7 @@ class LMLemmaDataset {
 
     val fn = (sentence: String) => {
       val tokens = tokenizer.standardTokenizer(sentence)
-      lm.findMinSlideSplitSentence(tokens).mkString(" ")
+      lm.splitSentence(tokens).mkString(" ")
     }
     fn
   }
@@ -126,7 +126,7 @@ class LMLemmaDataset {
           //sentences = sentences.filter(sentence => noMaxTokenLength(sentence) && sentence.length < params.maxSentenceLength)
           sentences.par.map(sentence=> tokenizer.standardTokenizer(sentence))
             .filter(_.nonEmpty).map(tokens => {
-            val lemmas = lemmaLM.findMinSlideSplitSentence(tokens)
+            val lemmas = lemmaLM.splitSentence(tokens)
               .flatMap(lemma=> lemma.split(lemmaLM.split))
             (tokens, lemmas)
           }).toArray.foreach {

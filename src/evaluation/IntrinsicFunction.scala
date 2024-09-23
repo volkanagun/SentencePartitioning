@@ -547,8 +547,13 @@ abstract class IntrinsicFunction() extends Serializable {
 
   def avg(tensors: Array[Array[Float]]): Array[Float] = {
     val size = tensors.head.length
+    avg(tensors, size)
+  }
+
+  def avg(tensors: Array[Array[Float]], size:Int): Array[Float] = {
     val sumTensor = tensors.foldLeft[Array[Float]](Array.fill[Float](size)(0f)) { case (main, tensor) => add(main, tensor) }
-    div(sumTensor, tensors.length)
+    val mxSize = math.max(tensors.length, 1)
+    div(sumTensor, mxSize)
   }
 
   def scalar(model: EmbeddingModel, wv: String): Array[Float] = {
@@ -753,10 +758,10 @@ case class Text3CosAddAnalogy(var classifier: String, val wordA: String, val wor
   def evaluateSingle(model: EmbeddingModel): EvalScore = {
 
     val dictionary = model.getDictionary()
-    val wordAset = model.tokenize(wordA)
-    val wordBset = model.tokenize(wordB)
-    val wordXset = model.tokenize(wordX)
-    val wordYset = model.tokenize(wordY)
+    val wordAset = model.split(wordA)
+    val wordBset = model.split(wordB)
+    val wordXset = model.split(wordX)
+    val wordYset = model.split(wordY)
 
     if (contains(dictionary, wordAset) && contains(dictionary, wordBset) && contains(dictionary, wordXset) && contains(dictionary, wordYset)) {
       val analogyTensor = analogy(model, wordAset, wordBset, wordXset)
