@@ -89,7 +89,81 @@ To change the fromDictionary training, you must obtain the lemmas of the words f
 ## Inference
 
 In the inference rankLM sentenceSplit method takes the tokenized sentences to predict the most likely sequence. It returns single sentence sequence which is partitioned into its n-grams.
+ An example scala code is given below. In this example, parameter initialization, training and sentence inference is included
 
+ ```scala
+object ExampleLM {
+
+  def createParams():Params={
+    val parameters = new Params()
+
+    parameters.adapterName = "rankLM"
+    parameters.sentencesFile = "resources/text/sentences/sentences-tr.txt"
+    parameters.lmWindowLength = 3
+    parameters.lmEpocs = 1000
+    parameters.lmMaxSentence = 240
+    parameters.lmTopSplit = 3
+
+    parameters
+  }
+
+  def trainModel() : RankLM={
+    val parameters = createParams()
+    val rankLM = new RankLM(parameters).initialize()
+      .loadTrain()
+
+    rankLM.asInstanceOf[RankLM]
+
+  }
+
+  def exampleSentence(): Unit = {
+
+    val rankLM = trainModel()
+    val sentences = Array[String](
+      "Yaşamın ucuna yolculuk filmi gerçekten çok güzeldi .",
+      "Saat ondan sonra burada bulunan alarm sistemi devreye giriyor .",
+      "Başbakanın sözleri çok konuşuldu .",
+      "Örneklerin elden geçmesi gerekiyordu ."
+    )
+
+    sentences.foreach(sentence=>{
+      val tokens = sentence.split("\\s")
+      val partitions = rankLM.splitSentence(tokens)
+      val partitionString = partitions.mkString(" ")
+      println(partitionString)
+    })
+  }
+
+  def main(args: Array[String]): Unit = {
+    exampleSentence()
+  }
+}
+
+```
+
+
+Inference of sentences for SyllableLM is also similar. Along with sentence splitting, token split can be obtained by the tokenSplit method of AbstractLM class. This methods creates candidate partitions for each token without using the context.
+
+```scala
+ def exampleToken(): Unit = {
+
+    val rankLM = trainModel()
+    val sentences = Array[String](
+      "Yaşamın ucuna yolculuk filmi gerçekten çok güzeldi .",
+      "Anıtkabire gelmek beni çok heyecanlandırdı ."
+    )
+
+    sentences.foreach(sentence=>{
+      val tokens = sentence.split("\\s")
+      tokens.foreach(token=>{
+        rankLM.splitToken(token).foreach(split=>{
+          println("Token: " + token + " Split: "+split)
+        })
+      })
+    })
+  }
+
+```
 
 
 
