@@ -10,11 +10,12 @@ object ExampleLM {
 
     parameters.adapterName = "rankLM"
     parameters.sentencesFile = "resources/text/sentences/sentences-tr.txt"
-    parameters.lmWindowLength = 3
-    parameters.lmEpocs = 10000
+    parameters.lmWindowLength = 2
+    parameters.lmEpocs = 1000
     parameters.lmMaxSentence = 2400
     parameters.lmMaxSentenceLength = 120
     parameters.lmTopSplit = 10
+    parameters.lmPrune = Int.MaxValue
     parameters.lmThreads = 480
 
     parameters
@@ -58,8 +59,9 @@ object ExampleLM {
 
     val rankLM = loadModel()
     val sentences = Array[String](
-      "yaşamın ucuna yolculuk filmi gerçekten çok güzeldi .",
-      "anıtkabire gelmek beni çok heyecanlandırdı ."
+      "giriyor",
+      "çok",
+      "saat"
     )
 
     sentences.foreach(sentence=>{

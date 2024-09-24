@@ -263,11 +263,11 @@ class RankLM(params: Params) extends AbstractLM(params) {
     this
   }
 
-  def partitioning(token:String):Array[String]={
+  def partitioning(token:String):Array[(String, Double)]={
     dictionary.filter(dictionary.inference(token), params.lmTopSplit)
   }
 
-  override def splitToken(token: String): Array[String] = partitioning(token)
+  override def splitToken(token: String): Array[String] = partitioning(token).map(_._1)
 
   def count(sentence: String): this.type = {
     val adjust = "START " + sentence + " END"
@@ -277,7 +277,8 @@ class RankLM(params: Params) extends AbstractLM(params) {
       .toArray
 
     sequences.foreach(sequence => {
-      val combinations = sequence.map(token => partitioning(token))
+      val combinations = sequence.map(token => partitioning(token)
+        .map(_._1))
       count(combinations)
     })
 
@@ -344,18 +345,43 @@ class RankLM(params: Params) extends AbstractLM(params) {
     scoreMap
   }
 
+  def combinatoric(input: Array[Array[(String, Double)]],
+                   result: Array[Array[(String, Double)]] = Array[Array[(String, Double)]](Array()),
+                   i: Int = 0): Array[Array[(String, Double)]] = {
 
-  def rank(sentence: Array[String]): Double = {
-    val adjust = "START" +: sentence :+ "END"
-    var scoreMap = Range(0, adjust.length).map(i => i -> 1d).toMap
-    scoreMap = rank(scoreMap, adjust)
+    if (i == input.length) result
+    else {
+
+      var crr = i;
+      val dist = input(crr).distinct
+
+      var array = Array[Array[(String, Double)]]()
+      for (k <- 0 until dist.length) {
+        for (j <- 0 until result.length) {
+          val current = result(j) :+ dist(k)
+          array = array :+ current
+        }
+      }
+
+      combinatoric(input, array, crr + 1)
+    }
+  }
+
+
+
+  def rank(sentence: Array[(String, Double)]): Double = {
+    val adjust = ("START", 1d) +: sentence :+ ("END", 1d)
+    var scoreMap = Range(0, adjust.length)
+      .map(index => index->adjust(index)._2).toMap
+    val input = adjust.map(_._1)
+    scoreMap = rank(scoreMap, input)
     scoreMap.map(_._2).sum
   }
 
   def inference(sentence: Array[String]): Array[String] = {
     val splits = sentence.map(token => partitioning(token)).filter(_.nonEmpty)
     val partitions = splits.sliding(params.lmWindowLength, 1).map(input => {
-      val combinations = lm.combinatoric(input)
+      val combinations = combinatoric(input)
       combinations.map(combinationSequence => {
           (combinationSequence, rank(combinationSequence))
         }).sortBy(item => item._2)
@@ -363,9 +389,9 @@ class RankLM(params: Params) extends AbstractLM(params) {
         .map(_._1).head
     }).toArray
 
-    var tokens = partitions.head.flatMap(item => item.split(lm.transducer.split))
+    var tokens = partitions.head.flatMap(item => item._1.split(lm.transducer.split))
     partitions.tail.foreach(item => {
-      tokens = tokens ++ item.last.split(lm.transducer.split)
+      tokens = tokens ++ item.last._1.split(lm.transducer.split)
     })
 
     tokens

@@ -27,15 +27,15 @@ class LMDictionary {
     dictionaryTrie.decodeScores(token, split)
   }
 
-  def filter(split: Array[(String, Array[Double])], topSplit: Int): Array[String] = {
+  def filter(split: Array[(String, Array[Double])], topSplit: Int): Array[(String, Double)] = {
     split.map{case(item, scores) => {
       val splitted = item.split("\\#")
        if(splitted.nonEmpty) {
          val score = splitted.zip(scores).map{case(suf, sc) => {
            val p = suf.length.toDouble / (item.length + alpha)
-           sc * 1.0 / math.log(p)
+           sc * math.exp(p)
          }}.sum / scores.length
-         (item, -score)
+         (item, score)
        }
       else{
         (item, 0d)
@@ -43,7 +43,7 @@ class LMDictionary {
       }}.sortBy(_._2)
       .reverse
       .take(topSplit)
-      .map(_._1)
+
   }
 
   def exists(): Boolean = {
