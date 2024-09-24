@@ -92,8 +92,8 @@ dictionaryTrie.add(Array(word, "END"))
 
 ## Inference
 
-In the inference rankLM sentenceSplit method takes the tokenized sentences to predict the most likely sequence. It returns single sentence sequence which is partitioned into its n-grams.
- An example scala code is given below. In this example, parameter initialization, training and sentence inference is included
+In the inferencem sentenceSplit method takes the tokenized sentences to predict the most likely sequence. It returns the most likely sentence sequence with partitioned into its n-grams.
+ An example scala code is given below. In this example, parameter initialization, training and sentence inference is included.
 
  ```scala
 object ExampleLM {
@@ -146,7 +146,8 @@ object ExampleLM {
 ```
 
 
-Inference of sentences for SyllableLM is also similar. Along with sentence splitting, token split can be obtained by the tokenSplit method of AbstractLM class. This methods creates candidate partitions for each token without using the context.
+Inference of sentences for SyllableLM is also similar. Along with sentence splitting, token split can be obtained by the tokenSplit method of AbstractLM class. This methods creates candidate partitions for each token without using the context. 
+The number of most likely splits can be determined by lmTopSplit in parameters. In this example this is set to 3. Note that for longer sequences, the chance of having large number of splits is high. So, this number must be set properly.  
 
 ```scala
  def exampleToken(): Unit = {
@@ -169,7 +170,7 @@ Inference of sentences for SyllableLM is also similar. Along with sentence split
 
 ```
 
-
+The library presented here can be used in Chinese Word Segmentation or in Hastag analysis directly by modifying the lemma dictionary.  
 
 
 
