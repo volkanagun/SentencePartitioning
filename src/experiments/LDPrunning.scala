@@ -36,7 +36,6 @@ class LDPrunning {
               params.embeddingModel = embeddingModel
               params.embeddingLength = embeddingLength
               params.lmMaxSentence = 240
-
               params.dictionarySize = 100000
               params.lmMaxSentenceLength = 200
               params.lmMinSentenceLength = 50
@@ -86,6 +85,7 @@ class LDPrunning {
   def train(): Unit = {
 
     val params = new Params()
+
     val ranges = params.windows
     val models = params.adapters
     ranges.foreach(window => {

@@ -17,6 +17,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>zemberek-nlp</groupId>
+            <artifactId>zemberek-morphology</artifactId>
+            <version>0.17.1</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/net.lecousin.compression/gzip -->
         <dependency>
             <groupId>net.lecousin.compression</groupId>
@@ -184,6 +190,13 @@
         </dependency>
 
     </dependencies>
+    <repositories>
+        <repository>
+            <id>zemberek-repo</id>
+            <name>Zemberek Maven Repository</name>
+            <url>https://raw.github.com/ahmetaa/maven-repo/master</url>
+        </repository>
+    </repositories>
     <build>
         <pluginManagement>
             <plugins>

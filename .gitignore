@@ -1,4 +1,8 @@
 /resources/text/
-/resources/binary/huawei.bin
-/resources/results/
-/resources/*
+/resources/binary/
+/resources/models/
+/resources/evaluation/
+/resources/embeddings/
+/resources/dictionary/
+/resources/transducers/
+

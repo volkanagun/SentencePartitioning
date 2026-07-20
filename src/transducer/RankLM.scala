@@ -313,8 +313,8 @@ class RankLM(params: Params) extends AbstractLM(params) {
           }
           }
 
-          val forwardScore = forwardScores.sum / forwardScores.length
-          scoreMap = scoreMap + (index -> (0.85f * scoreMap(index) + 0.15f * forwardScore));
+          val forwardScore = if (forwardScores.isEmpty) 0d else forwardScores.sum / forwardScores.length
+          scoreMap = scoreMap + (index -> (params.lmPriorWeight * scoreMap(index) + params.lmLikelihoodWeight * forwardScore));
         }
 
         /*for (k <- index + 1 until scores.length) {
@@ -372,10 +372,21 @@ class RankLM(params: Params) extends AbstractLM(params) {
   def rank(sentence: Array[(String, Double)]): Double = {
     val adjust = ("START", 1d) +: sentence :+ ("END", 1d)
     var scoreMap = Range(0, adjust.length)
-      .map(index => index->adjust(index)._2).toMap
+      .map(index => index->lengthPenaltyScore(adjust(index)._1, adjust(index)._2)).toMap
     val input = adjust.map(_._1)
     scoreMap = rank(scoreMap, input)
     scoreMap.map(_._2).sum
+  }
+
+  def lengthPenaltyScore(partition: String, score: Double): Double = {
+    val length = math.max(1, partition.split(split).count(_.nonEmpty))
+    params.lmLengthPenalty match {
+      case "none" => score
+      case "inverse_parts" => score / length
+      case "inverse_sqrt_parts" => score / math.sqrt(length)
+      case "inverse_log_parts" => score / math.log(length + 1d)
+      case _ => score
+    }
   }
 
   def inference(sentence: Array[String]): Array[String] = {

@@ -74,6 +74,9 @@ class Params {
   var lmTopSplit = 10
   var lmTopSyllableSplit = 200
   var lmIterations = 10
+  var lmLikelihoodWeight = 0.15d
+  var lmPriorWeight = 0.85d
+  var lmLengthPenalty = "none"
   var lmForceTrain = false
   var lmDoPrune = true
   var lmDoSample = false
@@ -157,6 +160,9 @@ class Params {
     params.lmSlideLength = lmSlideLength
     params.lmCandidateCount = lmCandidateCount
     params.lmIterations = lmIterations
+    params.lmLikelihoodWeight = lmLikelihoodWeight
+    params.lmPriorWeight = lmPriorWeight
+    params.lmLengthPenalty = lmLengthPenalty
     params.lmMaxWaitSeconds = lmMaxWaitSeconds
     params.lmThreads = lmThreads
     params.stats = stats
@@ -270,6 +276,9 @@ class Params {
     var array = Array[Int](adapterName.hashCode, lmWindowLength, lmSlideLength, lmTopSplit, lmSkip, lmStemLength)
     if (lmDoPrune) array = array :+ lmPrune
     if (lmDoSample) array = array :+ lmSample
+    if (lmLikelihoodWeight != 0.15d || lmPriorWeight != 0.85d || lmLengthPenalty != "none") {
+      array = array ++ Array[Int](lmLikelihoodWeight.hashCode(), lmPriorWeight.hashCode(), lmLengthPenalty.hashCode)
+    }
 
     array.foldRight(7) { case (a, main) => a + 7 * main }
   }
@@ -325,6 +334,9 @@ class Params {
       tag("LM_MAXSENTENCES", lmMaxSentence.toString) +
       tag("LM_THREADS", lmThreads.toString) +
       tag("LM_TOP_SPLIT", lmTopSplit.toString) +
+      tag("LM_LIKELIHOOD_WEIGHT", lmLikelihoodWeight.toString) +
+      tag("LM_PRIOR_WEIGHT", lmPriorWeight.toString) +
+      tag("LM_LENGTH_PENALTY", lmLengthPenalty) +
       tag("LM_PRUNE", lmPrune.toString) +
       tag("LM_DOSAMPLE", lmDoSample.toString) +
       tag("LM_SAMPLE", lmSample.toString) +
