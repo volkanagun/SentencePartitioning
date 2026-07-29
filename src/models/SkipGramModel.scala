@@ -12,13 +12,41 @@ import java.io.{File, FileOutputStream}
 
 class SkipGramModel(params:Params, tokenizer: Tokenizer,  lm:AbstractLM) extends CBOWModel(params, tokenizer, lm) {
 
-  override def train(filename: String): EmbeddingModel = {
-    val iter = new LineSentenceIterator(new File(filename))
-    val factory = defaultTokenizer()
-    val fname = params.modelFilename()
+  /** Loads a persisted SkipGram artifact without entering the training path. */
+  def loadExisting(): EmbeddingModel = {
+    val embeddings = new File(params.embeddingsFilename())
+    val modelFile = new File(params.modelFilename())
+    if (embeddings.exists()) {
+      reportProgress("loading existing SkipGram embeddings")
+      load()
+    }
+    else if (modelFile.exists()) {
+      reportProgress("loading SkipGram model " + modelFile.getPath)
+      vectorModel = WordVectorSerializer.readWord2VecModel(modelFile)
+      save()
+    }
+    else {
+      throw new IllegalStateException("SkipGram model does not exist: " + modelFile.getPath)
+    }
+    this
+  }
 
-    if (!(new File(fname).exists())|| params.forceTrain) {
-      println("SkipGram filename: " + fname)
+  override def train(filename: String): EmbeddingModel = {
+    val fname = params.modelFilename()
+    val embeddingFile = params.embeddingsFilename()
+    val modelFile = new File(fname)
+    val embeddings = new File(embeddingFile)
+
+    if (embeddings.exists()) {
+      loadExisting()
+    }
+    else if (modelFile.exists()) {
+      loadExisting()
+    }
+    else {
+      reportProgress("training SkipGram model " + fname)
+      val iter = new LineSentenceIterator(new File(filename))
+      val factory = defaultTokenizer()
       val windowLength = 5
 
       vectorModel = new Word2Vec.Builder()
@@ -40,8 +68,10 @@ class SkipGramModel(params:Params, tokenizer: Tokenizer,  lm:AbstractLM) extends
         .build()
 
       vectorModel.fit()
+      reportProgress("saving trained SkipGram model " + fname)
       WordVectorSerializer.writeWord2Vec(vectorModel, new FileOutputStream(fname))
       save()
+      reportProgress("SkipGram training completed")
     }
 
     this

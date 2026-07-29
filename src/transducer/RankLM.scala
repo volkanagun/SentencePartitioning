@@ -390,15 +390,28 @@ class RankLM(params: Params) extends AbstractLM(params) {
   }
 
   def inference(sentence: Array[String]): Array[String] = {
-    val splits = sentence.map(token => partitioning(token)).filter(_.nonEmpty)
-    val partitions = splits.sliding(params.lmWindowLength, 1).map(input => {
+    if (sentence.isEmpty) {
+      return Array()
+    }
+
+    val splits = sentence.map(token => {
+      val candidates = partitioning(token)
+      if (candidates.nonEmpty) candidates else Array((token, 0d))
+    })
+
+    val windowLength = math.max(1, math.min(params.lmWindowLength, splits.length))
+    val partitions = splits.sliding(windowLength, 1).map(input => {
       val combinations = combinatoric(input)
       combinations.map(combinationSequence => {
           (combinationSequence, rank(combinationSequence))
         }).sortBy(item => item._2)
         .reverse
-        .map(_._1).head
+        .map(_._1).headOption.getOrElse(input.map(_.head))
     }).toArray
+
+    if (partitions.isEmpty) {
+      return sentence
+    }
 
     var tokens = partitions.head.flatMap(item => item._1.split(lm.transducer.split))
     partitions.tail.foreach(item => {
@@ -415,8 +428,6 @@ class RankLM(params: Params) extends AbstractLM(params) {
   override def splitSentence(sentence: Array[String]): Array[String] = {
     inference(sentence)
   }
-
-
 
   override def save(): AbstractLM = {
     println("Saving model filename: " + getModelFilename())
@@ -466,6 +477,10 @@ class RankLM(params: Params) extends AbstractLM(params) {
   }
 
   override def loadTrain(): AbstractLM = {
+    if (exists()) {
+      return load()
+    }
+
     val range = Range(0, params.lmEpocs)
     val nsize = params.lmThreads
     val locale = new Locale("tr")

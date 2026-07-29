@@ -16,7 +16,10 @@ class FastTextModel(params:Params, tokenizer: Tokenizer,  lm:AbstractLM) extends
 
     val fname = params.embeddingsFilename()
 
-    if (!(new File(fname).exists())|| params.forceTrain) {
+    if (new File(fname).exists()) {
+      load()
+    }
+    else {
       println("FastText filename: " + fname)
       val vocabulary = Source.fromFile(filename).getLines().flatMap(line=> line.split("\\s+")).toSet
       val lines = Source.fromFile(params.fastTextBin).getLines()

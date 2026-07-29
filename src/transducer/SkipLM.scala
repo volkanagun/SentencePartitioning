@@ -93,10 +93,6 @@ class SkipLM(override val params: Params) extends AbstractLM(params) {
   override def loadTrain(): this.type = {
     if (exists()) {
       lm = TransducerOp.loadLM(modelFilename, lm.transducer)
-      if (params.lmForceTrain || lm.isEmpty()) {
-        lm = TransducerOp.trainParallelCombinatoricBySkip(lm, textFilename, modelFilename, params)
-        TransducerOp.saveLM(modelFilename, lm)
-      }
     }
     else {
       lm = TransducerOp.trainParallelCombinatoricBySkip(lm.transducer, textFilename, modelFilename, params)

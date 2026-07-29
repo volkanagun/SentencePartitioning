@@ -1,0 +1,8 @@
+task,status,count
+analogy,found,95
+morphology,found,95
+ner,found,95
+pos,completed,28
+pos,found,67
+sentiment,completed,13
+sentiment,found,82

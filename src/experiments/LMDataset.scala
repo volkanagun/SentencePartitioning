@@ -36,6 +36,11 @@ class LMDataset {
   }
 
   def construct(trainFilename: String, targetFilename: String, wordCount: Int = 10): Unit = {
+    if (new File(targetFilename).exists()) {
+      println("Found corpus filename: " + targetFilename)
+      return
+    }
+
     var wordMap = Source.fromFile(trainFilename).getLines().flatMap(line => {
       line.split("[\\s\\p{Punct}]+")
     }).toSet.toArray
@@ -71,7 +76,7 @@ class LMDataset {
     println(s"Corpus filename: ${fname}")
 
 
-    if (!fname.exists() || params.lmForceTrain) {
+    if (!fname.exists()) {
       val corpusPrint = new PrintWriter(params.corpusFilename(taskName))
       val sentenceSplit = (sentence:String) => lm.splitSentence(tokenizer.standardTokenizer(sentence))
 

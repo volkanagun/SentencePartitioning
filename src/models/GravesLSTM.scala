@@ -2,7 +2,6 @@ package models
 
 import experiments.Params
 import org.deeplearning4j.nn.conf.inputs.InputType
-import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode
 import org.deeplearning4j.nn.conf.layers.recurrent.LastTimeStep
 import org.deeplearning4j.nn.conf.layers.{DenseLayer, EmbeddingSequenceLayer, GlobalPoolingLayer, LSTM, OutputLayer, PoolingType, SelfAttentionLayer}
 import org.deeplearning4j.nn.conf.{NeuralNetConfiguration, WorkspaceMode}
@@ -22,7 +21,6 @@ class GravesLSTMModel(params:Params, tokenizer:Tokenizer,  lm:AbstractLM) extend
 
 
     val conf = new NeuralNetConfiguration.Builder()
-      .cudnnAlgoMode(AlgoMode.PREFER_FASTEST)
       .dataType(DataType.FLOAT)
       .activation(Activation.TANH)
       .updater(new Adam(params.lrate))

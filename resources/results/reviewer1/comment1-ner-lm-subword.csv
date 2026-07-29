@@ -1,0 +1,13 @@
+variant_id,task,method,lm_window_length,lm_slide_length,lm_top_split,lm_skip,lm_stem_length,lm_prune,lm_likelihood_weight,lm_prior_weight,lm_length_penalty,corpus_filename,result_filename,accuracy,f1,status
+"v1","ner","lm-subword","2","2","1","2","7","100","0.15","0.85","none","resources/text//ner/74555517.txt","resources/results/skip/lm-subword/ner/skip//240-2-1107668419.xml","","","found"
+"v2","ner","lm-subword","2","2","3","2","7","100","0.15","0.85","none","resources/text//ner/74556203.txt","resources/results/skip/lm-subword/ner/skip//240-2-767355295.xml","","","found"
+"v3","ner","lm-subword","2","2","5","2","7","100","0.15","0.85","none","resources/text//ner/74556889.txt","resources/results/skip/lm-subword/ner/skip//240-2-427042171.xml","","","found"
+"v4","ner","lm-subword","3","3","1","3","7","100","0.15","0.85","none","resources/text//ner/74557974.txt","resources/results/skip/lm-subword/ner/skip//240-3--1908082251.xml","","","found"
+"v5","ner","lm-subword","3","3","3","3","7","100","0.15","0.85","none","resources/text//ner/74558660.txt","resources/results/skip/lm-subword/ner/skip//240-3-2046571921.xml","","","found"
+"v6","ner","lm-subword","3","3","5","3","7","100","0.15","0.85","none","resources/text//ner/74559346.txt","resources/results/skip/lm-subword/ner/skip//240-3-1706258797.xml","","","found"
+"v7","ner","lm-subword","4","4","1","4","7","100","0.15","0.85","none","resources/text//ner/74560431.txt","resources/results/skip/lm-subword/ner/skip//240-4--628865625.xml","","","found"
+"v8","ner","lm-subword","4","4","3","4","7","100","0.15","0.85","none","resources/text//ner/74561117.txt","resources/results/skip/lm-subword/ner/skip//240-4--969178749.xml","","","found"
+"v9","ner","lm-subword","4","4","5","4","7","100","0.15","0.85","none","resources/text//ner/74561803.txt","resources/results/skip/lm-subword/ner/skip//240-4--1309491873.xml","","","found"
+"v10","ner","lm-subword","3","3","3","3","7","100","0.15","0.85","none","resources/text//ner/113265181.txt","resources/results/skip/lm-subword/ner/skip//240-3-1040316675.xml","","","found"
+"v11","ner","lm-subword","3","3","3","3","7","100","0.15","0.85","none","resources/text//ner/117382896.txt","resources/results/skip/lm-subword/ner/skip//240-3-567739113.xml","","","found"
+"v12","ner","lm-subword","3","3","3","3","7","100","0.15","0.85","none","resources/text//ner/125618326.txt","resources/results/skip/lm-subword/ner/skip//240-3--377416011.xml","","","found"

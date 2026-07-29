@@ -1,0 +1,10 @@
+variant_id,task,method,lm_window_length,lm_slide_length,lm_top_split,lm_skip,lm_stem_length,lm_prune,lm_likelihood_weight,lm_prior_weight,lm_length_penalty,corpus_filename,result_filename,accuracy,f1,status
+"v1","analogy","frequent-ngram","2","2","1","2","7","100","0.15","0.85","none","resources/text//intrinsic/175838085.txt","resources/results/skip/frequent-ngram/intrinsic/skip//240-2-733130507.xml","","","found"
+"v2","analogy","frequent-ngram","2","2","3","2","7","100","0.15","0.85","none","resources/text//intrinsic/175838771.txt","resources/results/skip/frequent-ngram/intrinsic/skip//240-2-392817383.xml","","","found"
+"v3","analogy","frequent-ngram","2","2","5","2","7","100","0.15","0.85","none","resources/text//intrinsic/175839457.txt","resources/results/skip/frequent-ngram/intrinsic/skip//240-2-52504259.xml","","","found"
+"v4","analogy","frequent-ngram","3","3","1","3","7","100","0.15","0.85","none","resources/text//intrinsic/175840542.txt","resources/results/skip/frequent-ngram/intrinsic/skip//240-3-2012347133.xml","","","found"
+"v5","analogy","frequent-ngram","3","3","3","3","7","100","0.15","0.85","none","resources/text//intrinsic/175841228.txt","resources/results/skip/frequent-ngram/intrinsic/skip//240-3-1672034009.xml","","","found"
+"v6","analogy","frequent-ngram","3","3","5","3","7","100","0.15","0.85","none","resources/text//intrinsic/175841914.txt","resources/results/skip/frequent-ngram/intrinsic/skip//240-3-1331720885.xml","","","found"
+"v7","analogy","frequent-ngram","4","4","1","4","7","100","0.15","0.85","none","resources/text//intrinsic/175842999.txt","resources/results/skip/frequent-ngram/intrinsic/skip//240-4--1003403537.xml","","","found"
+"v8","analogy","frequent-ngram","4","4","3","4","7","100","0.15","0.85","none","resources/text//intrinsic/175843685.txt","resources/results/skip/frequent-ngram/intrinsic/skip//240-4--1343716661.xml","","","found"
+"v9","analogy","frequent-ngram","4","4","5","4","7","100","0.15","0.85","none","resources/text//intrinsic/175844371.txt","resources/results/skip/frequent-ngram/intrinsic/skip//240-4--1684029785.xml","","","found"

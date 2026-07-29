@@ -27,7 +27,7 @@ class LMLemmaDataset {
     params.lmTopSplit = 5
     params.lmSkip = window - 1
     params.lmSlideLength = 5
-    params.lmForceTrain = true
+    params.lmForceTrain = false
     params.lmThreads = 12
 
     params.maxSentences = 10000
@@ -51,7 +51,7 @@ class LMLemmaDataset {
     params.lmSlideLength = 7
     params.lmTopSplit = 3
     params.lmSkip = 10
-    params.lmForceTrain = true
+    params.lmForceTrain = false
 
     params.maxSentences = 20000
     params.maxSentenceLength = 200

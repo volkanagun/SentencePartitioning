@@ -3,6 +3,7 @@ package experiments
 import org.nd4j.linalg.factory.Nd4j
 import transducer.{AbstractLM, LMExperiment}
 
+import java.io.File
 import java.util.concurrent.ForkJoinPool
 import scala.collection.parallel.CollectionConverters.ArrayIsParallelizable
 import scala.collection.parallel.ForkJoinTaskSupport
@@ -91,7 +92,7 @@ class LDPrunning {
     ranges.foreach(window => {
       models.foreach(name => {
         val lm = params.modelDefault(name, window)
-        if (!lm.exists() || params.lmForceTrain) {
+        if (!lm.exists()) {
           println("Training LM model: " + name + " with window: " + window)
           lm.initialize().loadTrain()
         }
@@ -102,13 +103,14 @@ class LDPrunning {
   def train(params: Params, name: String): AbstractLM = {
 
     val lm = params.model(params, name)
-    if (!lm.exists() || lm.isEmpty() || params.lmForceTrain) {
+    if (!lm.exists()) {
       println("Training LM model: " + name + " with window: " + params.lmWindowLength)
       lm.initialize()
       lm.loadTrain()
     }
     else {
       println("Model found: " + lm.exists())
+      lm.load()
     }
 
     lm
@@ -130,7 +132,7 @@ class LDPrunning {
 
       tasks.foreach(task => {
         val copyParams = params.copy()
-        if (doConstruct) {
+        if (doConstruct && !new File(copyParams.corpusFilename(task)).exists()) {
           dataset.construct(lm, task)
         }
 
@@ -149,7 +151,6 @@ class LDPrunning {
 
 object LDPrunning {
   def main(args: Array[String]): Unit = {
-    System.setProperty("org.bytedeco.openblas.load", "mkl")
     Nd4j.getEnvironment.setMaxPrimaryMemory(160L * 1024L * 1024L * 1024L)
     Nd4j.getEnvironment.setMaxDeviceMemory(340L * 1024L * 1024L * 1024L)
     new LDPrunning().evaluate()

@@ -5,7 +5,6 @@ import org.deeplearning4j.nn.api.layers.RecurrentLayer
 import org.deeplearning4j.nn.conf.{NeuralNetConfiguration, RNNFormat, WorkspaceMode}
 import org.deeplearning4j.nn.conf.graph.MergeVertex
 import org.deeplearning4j.nn.conf.inputs.InputType
-import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode
 import org.deeplearning4j.nn.conf.layers.recurrent.LastTimeStep
 import org.deeplearning4j.nn.conf.layers.{EmbeddingSequenceLayer, LSTM, OutputLayer, RnnOutputLayer}
 import org.deeplearning4j.nn.graph.ComputationGraph
@@ -77,7 +76,7 @@ class ExtrinsicPOS(params: Params, tokenizer: Tokenizer,  lm:AbstractLM) extends
         var inputRightStack = Array[INDArray]()
         var outputStack = Array[INDArray]()
         var i = 0;
-        while (i < params.evalBatchSize && samples.hasNext) {
+        while (i < params.storchBatch && samples.hasNext) {
           val (input, _) = samples.next()
           val tokens = input.split("\\s+")
           val inputOutput = tokens.map(word => word.split("/")).take(params.embeddingWindowLength)
@@ -103,9 +102,11 @@ class ExtrinsicPOS(params: Params, tokenizer: Tokenizer,  lm:AbstractLM) extends
           i = i + 1
         }
 
-        val vLeft = Nd4j.vstack(inputLeftStack: _*)
-        val vRight = Nd4j.vstack(inputRightStack: _*)
-        val vOutput = Nd4j.vstack(outputStack: _*)
+        // vstack may retain the previous full-batch shape when the final batch
+        // is partial. Concatenation preserves the actual leading dimension.
+        val vLeft = Nd4j.concat(0, inputLeftStack: _*)
+        val vRight = Nd4j.concat(0, inputRightStack: _*)
+        val vOutput = Nd4j.concat(0, outputStack: _*)
 
 
         new MultiDataSet(Array(vLeft, vRight), Array(vOutput))
@@ -133,7 +134,6 @@ class ExtrinsicPOS(params: Params, tokenizer: Tokenizer,  lm:AbstractLM) extends
 
     val categorySize = labels().length
     val conf = new NeuralNetConfiguration.Builder()
-      .cudnnAlgoMode(AlgoMode.PREFER_FASTEST)
       .updater(new Adam.Builder().learningRate(params.lrate).build())
       .dropOut(0.2)
       .graphBuilder()

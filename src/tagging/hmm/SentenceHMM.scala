@@ -51,7 +51,7 @@ class SentenceHMM() extends SequenceHMM() {
     params.adapterName = "lm-syllable"
     params.lmEpocs = 1
     params.lmMaxSentence = 500000
-    params.lmForceTrain = true
+    params.lmForceTrain = false
     params.lmCandidateCount = 3
     params.lmMaxSentenceLength = 170
     params.lmWindowLength = 10
@@ -249,9 +249,10 @@ class SentenceHMM() extends SequenceHMM() {
     if (exists()) {
       load(modelFilename)
     }
-
-    trainEpocs()
-    save(modelFilename)
+    else {
+      trainEpocs()
+      save(modelFilename)
+    }
     this
   }
 

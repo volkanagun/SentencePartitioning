@@ -74,11 +74,6 @@ class LemmaLM(params:Params) extends SkipLM(params) {
   override def loadTrain(): this.type = {
     if (exists()) {
       lm = TransducerOp.loadLM(getModelFilename(), lm.transducer)
-      if (params.lmForceTrain || lm.isEmpty()) {
-        lm = TransducerOp.trainParallelCombinatoricBySkip(lm,partition,  textFilename, getModelFilename(), params)
-
-        TransducerOp.saveLM(getModelFilename(), lm)
-      }
     }
     else {
       lm = TransducerOp.trainParallelCombinatoricBySkip(lm.transducer, textFilename,getModelFilename(), params)

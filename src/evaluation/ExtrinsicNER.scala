@@ -30,31 +30,26 @@ class ExtrinsicNER(params:Params, tokenizer: Tokenizer,  lm:AbstractLM) extends 
 
 
   override def universe(): Set[String] = {
-    Source.fromFile(getTraining()).getLines().map(token => {
-      val word = token.split("\\s+").head
-      word
-    }).toSet
+    val source = Source.fromFile(getTraining(), "UTF-8")
+    try source.getLines().filter(_.trim.nonEmpty).map(_.split("\\s+").head).toSet
+    finally source.close()
+  }
+
+  private def documents(filename: String): Vector[String] = {
+    val source = Source.fromFile(filename, "UTF-8")
+    try source.mkString.split("(?:\\r?\\n){2,}").map(_.trim).filter(_.nonEmpty).toVector
+    finally source.close()
   }
 
   override def loadSamples(filename: String): Iterator[(String, String)] = {
-
     val rnd = new Random(17)
-    val array = Source.fromFile(filename).getLines().toSeq
-    var sentences  = Array[(String, String)]()
-    var sentence = ""
-    rnd.shuffle(array).iterator.foreach(wordLabel => {
-      if(wordLabel.trim.nonEmpty){
-        val Array(word, label) = wordLabel.split("[\t\\s]+")
-        sentence += " " + word+"/"+label
-      }
-      else{
-        val crrSentence = sentence.trim.toLowerCase(locale)
-        sentences = sentences :+ (crrSentence, "")
-        sentence = ""
-      }
+    rnd.shuffle(documents(filename)).iterator.map(document => {
+      val sentence = document.linesIterator.filter(_.trim.nonEmpty).map(wordLabel => {
+        val fields = wordLabel.trim.split("[\t\\s]+")
+        fields.head + "/" + fields.last
+      }).mkString(" ").toLowerCase(locale)
+      (sentence, "")
     })
-
-    sentences.iterator
   }
 
   override def labels(): Array[String] = {

@@ -10,11 +10,19 @@ import java.util.concurrent.ForkJoinPool
 import scala.collection.parallel.CollectionConverters.ArrayIsParallelizable
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.io.Source
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * @author Volkan Agun
  */
 class IntrinsicEvaluation(val reportFilename: String) extends IntrinsicFunction with Serializable {
+
+  private var progressReporter: String => Unit = _ => ()
+
+  def withProgressReporter(reporter: String => Unit): this.type = {
+    progressReporter = Option(reporter).getOrElse(_ => ())
+    this
+  }
 
   var functions: Array[IntrinsicFunction] = Array()
   var testWords = Set[String]()
@@ -22,11 +30,21 @@ class IntrinsicEvaluation(val reportFilename: String) extends IntrinsicFunction 
 
   override def setDictionary(set: Set[String], model:EmbeddingModel): this.type = {
 
-    println("Evaluating embeddings of the dictionary words")
+    progressReporter(s"evaluating dictionary embeddings 0/${set.size}")
     testWords = set.map(_.trim).filter(_.nonEmpty)
-    testEmbeddings = testWords.toArray.par.map(target => (target, model.forward(target))).toArray.toSet
+    val completed = new AtomicInteger(0)
+    val updateEvery = math.max(1, testWords.size / 100)
+    testEmbeddings = testWords.toArray.par.map(target => {
+      val result = target -> model.forward(target)
+      val done = completed.incrementAndGet()
+      if (done % updateEvery == 0 || done == testWords.size) {
+        progressReporter(s"evaluating dictionary embeddings $done/${testWords.size}")
+      }
+      result
+    }).toArray.toSet
 
     functions.foreach(ier=> ier.setWords(testWords).setEmbeddings(testEmbeddings))
+    progressReporter(s"dictionary embeddings completed: ${testWords.size}")
     this
   }
 
@@ -47,9 +65,9 @@ class IntrinsicEvaluation(val reportFilename: String) extends IntrinsicFunction 
 
 
   override def universe(): Set[String] = {
-    println("Computing set of queries")
+    progressReporter("computing query universe")
     val set = functions.flatMap(function => function.universe()).toSet
-    println("Queries are found...")
+    progressReporter(s"queries found: ${set.size}")
     set
   }
 
@@ -62,13 +80,20 @@ class IntrinsicEvaluation(val reportFilename: String) extends IntrinsicFunction 
 
 
   override def evaluateReport(model: EmbeddingModel, params:Params): InstrinsicEvaluationReport = {
+    if (new File(reportFilename).exists()) {
+      println("Found result filename: " + reportFilename)
+      return new InstrinsicEvaluationReport()
+    }
+
     val ier = new InstrinsicEvaluationReport()
-    println(s"Total Evaluation Functions: ${functions.map(_.count()).sum}")
+    val total = functions.map(_.count()).sum
+    progressReporter(s"evaluating functions: $total")
     val parFunctions= functions.par
     parFunctions.tasksupport = new ForkJoinTaskSupport(new ForkJoinPool(params.nthreads))
     parFunctions.map(intr => intr.evaluateReport(model, params)).toArray.foreach(intr => {
       ier.append(intr)
     })
+    progressReporter(s"evaluation functions completed: $total")
 
     new File(reportFilename.substring(0, reportFilename.lastIndexOf("/"))).mkdirs()
     val pw = new PrintWriter(reportFilename)
@@ -233,4 +258,3 @@ object IntrinsicEvaluation{
     mergeText()
   }
 }
-

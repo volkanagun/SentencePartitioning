@@ -82,12 +82,6 @@ class NGramLM(override val params: Params) extends AbstractLM(params) {
 
       lm = TransducerOp.loadLM(modelFilename, new Transducer())
 
-      if(params.lmForceTrain || lm.isEmpty()) {
-        lm = TransducerOp.trainParallelCombinatoricBySlide(lm, textFilename, modelFilename, params)
-
-        TransducerOp.saveLM(modelFilename, lm)
-      }
-
     }
     else {
       lm = TransducerOp.trainParallelCombinatoricBySlide(new Transducer(), textFilename, modelFilename, params)
@@ -122,4 +116,3 @@ class NGramLM(override val params: Params) extends AbstractLM(params) {
 
   override def splitToken(token: String): Array[String] = lm.tokenSplit(token, params.lmTopSplit)
 }
-

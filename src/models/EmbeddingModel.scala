@@ -12,6 +12,15 @@ import scala.collection.parallel.CollectionConverters.ArrayIsParallelizable
 
 abstract class EmbeddingModel(val params: Params, val tokenizer: Tokenizer, val lm: AbstractLM) extends IntrinsicFunction {
 
+  private var progressReporter: String => Unit = _ => ()
+
+  def withProgressReporter(reporter: String => Unit): this.type = {
+    progressReporter = Option(reporter).getOrElse(_ => ())
+    this
+  }
+
+  protected def reportProgress(detail: String): Unit = progressReporter(detail)
+
   var avgTime = 0d
   var sampleCount = 0
   var locale = new Locale("tr")

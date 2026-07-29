@@ -4,7 +4,6 @@ import evaluation.{EvalScore, InstrinsicEvaluationReport}
 import experiments.Params
 import org.deeplearning4j.nn.conf.{NeuralNetConfiguration, WorkspaceMode}
 import org.deeplearning4j.nn.conf.inputs.InputType
-import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode
 import org.deeplearning4j.nn.conf.layers._
 import org.deeplearning4j.nn.graph.ComputationGraph
 import org.deeplearning4j.nn.weights.WeightInit
@@ -262,12 +261,17 @@ class SelfAttentionLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM) ext
   override def train(filename: String): EmbeddingModel = {
 
     var i = 0
+    val embeddingFile = new File(params.embeddingsFilename())
     val fname = params.modelFilename()
     val modelFile = new File(fname)
     println("LSTM filename: " + fname)
+    DL4JGpu.configure()
 
 
-    if (!(modelFile.exists()) || params.forceTrain) {
+    if (embeddingFile.exists()) {
+      load()
+    }
+    else if (!modelFile.exists()) {
 
 
       val size = Source.fromFile(filename).getLines().size
@@ -350,7 +354,6 @@ class SelfAttentionLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM) ext
 
 
     val conf = new NeuralNetConfiguration.Builder()
-      .cudnnAlgoMode(AlgoMode.PREFER_FASTEST)
       .dataType(DataType.FLOAT)
       .activation(Activation.TANH)
       .updater(new Adam(params.lrate))
@@ -376,14 +379,13 @@ class SelfAttentionLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM) ext
     conf.setTrainingWorkspaceMode(WorkspaceMode.ENABLED)
     conf.setInferenceWorkspaceMode(WorkspaceMode.ENABLED)
 
-    new ComputationGraph(conf)
+    DL4JGpu.prepare(new ComputationGraph(conf))
   }
 
 
   def model(): ComputationGraph = {
 
     val conf = new NeuralNetConfiguration.Builder()
-      .cudnnAlgoMode(AlgoMode.PREFER_FASTEST)
       .dataType(DataType.FLOAT)
       .activation(Activation.TANH)
       .updater(new Adam(params.lrate))
@@ -409,7 +411,7 @@ class SelfAttentionLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM) ext
     conf.setTrainingWorkspaceMode(WorkspaceMode.ENABLED)
     conf.setInferenceWorkspaceMode(WorkspaceMode.ENABLED)
 
-    new ComputationGraph(conf)
+    DL4JGpu.prepare(new ComputationGraph(conf))
   }
 
 

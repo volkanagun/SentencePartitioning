@@ -116,10 +116,6 @@ class SyllableLM(override val params:Params)  extends AbstractLM(params) {
   override def loadTrain(): SyllableLM = {
     if (exists()) {
       lm = TransducerOp.loadLM(modelFilename)
-      if(params.lmForceTrain || lm.isEmpty()) {
-        lm = TransducerOp.trainParallel(lm, textFilename, modelFilename, params)
-        TransducerOp.saveLM(modelFilename, lm)
-      }
     }
     else {
       lm = TransducerOp.trainParallel(lm.transducer, textFilename, modelFilename, params)

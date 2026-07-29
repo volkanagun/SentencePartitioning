@@ -8,7 +8,7 @@ import org.jblas.DoubleMatrix
 import transducer.AbstractLM
 import utils.Tokenizer
 
-import java.io.{FileOutputStream, ObjectOutputStream}
+import java.io.{File, FileOutputStream, ObjectOutputStream}
 import java.util
 import java.util.List
 
@@ -19,17 +19,22 @@ class GloveModel(params:Params, tokenizer:Tokenizer,  lm:AbstractLM) extends CBO
 
 
   override def train(filename: String): EmbeddingModel = {
-    val options = new Options
-    options.debug = true
-    vocab = GloVe.build_vocabulary(filename, options)
-    options.window_size = 3
-    val c = GloVe.build_cooccurrence(vocab, filename, options)
+    if (new File(params.embeddingsFilename()).exists()) {
+      load()
+    }
+    else {
+      val options = new Options
+      options.debug = true
+      vocab = GloVe.build_vocabulary(filename, options)
+      options.window_size = 3
+      val c = GloVe.build_cooccurrence(vocab, filename, options)
 
-    options.iterations = 10
-    options.vector_size = 10
-    options.debug = true
-    vectors = GloVe.train(vocab, c, options)
-    save()
+      options.iterations = 10
+      options.vector_size = 10
+      options.debug = true
+      vectors = GloVe.train(vocab, c, options)
+      save()
+    }
   }
 
   override def save(): EmbeddingModel = {

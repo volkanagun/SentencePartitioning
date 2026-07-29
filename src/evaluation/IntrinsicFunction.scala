@@ -15,6 +15,11 @@ class InstrinsicEvaluationReport extends Serializable {
   var testpairCount = 0d
   var testoovCount = 0d
   var trainTime = 0d
+  var classificationMetricCount = 0d
+  var classificationAccuracy = 0d
+  var classificationPrecision = 0d
+  var classificationRecall = 0d
+  var classificationFScore = 0d
 
   var classifierScoreMap = Map[String, Double]()
   var classifierSimilarityMap = Map[String, Double]()
@@ -51,6 +56,22 @@ class InstrinsicEvaluationReport extends Serializable {
   def incrementSimilarity(value: Double): this.type = {
     synchronized {
       similarity += value
+      this
+    }
+  }
+
+  def incrementClassificationMetrics(
+    accuracy: Double,
+    precision: Double,
+    recall: Double,
+    fScore: Double
+  ): this.type = {
+    synchronized {
+      classificationMetricCount += 1d
+      classificationAccuracy += accuracy
+      classificationPrecision += precision
+      classificationRecall += recall
+      classificationFScore += fScore
       this
     }
   }
@@ -105,6 +126,11 @@ class InstrinsicEvaluationReport extends Serializable {
       truepositives += report.truepositives
       testpairCount += report.testpairCount
       similarity += report.similarity
+      classificationMetricCount += report.classificationMetricCount
+      classificationAccuracy += report.classificationAccuracy
+      classificationPrecision += report.classificationPrecision
+      classificationRecall += report.classificationRecall
+      classificationFScore += report.classificationFScore
       report.classifierScoreMap.foreach { case (key, value) => classifierScoreMap = classifierScoreMap.updated(key, value + classifierScoreMap.getOrElse(key, 0d)) }
       report.classifierQueryCount.foreach { case (key, value) => classifierQueryCount = classifierQueryCount.updated(key, value + classifierQueryCount.getOrElse(key, 0d)) }
       report.classifierOOVMap.foreach { case (key, value) => classifierOOVMap = classifierOOVMap.updated(key, value + classifierOOVMap.getOrElse(key, 0d)) }
@@ -282,8 +308,20 @@ class InstrinsicEvaluationReport extends Serializable {
     pw.println(printXMLTag("TRUE_COUNT", truepositives))
     pw.println(printXMLTag("TRUE_RATE", truepositives / testpairCount))
     pw.println(printXMLTag("SIMILARITY", similarity / testpairCount));
-    pw.println(printXMLTag("F1-MEASURE", similarity / testpairCount));
-    pw.println(printXMLTag("ACCURACY", truepositives / testpairCount));
+    if (classificationMetricCount > 0d) {
+      val precision = classificationPrecision / classificationMetricCount
+      val recall = classificationRecall / classificationMetricCount
+      val fScore = classificationFScore / classificationMetricCount
+      val accuracy = classificationAccuracy / classificationMetricCount
+      pw.println(printXMLTag("PRECISION", precision))
+      pw.println(printXMLTag("RECALL", recall))
+      pw.println(printXMLTag("F-SCORE", fScore))
+      pw.println(printXMLTag("F1-MEASURE", fScore))
+      pw.println(printXMLTag("ACCURACY", accuracy))
+    } else {
+      pw.println(printXMLTag("F1-MEASURE", similarity / testpairCount));
+      pw.println(printXMLTag("ACCURACY", truepositives / testpairCount));
+    }
 
 
     val skippedClassifiers = classifierSkipCount.map { case (name, count) => (name, classifierQueryCount(name) == count) }
@@ -395,7 +433,12 @@ class InstrinsicEvaluationReport extends Serializable {
   }
 }
 
-case class EvalScore(tp: Double, similarity: Double)
+case class EvalScore(
+  tp: Double,
+  similarity: Double,
+  precision: Double = Double.NaN,
+  recall: Double = Double.NaN
+)
 
 abstract class IntrinsicFunction() extends Serializable {
 
@@ -1242,4 +1285,3 @@ case class SemEvalAnalogy(var classifier: String, semevalid: String, wordPairs: 
   }
 
 }
-

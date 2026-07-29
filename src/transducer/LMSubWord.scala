@@ -32,10 +32,6 @@ class LMSubWord(params: Params) extends SkipLM(params) {
   override def loadTrain(): this.type = {
     if (exists()) {
       lm = TransducerOp.loadLM(getModelFilename(), lm.transducer)
-      if (params.lmForceTrain || lm.isEmpty()) {
-        lm = TransducerOp.trainEfficientCombinatoricBySkip(lm, params.sentencesFile,getModelFilename(),  params)
-        TransducerOp.saveLM(getModelFilename(), lm)
-      }
     }
     else {
       lm = TransducerOp.trainEfficientCombinatoricBySkip(lm, textFilename, getModelFilename(), params)

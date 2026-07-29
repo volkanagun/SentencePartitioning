@@ -28,7 +28,10 @@ abstract class AbstractLM(val params: Params) extends Serializable{
 
   def initialize(): this.type = {
 
-    if(!exists() || lm.isEmpty()) {
+    if (exists()) {
+      load()
+    }
+    else {
       lm.transducer = TransducerOp.fromDictionary(lm.transducer, dictionaryFilename, dictionaryTextFilename, params)
       lm.transducer = TransducerOp.fromText(lm.transducer, textFilename, params)
       lm = new TransducerLM(lm.transducer)

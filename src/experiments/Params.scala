@@ -23,7 +23,7 @@ class Params {
   var embeddingLength: Int = 100
   var embeddingWindowLength: Int = 20
   var forceTrain = false
-  var forceEval = true
+  var forceEval = false
 
   var dictionarySize: Int = 500000
   var freqCutoff: Int = 0
@@ -34,6 +34,7 @@ class Params {
   var evalDictionarySize = 500000
   var evalBatchSize = 24
   var evalEpocs = 15
+  var storchBatch = 1024 * 16
 
   var sentimentSize: Int = 3
   var nerSize: Int = 10
@@ -139,6 +140,7 @@ class Params {
     params.evalWindowLength = evalWindowLength
     params.evalBatchSize = evalBatchSize
     params.evalUseEmbeddings = evalUseEmbeddings
+    params.storchBatch = storchBatch
 
     params.lmEpocs = lmEpocs
     params.lmThreads = lmThreads
@@ -346,6 +348,7 @@ class Params {
       tag("LM_SKIP", lmSkip.toString) +
       tag("LM_STEM_LENGTH", lmStemLength.toString) +
       tag("LM_MAX_SENTENCE_LENGTH", lmMaxSentenceLength.toString) +
+      tag("STORCH_BATCH", storchBatch.toString) +
       "</LANGUAGE_PARAMETERS>\n"
   }
 

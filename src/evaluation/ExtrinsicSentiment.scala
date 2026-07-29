@@ -1,10 +1,9 @@
 package evaluation
 
 import experiments.Params
-import models.EmbeddingModel
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration
+import models.{DL4JGpu, EmbeddingModel, StorchExtrinsicTrainer}
+import org.deeplearning4j.nn.conf.{NeuralNetConfiguration, WorkspaceMode}
 import org.deeplearning4j.nn.conf.inputs.InputType
-import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode
 import org.deeplearning4j.nn.conf.layers.{DenseLayer, EmbeddingSequenceLayer, GlobalPoolingLayer, LSTM, OutputLayer, PoolingType, SelfAttentionLayer}
 import org.deeplearning4j.nn.graph.ComputationGraph
 import org.deeplearning4j.nn.weights.WeightInit
@@ -95,7 +94,7 @@ class ExtrinsicSentiment(params: Params, tokenizer: Tokenizer, lm: AbstractLM) e
         var maskOutputStack = Array[INDArray]()
 
 
-        while (cnt < params.evalBatchSize && hasNext) {
+        while (cnt < params.storchBatch && hasNext) {
           val (sentence, label) = lines.next()
           val tokens = padBegining(sentence.split("[\\s\\p{Punct}]+"), maxWindowSize)
             .map(_.trim).filter(_.nonEmpty)
@@ -109,10 +108,11 @@ class ExtrinsicSentiment(params: Params, tokenizer: Tokenizer, lm: AbstractLM) e
           cnt += 1
         }
 
-        val maskingInput = Nd4j.vstack(maskInputStack: _*)
-        val maskingOutput = Nd4j.vstack(maskOutputStack: _*)
-        val trainVector = Nd4j.vstack(trainStack: _*)
-        val trainOutputVector = Nd4j.vstack(trainOutputStack: _*)
+        // Preserve the real size of a partial final batch.
+        val maskingInput = Nd4j.concat(0, maskInputStack: _*)
+        val maskingOutput = Nd4j.concat(0, maskOutputStack: _*)
+        val trainVector = Nd4j.concat(0, trainStack: _*)
+        val trainOutputVector = Nd4j.concat(0, trainOutputStack: _*)
         new org.nd4j.linalg.dataset.MultiDataSet(trainVector, trainOutputVector, maskingInput, maskingOutput)
       }
 
@@ -137,8 +137,7 @@ class ExtrinsicSentiment(params: Params, tokenizer: Tokenizer, lm: AbstractLM) e
 
   override def universe(): Set[String] = {
     Source.fromFile(getTraining()).getLines().filter(l => l.contains("\t"))
-      .take(trainingSize)
-      .flatMap(line => {
+      .take(trainingSize).flatMap(line => {
         val sentence = line.split("\t").head
         tokenizer.standardTokenizer(sentence)
       }).toSet
@@ -149,7 +148,6 @@ class ExtrinsicSentiment(params: Params, tokenizer: Tokenizer, lm: AbstractLM) e
     val categorySize = labels().length
 
     val conf = new NeuralNetConfiguration.Builder()
-      .cudnnAlgoMode(AlgoMode.NO_WORKSPACE)
       .dataType(DataType.FLOAT)
       .activation(Activation.TANH)
       .updater(new Adam(params.lrate))
@@ -169,57 +167,26 @@ class ExtrinsicSentiment(params: Params, tokenizer: Tokenizer, lm: AbstractLM) e
 
       .build()
 
-    new ComputationGraph(conf)
+    conf.setTrainingWorkspaceMode(WorkspaceMode.ENABLED)
+    conf.setInferenceWorkspaceMode(WorkspaceMode.ENABLED)
+
+    DL4JGpu.prepare(new ComputationGraph(conf))
   }
 
   override def train(filename: String): EmbeddingModel = {
-
-    var i = 0
-    val fname = params.modelEvaluationFilename()
-    val modelFile = new File(fname)
-    println("Self-Attention LSTM filename: " + fname)
-    if (!(modelFile.exists()) || params.forceTrain) {
-
-
-      val size = Source.fromFile(filename).getLines().size
-
-      load()
-
-      computationGraph = model()
-
-      //val statsStorage = new InMemoryStatsStorage()
-      //val uiServer = UIServer.getInstance()
-      //uiServer.attach(statsStorage)
-
-      computationGraph.addListeners(new PerformanceListener(1, true))
-
-      val multiDataSetIterator = iterator(filename)
-
-      var start = System.currentTimeMillis()
-      var isTrained = false
-      sampleCount = 0
-      while (i < params.evalEpocs) {
-
-        println("Epoc : " + i)
-
-        computationGraph.fit(multiDataSetIterator)
-        multiDataSetIterator.reset()
-
-        i = i + 1
-        sampleCount += size
-        //System.gc()
-      }
-      val passedTime = System.currentTimeMillis() - start
-      avgTime = passedTime / (sampleCount)
-      println("Saving model...")
-      ModelSerializer.writeModel(computationGraph, modelFile, true)
-      //uiServer.stop()
-      System.gc()
-      save()
-    }
-    else {
-      computationGraph = ModelSerializer.restoreComputationGraph(modelFile)
-    }
+    load()
+    StorchExtrinsicTrainer.trainAndEvaluate(
+      getClassifier(),
+      iterator(filename),
+      iterator(filename),
+      params.evalEpocs,
+      params.lrate,
+      params.embeddingLength,
+      params.hiddenLength,
+      labels().length,
+      params.modelEvaluationFilename(),
+      params.storchBatch
+    )
     this
 
   }

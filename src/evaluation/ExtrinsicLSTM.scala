@@ -1,11 +1,10 @@
 package evaluation
 
 import experiments.Params
-import models.{EmbeddingModel, SelfAttentionLSTM}
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration
+import models.{DL4JGpu, EmbeddingModel, SelfAttentionLSTM, StorchExtrinsicTrainer}
+import org.deeplearning4j.nn.conf.{NeuralNetConfiguration, WorkspaceMode}
 import org.deeplearning4j.nn.conf.graph.MergeVertex
 import org.deeplearning4j.nn.conf.inputs.InputType
-import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode
 import org.deeplearning4j.nn.conf.layers.recurrent.LastTimeStep
 import org.deeplearning4j.nn.conf.layers.{EmbeddingSequenceLayer, LSTM, OutputLayer}
 import org.deeplearning4j.nn.graph.ComputationGraph
@@ -44,11 +43,10 @@ abstract class ExtrinsicLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM
   override def count(): Int = 1
 
   override def universe(): Set[String] = {
-    Source.fromFile(getTraining()).getLines().flatMap(sentence => {
-      val tokens = sentence.split("\\s+")
-        .map(token => token.split("\\/").head)
-      tokens
-    }).toSet
+    val source = Source.fromFile(getTraining(), "UTF-8")
+    try source.getLines().flatMap(sentence =>
+      sentence.split("\\s+").map(token => token.split("\\/").head)).toSet
+    finally source.close()
   }
 
 
@@ -70,57 +68,38 @@ abstract class ExtrinsicLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM
     val trainingFilename = getTraining()
     val testingFilename = getTesing()
 
-    train(trainingFilename)
-    val evaluation: Evaluation = computationGraph.evaluate(iterator(testingFilename))
+    load()
+    val metrics = StorchExtrinsicTrainer.trainAndEvaluate(
+      getClassifier(),
+      iterator(trainingFilename),
+      iterator(testingFilename),
+      params.evalEpocs,
+      params.lrate,
+      params.embeddingLength,
+      params.hiddenLength,
+      labels().length,
+      params.modelEvaluationFilename(),
+      params.storchBatch
+    )
 
-    EvalScore(evaluation.accuracy(), evaluation.f1())
+    EvalScore(metrics.accuracy, metrics.f1, metrics.precision, metrics.recall)
   }
 
 
   override def train(filename: String): EmbeddingModel = {
-
-    var i = 0
-    val fname = params.modelEvaluationFilename()
-    val modelFile = new File(fname)
-    println("LSTM evaluation filename: " + fname)
-    if (!(modelFile.exists()) || params.forceEval) {
-
-
-      val size = Source.fromFile(filename).getLines().size
-
-      load()
-
-      computationGraph = model()
-
-      computationGraph.addListeners(new PerformanceListener(10, true))
-
-      val multiDataSetIterator = iterator(filename)
-
-      var start = System.currentTimeMillis()
-      var isTrained = false
-      sampleCount = 0
-      while (i < params.evalEpocs) {
-
-        println("Epoc : " + i)
-
-        computationGraph.fit(multiDataSetIterator)
-        multiDataSetIterator.reset()
-
-        i = i + 1
-        sampleCount += size
-
-      }
-      val passedTime = System.currentTimeMillis() - start
-      avgTime = passedTime / (sampleCount)
-      println("Saving model...")
-      ModelSerializer.writeModel(computationGraph, modelFile, true)
-      //uiServer.stop()
-      System.gc()
-      save()
-    }
-    else {
-      computationGraph = ModelSerializer.restoreComputationGraph(modelFile)
-    }
+    load()
+    StorchExtrinsicTrainer.trainAndEvaluate(
+      getClassifier(),
+      iterator(filename),
+      iterator(filename),
+      params.evalEpocs,
+      params.lrate,
+      params.embeddingLength,
+      params.hiddenLength,
+      labels().length,
+      params.modelEvaluationFilename(),
+      params.storchBatch
+    )
     this
 
   }
@@ -146,6 +125,12 @@ abstract class ExtrinsicLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM
     ier.incrementSimilarity(value.similarity)
     ier.incrementSimilarityMap(classifier, value.similarity)
 
+    ier.incrementClassificationMetrics(
+      value.tp,
+      value.precision,
+      value.recall,
+      value.similarity
+    )
 
     ier.printProgress(classifier)
     ier
@@ -232,7 +217,6 @@ abstract class ExtrinsicLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM
   override def model(): ComputationGraph = {
 
     val conf = new NeuralNetConfiguration.Builder()
-      .cudnnAlgoMode(AlgoMode.PREFER_FASTEST)
       .updater(new Adam.Builder().learningRate(params.lrate).build())
       .dropOut(0.5)
       .graphBuilder()
@@ -265,9 +249,10 @@ abstract class ExtrinsicLSTM(params: Params, tokenizer: Tokenizer, lm:AbstractLM
         InputType.recurrent(params.evalDictionarySize))
       .build()
 
-    val graph = new ComputationGraph(conf)
-    graph.init()
-    graph
+    conf.setTrainingWorkspaceMode(WorkspaceMode.ENABLED)
+    conf.setInferenceWorkspaceMode(WorkspaceMode.ENABLED)
+
+    DL4JGpu.prepare(new ComputationGraph(conf))
 
 
   }

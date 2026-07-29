@@ -1,0 +1,10 @@
+variant_id,task,method,lm_window_length,lm_slide_length,lm_top_split,lm_skip,lm_stem_length,lm_prune,lm_likelihood_weight,lm_prior_weight,lm_length_penalty,corpus_filename,result_filename,accuracy,f1,status
+"v1","pos","lm-syllable","2","2","1","2","7","100","0.15","0.85","none","resources/text//pos/1312390923.txt","resources/results/skip/lm-syllable/pos/skip//240-2--502145215.xml","","","found"
+"v2","pos","lm-syllable","2","2","3","2","7","100","0.15","0.85","none","resources/text//pos/1312391609.txt","resources/results/skip/lm-syllable/pos/skip//240-2--842458339.xml","","","found"
+"v3","pos","lm-syllable","2","2","5","2","7","100","0.15","0.85","none","resources/text//pos/1312392295.txt","resources/results/skip/lm-syllable/pos/skip//240-2--1182771463.xml","","","found"
+"v4","pos","lm-syllable","3","3","1","3","7","100","0.15","0.85","none","resources/text//pos/1312393380.txt","resources/results/skip/lm-syllable/pos/skip//240-3-777071411.xml","","","found"
+"v5","pos","lm-syllable","3","3","3","3","7","100","0.15","0.85","none","resources/text//pos/1312394066.txt","resources/results/skip/lm-syllable/pos/skip//240-3-436758287.xml","","","found"
+"v6","pos","lm-syllable","3","3","5","3","7","100","0.15","0.85","none","resources/text//pos/1312394752.txt","resources/results/skip/lm-syllable/pos/skip//240-3-96445163.xml","","","found"
+"v7","pos","lm-syllable","4","4","1","4","7","100","0.15","0.85","none","resources/text//pos/1312395837.txt","resources/results/skip/lm-syllable/pos/skip//240-4-2056288037.xml","","","found"
+"v8","pos","lm-syllable","4","4","3","4","7","100","0.15","0.85","none","resources/text//pos/1312396523.txt","resources/results/skip/lm-syllable/pos/skip//240-4-1715974913.xml","","","found"
+"v9","pos","lm-syllable","4","4","5","4","7","100","0.15","0.85","none","resources/text//pos/1312397209.txt","resources/results/skip/lm-syllable/pos/skip//240-4-1375661789.xml","","","found"

@@ -38,7 +38,6 @@ public class MainExperimentLog {
 
     public static void main(String[] args){
         logInfo();
-        System.setProperty("org.bytedeco.openblas.load", "mkl");
         new NNExperiment().evaluate();
     }
 }

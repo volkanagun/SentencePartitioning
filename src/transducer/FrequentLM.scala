@@ -37,7 +37,9 @@ class FrequentLM(params: Params) extends AbstractLM(params) {
 
   override def loadTrain(): AbstractLM = {
 
-    Tokenizer.freqStemConstruct(params.sentencesFile, params, tokenizerZipFilename)
+    if (!exists()) {
+      Tokenizer.freqStemConstruct(params.sentencesFile, params, tokenizerZipFilename)
+    }
     tokenizer.loadZip(tokenizerZipFilename)
     this
   }

@@ -34,7 +34,17 @@ class CBOWModel(params:Params, tokenizer: Tokenizer, lm:AbstractLM) extends Embe
     val factory = defaultTokenizer()
     val fname = params.modelFilename()
     val embeddingFile = params.embeddingsFilename()
-    if (!(new File(fname).exists()) || !(new File(embeddingFile).exists()) || params.forceTrain) {
+    val modelFile = new File(fname)
+    val embeddings = new File(embeddingFile)
+    if (embeddings.exists()) {
+      load()
+    }
+    else if (modelFile.exists()) {
+      println("Loading CBOW model filename: " + fname)
+      vectorModel = WordVectorSerializer.readWord2VecModel(modelFile)
+      save()
+    }
+    else {
       println("Training for CBOW filename: " + fname)
 
       vectorModel = new Word2Vec.Builder()
@@ -56,16 +66,13 @@ class CBOWModel(params:Params, tokenizer: Tokenizer, lm:AbstractLM) extends Embe
       WordVectorSerializer.writeWord2Vec(vectorModel, new FileOutputStream(fname))
       save()
     }
-    else{
-      load()
-    }
 
     this
   }
 
   override def save(): EmbeddingModel = {
     if(vectorModel!=null){
-      println("Saving vector model...")
+      reportProgress("saving embedding vectors")
       val filename = params.embeddingsFilename()
       val table = vectorModel.getLookupTable()
       val vocabCache = table.getVocabCache()
@@ -75,6 +82,7 @@ class CBOWModel(params:Params, tokenizer: Tokenizer, lm:AbstractLM) extends Embe
       val array = vectors.asScala.toArray
       printer.writeInt(array.length)
 
+      val updateEvery = math.max(1, array.length / 100)
       array.zipWithIndex.foreach {indPair => {
         val word = vocabCache.elementAtIndex(indPair._2)
         val wordStr = word.getWord
@@ -84,6 +92,9 @@ class CBOWModel(params:Params, tokenizer: Tokenizer, lm:AbstractLM) extends Embe
         printer.writeObject(wordVector)
 
         update(wordStr, wordVector)
+        if ((indPair._2 + 1) % updateEvery == 0 || indPair._2 + 1 == array.length) {
+          reportProgress(s"saving embeddings ${indPair._2 + 1}/${array.length}")
+        }
 
       }}
 
@@ -96,15 +107,20 @@ class CBOWModel(params:Params, tokenizer: Tokenizer, lm:AbstractLM) extends Embe
   override def load(): EmbeddingModel = {
     val filename = params.embeddingsFilename()
     if(new File(filename).exists()) {
-      println("Loading embedding filename: "+ filename)
+      reportProgress("loading embedding file " + filename)
       val reader = new ObjectInputStream(new FileInputStream(filename))
       val size = reader.readInt()
+      val updateEvery = math.max(1, size / 100)
       for (i <- 0 until size) {
         val wordStr = reader.readObject().asInstanceOf[String]
         val wordVector = reader.readObject().asInstanceOf[Array[Float]]
         update(wordStr, wordVector)
+        if ((i + 1) % updateEvery == 0 || i + 1 == size) {
+          reportProgress(s"loading embeddings ${i + 1}/$size")
+        }
       }
       reader.close()
+      reportProgress(s"loaded $size embeddings")
     }
     this
   }

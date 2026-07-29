@@ -14,7 +14,22 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <nd4j.version>1.0.0-M2.1</nd4j.version>
+        <nd4j.backend>nd4j-native-platform</nd4j.backend>
+        <!-- Keep JavaCPP Java classes and native classifier aligned for Torch and ND4J. -->
+        <javacpp.version>1.5.10</javacpp.version>
+        <javacpp.pytorch.version>2.1.2-1.5.10</javacpp.pytorch.version>
+        <javacpp.cuda.version>12.3-8.9-1.5.10</javacpp.cuda.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>javacpp</artifactId>
+                <version>${javacpp.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -52,7 +67,7 @@
 
         <dependency>
             <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native-platform</artifactId>
+            <artifactId>${nd4j.backend}</artifactId>
             <version>${nd4j.version}</version>
             <exclusions>
                 <exclusion>  <!-- declare the exclusion here -->
@@ -63,6 +78,10 @@
                 <exclusion>
                     <groupId>org.bytedeco</groupId>
                     <artifactId>mkl-platform</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>javacpp-platform</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -76,6 +95,10 @@
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>javacpp-platform</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -87,6 +110,10 @@
                 <exclusion>  <!-- declare the exclusion here -->
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>javacpp-platform</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -110,19 +137,6 @@
             <version>1.2.4</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>mkl-platform</artifactId>
-            <version>2019.5-1.5.2</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>mkl-platform-redist</artifactId>
-            <version>2019.5-1.5.2</version>
-        </dependency>
 
         <dependency>
             <groupId>org.json4s</groupId>
@@ -189,6 +203,22 @@
             <version>1.4.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>pytorch</artifactId>
+            <version>${javacpp.pytorch.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>javacpp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>openblas</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
     </dependencies>
     <repositories>
         <repository>
@@ -233,4 +263,33 @@
             </plugins>
         </pluginManagement>
     </build>
+    <profiles>
+        <profile>
+            <id>storch-cuda</id>
+            <activation>
+                <!-- POS, NER, and Sentiment evaluations require the Torch CUDA runtime. -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>javacpp</artifactId>
+                    <version>${javacpp.version}</version>
+                    <classifier>linux-x86_64</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>pytorch</artifactId>
+                    <version>${javacpp.pytorch.version}</version>
+                    <classifier>linux-x86_64-gpu</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>cuda</artifactId>
+                    <version>${javacpp.cuda.version}</version>
+                    <classifier>linux-x86_64-redist</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
