@@ -1,0 +1,43 @@
+\documentclass{article}
+
+\usepackage[a4paper,landscape,margin=12mm]{geometry}
+\usepackage{array}
+\usepackage{graphicx}
+
+\pagestyle{empty}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+
+\newcommand{\plotcell}[2]{%
+  \begin{minipage}[t]{0.315\textwidth}
+    \centering
+    \includegraphics[
+      width=\linewidth,
+      height=0.37\textheight,
+      keepaspectratio
+    ]{#1}
+
+    \small #2
+  \end{minipage}%
+}
+
+\begin{document}
+
+\begin{center}
+  \centering
+  \begin{tabular}{@{}ccc@{}}
+    \plotcell{lm_graph_density_analogy.pdf}{(a) Analogy---Accuracy}
+    &
+    \plotcell{lm_graph_density_morphology.pdf}{(b) Morphology---F-measure}
+    &
+    \plotcell{lm_graph_density_ner.pdf}{(c) NER---F-measure}
+    \\
+    \plotcell{lm_graph_density_pos.pdf}{(d) POS---F-measure}
+    &
+    \plotcell{lm_graph_density_sentiment.pdf}{(e) Sentiment---F-measure}
+    &
+    {}
+  \end{tabular}
+\end{center}
+
+\end{document}

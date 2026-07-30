@@ -1,0 +1,45 @@
+\documentclass{article}
+
+\usepackage[a4paper,landscape,margin=12mm]{geometry}
+\usepackage{array}
+\usepackage{graphicx}
+
+\pagestyle{empty}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+
+\newcommand{\plotcell}[2]{%
+  \begin{minipage}[t]{0.315\textwidth}
+    \centering
+    \includegraphics[
+      width=\linewidth,
+      height=0.37\textheight,
+      keepaspectratio
+    ]{#1}
+
+    \small #2
+  \end{minipage}%
+}
+
+\begin{document}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{@{}ccc@{}}
+    \plotcell{distributions_analogy.pdf}{(a) Analogy}
+    &
+    \plotcell{distributions_morphology.pdf}{(b) Morphology}
+    &
+    \plotcell{distributions_ner.pdf}{(c) NER}
+    \\
+    \plotcell{distributions_pos.pdf}{(d) POS}
+    &
+    \plotcell{distributions_sentiment.pdf}{(e) Sentiment}
+    &
+    \plotcell{parameter_sensitivity.pdf}{(f) Parameter sensitivity}
+  \end{tabular}
+  \caption{Score distributions by task and descriptive parameter sensitivity.}
+  \label{tab:reviewer1-distributions}
+\end{table}
+
+\end{document}

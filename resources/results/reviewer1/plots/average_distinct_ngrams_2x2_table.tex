@@ -1,0 +1,48 @@
+\documentclass{article}
+
+\usepackage[a4paper,margin=12mm]{geometry}
+\usepackage{float}
+\usepackage{graphicx}
+
+\pagestyle{empty}
+\setlength{\tabcolsep}{3pt}
+
+\begin{document}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{cc}
+    \includegraphics[
+      width=0.47\textwidth,
+      height=0.34\textheight,
+      keepaspectratio
+    ]{avg-intrinsic.pdf}
+    &
+    \includegraphics[
+      width=0.47\textwidth,
+      height=0.34\textheight,
+      keepaspectratio
+    ]{avg-ner.pdf}
+    \\
+    Intrinsic & NER
+    \\
+    \includegraphics[
+      width=0.47\textwidth,
+      height=0.34\textheight,
+      keepaspectratio
+    ]{avg-pos.pdf}
+    &
+    \includegraphics[
+      width=0.47\textwidth,
+      height=0.34\textheight,
+      keepaspectratio
+    ]{avg-sentiment.pdf}
+    \\
+    POS & Sentiment
+  \end{tabular}
+  \caption{Average distinct n-grams per sentence and task performance.
+  Intrinsic uses Accuracy; NER, POS, and Sentiment use F-measure.}
+  \label{tab:avg}
+\end{table}
+
+\end{document}
