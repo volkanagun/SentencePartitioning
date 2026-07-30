@@ -17,8 +17,8 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
   private val resultFolder = "resources/results/reviewer1"
   private val skipGramModel = "skip"
   private val evaluationTasks = Array("pos", "ner", "sentiment", "analogy", "morphology")
-  private val lmMethods = Array("frequent-ngram", "lm-lemma", "lm-rank", "lm-skip", "lm-syllable", "lm-subword")
-  private val parallelEvaluations = 16
+  private val lmMethods = Array("lm-word", "frequent-ngram", "lm-lemma", "lm-rank", "lm-skip", "lm-syllable", "lm-subword")
+  private val parallelEvaluations = 4
   private case class CombinationRow(task: String,
                                     method: String,
                                     status: String,
@@ -317,7 +317,18 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
       topSplits.map(topSplit => tunedParams(method, window, topSplit))
     })
 
-    if (method == "lm-rank" || method == "lm-lemma") {
+    if (method == "lm-word"){
+      val params = new Params()
+      params.adapterName = method
+      params.embeddingModel = skipGramModel
+      params.epocs = 5
+      params.batchSize = 128
+      params.storchBatch = 256
+      params.forceTrain = false
+      params.lmForceTrain = false
+      Array(params)
+    }
+    else if (method == "lm-rank" || method == "lm-lemma") {
       rankParams(method, base)
     }
     else if (method == "lm-subword") {
@@ -387,6 +398,7 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
 
   private def normalizeMethod(methodName: String): String = {
     methodName.trim.toLowerCase match {
+      case "wordlm" | "lm-word" => "lm-word"
       case "frequentlm" | "frequent-ngram" => "frequent-ngram"
       case "lemmalm" | "lm-lemma" => "lm-lemma"
       case "ranklm" | "lm-rank" => "lm-rank"

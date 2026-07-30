@@ -5,11 +5,11 @@ morphology,f_score,0.538576,lm-skip,v1,2,2,1,2,7,100,0.15,0.85,none,resources/re
 ner,accuracy,0.953489640131,lm-lemma,v11,3,3,3,3,7,100,0.0,1.0,inverse_parts,resources/results/skip/lm-lemma/ner/skip//240-3-1922520633.xml
 ner,precision,0.817437406142,lm-subword,v4,3,3,1,3,7,100,0.15,0.85,none,resources/results/skip/lm-subword/ner/skip//240-3--1908082251.xml
 ner,recall,0.624056306768,lm-syllable,v7,4,4,1,4,7,100,0.15,0.85,none,resources/results/skip/lm-syllable/ner/skip//240-4-2056288037.xml
-ner,f_score,0.953489640131,lm-lemma,v11,3,3,3,3,7,100,0.0,1.0,inverse_parts,resources/results/skip/lm-lemma/ner/skip//240-3-1922520633.xml
+ner,f_score,0.682858516552,lm-syllable,v7,4,4,1,4,7,100,0.15,0.85,none,resources/results/skip/lm-syllable/ner/skip//240-4-2056288037.xml
 pos,accuracy,0.88445807771,lm-skip,v1,2,2,1,2,7,100,0.15,0.85,none,resources/results/skip/lm-skip/pos/skip//240-2-1110150456.xml
 pos,precision,0.722015799537,lm-lemma,v17,3,3,3,3,7,100,0.05,0.95,inverse_log_parts,resources/results/skip/lm-lemma/pos/skip//240-3-769577289.xml
 pos,recall,0.636342079734,lm-subword,v4,3,3,1,3,7,100,0.15,0.85,none,resources/results/skip/lm-subword/pos/skip//240-3--1908082251.xml
-pos,f_score,0.88445807771,lm-skip,v1,2,2,1,2,7,100,0.15,0.85,none,resources/results/skip/lm-skip/pos/skip//240-2-1110150456.xml
+pos,f_score,0.645612056817,lm-lemma,v8,4,4,3,4,7,100,0.15,0.85,none,resources/results/skip/lm-lemma/pos/skip//240-4--417160879.xml
 sentiment,accuracy,0.8396,lm-subword,v7,4,4,1,4,7,100,0.15,0.85,none,resources/results/skip/lm-subword/sentiment/skip//240-4--628865625.xml
 sentiment,precision,0.77993392522,lm-subword,v7,4,4,1,4,7,100,0.15,0.85,none,resources/results/skip/lm-subword/sentiment/skip//240-4--628865625.xml
 sentiment,recall,0.677464573572,lm-skip,v4,3,3,1,3,7,100,0.15,0.85,none,resources/results/skip/lm-skip/sentiment/skip//240-3--1905600214.xml

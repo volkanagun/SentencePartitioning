@@ -9,9 +9,10 @@ Morphology ablations do not train CBOW or SkipGram; they directly partition `res
 
 For `RankLM` and `LemmaLM`, ablation includes Algorithm 4 likelihood/prior damping weights and length penalty formulations.
 
-Total ablation parameter variants across all tasks: 475
+Total ablation parameter variants across all tasks: 480
 
 Variants per method:
+- `lm-word`: 1 per task
 - `frequent-ngram`: 9 per task
 - `lm-lemma`: 28 per task
 - `lm-rank`: 28 per task

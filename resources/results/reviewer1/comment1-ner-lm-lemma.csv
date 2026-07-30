@@ -3,7 +3,7 @@ variant_id,task,method,lm_window_length,lm_slide_length,lm_top_split,lm_skip,lm_
 "v2","ner","lm-lemma","2","2","3","2","7","100","0.15","0.85","none","resources/text//ner/-1392568951.txt","resources/results/skip/lm-lemma/ner/skip//240-2-1319373165.xml","","","found"
 "v3","ner","lm-lemma","2","2","5","2","7","100","0.15","0.85","none","resources/text//ner/-1392568265.txt","resources/results/skip/lm-lemma/ner/skip//240-2-979060041.xml","","","found"
 "v4","ner","lm-lemma","3","3","1","3","7","100","0.15","0.85","none","resources/text//ner/-1392567180.txt","resources/results/skip/lm-lemma/ner/skip//240-3--1356064381.xml","","","found"
-"v5","ner","lm-lemma","3","3","3","3","7","100","0.15","0.85","none","resources/text//ner/-1392566494.txt","resources/results/skip/lm-lemma/ner/skip//240-3--1696377505.xml","","","found"
+"v5","ner","lm-lemma","3","3","3","3","7","100","0.15","0.85","none","resources/text//ner/-1392566494.txt","resources/results/skip/lm-lemma/ner/skip//240-3--1696377505.xml","","","completed"
 "v6","ner","lm-lemma","3","3","5","3","7","100","0.15","0.85","none","resources/text//ner/-1392565808.txt","resources/results/skip/lm-lemma/ner/skip//240-3--2036690629.xml","","","found"
 "v7","ner","lm-lemma","4","4","1","4","7","100","0.15","0.85","none","resources/text//ner/-1392564723.txt","resources/results/skip/lm-lemma/ner/skip//240-4--76847755.xml","","","found"
 "v8","ner","lm-lemma","4","4","3","4","7","100","0.15","0.85","none","resources/text//ner/-1392564037.txt","resources/results/skip/lm-lemma/ner/skip//240-4--417160879.xml","","","found"

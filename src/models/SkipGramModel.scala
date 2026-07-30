@@ -50,7 +50,7 @@ class SkipGramModel(params:Params, tokenizer: Tokenizer,  lm:AbstractLM) extends
       val windowLength = 5
 
       vectorModel = new Word2Vec.Builder()
-        .workers(24)
+        .workers(32)
         .minWordFrequency(3)
         .layerSize(params.embeddingLength)
         .windowSize(windowLength)
@@ -62,7 +62,11 @@ class SkipGramModel(params:Params, tokenizer: Tokenizer,  lm:AbstractLM) extends
         .tokenizerFactory(factory)
         .elementsLearningAlgorithm("org.deeplearning4j.models.embeddings.learning.impl.elements.SkipGram")
         .allowParallelTokenization(true)
-        .useHierarchicSoftmax(true)
+        // DL4J 1.0.0-M2.1 cannot combine hierarchical softmax and negative
+        // sampling when a vocabulary entry has no Huffman codes: SkipGram
+        // passes an empty code array to Nd4j.create(), which rejects it.
+        // Use the already configured negative-sampling objective by itself.
+        .useHierarchicSoftmax(false)
         .sampling(0.3)
         .negativeSample(5)
         .build()

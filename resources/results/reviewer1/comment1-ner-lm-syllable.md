@@ -11,4 +11,5 @@ POS, NER, and Sentiment use their original fixed training and testing datasets.
 The CSV file beside this summary records all tuned LM parameters and the result XML path for each variant.
 
 Status counts:
-- `found`: 9
+- `completed`: 2
+- `found`: 7
