@@ -1,12 +1,12 @@
 package experiments
 
 import models.{CBOWModel, EmbeddingModel, FastTextModel, GloveModel, SelfAttentionLSTM, SkipGramModel}
-import transducer.{AbstractLM, FrequentLM, LMSubWord, LemmaLM, NGramLM, RankLM, SkipLM, SyllableLM, WordLM}
+import transducer.{AbstractLM, FrequentLM, LMSubWord, LemmaLM, NGramLM, RankLM, SentencePieceLM, SkipLM, SyllableLM, WordLM}
 import utils.Tokenizer
 
 class Params {
 
-  val adapters = Array("lm-subword", "lm-rank", "lm-lemma", /*"frequent-ngram",*/ "lm-ngram", "lm-syllable", "lm-skip").reverse
+  val adapters = Array("lm-sentencepiece", "lm-subword", "lm-rank", "lm-lemma", /*"frequent-ngram",*/ "lm-ngram", "lm-syllable", "lm-skip").reverse
   val windows = Array(2, 3, 4).reverse
   val tasks = Array("ner", "pos", "sentiment", "intrinsic")
   val selectionSizes = Array(500000)
@@ -35,6 +35,9 @@ class Params {
   var evalBatchSize = 24
   var evalEpocs = 15
   var storchBatch = 1024 * 16
+  var evalCrossValidation = false
+  var evalCrossValidationFolds = 10
+  var evalCrossValidationSeed = 17
 
   var sentimentSize: Int = 3
   var nerSize: Int = 10
@@ -78,6 +81,9 @@ class Params {
   var lmLikelihoodWeight = 0.15d
   var lmPriorWeight = 0.85d
   var lmLengthPenalty = "none"
+  var sentencePieceModelType = "bpe"
+  var sentencePieceVocabSize = 200000
+  var sentencePieceCharacterCoverage = 1.0d
   var lmForceTrain = false
   var lmDoPrune = true
   var lmDoSample = false
@@ -141,6 +147,9 @@ class Params {
     params.evalBatchSize = evalBatchSize
     params.evalUseEmbeddings = evalUseEmbeddings
     params.storchBatch = storchBatch
+    params.evalCrossValidation = evalCrossValidation
+    params.evalCrossValidationFolds = evalCrossValidationFolds
+    params.evalCrossValidationSeed = evalCrossValidationSeed
 
     params.lmEpocs = lmEpocs
     params.lmThreads = lmThreads
@@ -165,6 +174,9 @@ class Params {
     params.lmLikelihoodWeight = lmLikelihoodWeight
     params.lmPriorWeight = lmPriorWeight
     params.lmLengthPenalty = lmLengthPenalty
+    params.sentencePieceModelType = sentencePieceModelType
+    params.sentencePieceVocabSize = sentencePieceVocabSize
+    params.sentencePieceCharacterCoverage = sentencePieceCharacterCoverage
     params.lmMaxWaitSeconds = lmMaxWaitSeconds
     params.lmThreads = lmThreads
     params.stats = stats
@@ -203,6 +215,9 @@ class Params {
     }
     else if ("lm-word".equals(name)) {
       new WordLM(params)
+    }
+    else if ("lm-sentencepiece".equals(name)) {
+      new SentencePieceLM(params)
     }
     else {
       null
@@ -246,7 +261,7 @@ class Params {
 
   def resultFilename(modelling: String): String = {
     val fname = resultFolder + modelling + "/" + lmMaxSentence + "-" + lmWindowLength
-    fname + "-" + modelID() + ".xml"
+    fname + "-" + modelID() + evaluationResultSuffix + ".xml"
   }
 
   def modelFilename(): String = {
@@ -255,6 +270,22 @@ class Params {
 
   def modelEvaluationFilename(): String = {
     modelFolder + "eval-" + modelID() + ".zip"
+  }
+
+  def crossValidationModelEvaluationFilename(fold: Int): String = {
+    require(fold >= 0 && fold < evalCrossValidationFolds,
+      s"Cross-validation fold must be in [0, $evalCrossValidationFolds): $fold")
+    modelFolder + "eval-" + modelID() +
+      s"-cv${evalCrossValidationFolds}-seed${evalCrossValidationSeed}-fold${fold + 1}.zip"
+  }
+
+  private def evaluationResultSuffix: String = {
+    if (evalCrossValidation) {
+      s"-cv${evalCrossValidationFolds}-seed${evalCrossValidationSeed}"
+    }
+    else {
+      ""
+    }
   }
 
   def dictionaryFilename(): String = {
@@ -275,6 +306,17 @@ class Params {
   }
 
   def lmID(): Int = {
+    if ("lm-sentencepiece".equals(adapterName)) {
+      return Array[Int](
+        adapterName.hashCode,
+        sentencePieceModelType.hashCode,
+        sentencePieceVocabSize,
+        sentencePieceCharacterCoverage.hashCode(),
+        lmMaxSentence,
+        lmMaxSentenceLength)
+        .foldRight(7) { case (a, main) => a + 7 * main }
+    }
+
     var array = Array[Int](adapterName.hashCode, lmWindowLength, lmSlideLength, lmTopSplit, lmSkip, lmStemLength)
     if (lmDoPrune) array = array :+ lmPrune
     if (lmDoSample) array = array :+ lmSample
@@ -339,6 +381,9 @@ class Params {
       tag("LM_LIKELIHOOD_WEIGHT", lmLikelihoodWeight.toString) +
       tag("LM_PRIOR_WEIGHT", lmPriorWeight.toString) +
       tag("LM_LENGTH_PENALTY", lmLengthPenalty) +
+      tag("SENTENCEPIECE_MODEL_TYPE", sentencePieceModelType) +
+      tag("SENTENCEPIECE_VOCAB_SIZE", sentencePieceVocabSize.toString) +
+      tag("SENTENCEPIECE_CHARACTER_COVERAGE", sentencePieceCharacterCoverage.toString) +
       tag("LM_PRUNE", lmPrune.toString) +
       tag("LM_DOSAMPLE", lmDoSample.toString) +
       tag("LM_SAMPLE", lmSample.toString) +
@@ -349,6 +394,9 @@ class Params {
       tag("LM_STEM_LENGTH", lmStemLength.toString) +
       tag("LM_MAX_SENTENCE_LENGTH", lmMaxSentenceLength.toString) +
       tag("STORCH_BATCH", storchBatch.toString) +
+      tag("EVAL_CROSS_VALIDATION", evalCrossValidation.toString) +
+      tag("EVAL_CROSS_VALIDATION_FOLDS", evalCrossValidationFolds.toString) +
+      tag("EVAL_CROSS_VALIDATION_SEED", evalCrossValidationSeed.toString) +
       "</LANGUAGE_PARAMETERS>\n"
   }
 

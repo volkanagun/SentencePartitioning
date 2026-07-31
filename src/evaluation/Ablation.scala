@@ -17,7 +17,7 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
   private val resultFolder = "resources/results/reviewer1"
   private val skipGramModel = "skip"
   private val evaluationTasks = Array("pos", "ner", "sentiment", "analogy", "morphology")
-  private val lmMethods = Array("lm-word", "frequent-ngram", "lm-lemma", "lm-rank", "lm-skip", "lm-syllable", "lm-subword")
+  private val lmMethods = Array("lm-word", "lm-sentencepiece", "frequent-ngram", "lm-lemma", "lm-rank", "lm-skip", "lm-syllable", "lm-subword")
   private val parallelEvaluations = 4
   private case class CombinationRow(task: String,
                                     method: String,
@@ -36,6 +36,12 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
                             lmLikelihoodWeight: Double,
                             lmPriorWeight: Double,
                             lmLengthPenalty: String,
+                            sentencePieceModelType: String,
+                            sentencePieceVocabSize: String,
+                            sentencePieceCharacterCoverage: String,
+                            evaluationProtocol: String,
+                            crossValidationFolds: String,
+                            crossValidationSeed: String,
                             corpusFilename: String,
                             resultFilename: String,
                             accuracy: Double,
@@ -43,21 +49,29 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
                             status: String)
 
   def experiments(taskName: String, methodName: String): Unit = {
+    experiments(taskName, methodName, new Params())
+  }
+
+  def experiments(taskName: String, methodName: String, evaluationParams: Params): Unit = {
     val task = normalizeTask(taskName)
     val method = normalizeMethod(methodName)
     val total = ablationParams(method).length
     val progress = new Ablation.ProgressBar(s"$task/$method", total)
-    experiments(task, method, Some(progress))
+    experiments(task, method, Some(progress), evaluationParams)
     progress.finish()
   }
 
-  private def experiments(task: String, method: String, progress: Option[Ablation.ProgressBar]): Unit = {
+  private def experiments(task: String,
+                          method: String,
+                          progress: Option[Ablation.ProgressBar],
+                          evaluationParams: Params): Unit = {
     val outputDir = new File(resultFolder)
     outputDir.mkdirs()
 
     val rows = ablationParams(method).zipWithIndex.map { case (params, index) =>
       params.embeddingModel = skipGramModel
       params.adapterName = method
+      configureEvaluation(params, evaluationParams, task)
       val variantId = s"v${index + 1}"
       val reportStage = (detail: String) =>
         progress.foreach(_.update(s"$task/$method/$variantId: $detail"))
@@ -72,6 +86,10 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
   }
 
   def experiments(): Unit = {
+    experiments(new Params())
+  }
+
+  def experiments(evaluationParams: Params): Unit = {
     val outputDir = new File(resultFolder)
     outputDir.mkdirs()
     writeDesignMatrix(new File(outputDir, "comment1-design-matrix.md"))
@@ -87,7 +105,7 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
       val start = System.currentTimeMillis()
       val status =
         try {
-          new Ablation().experiments(task, method, Some(progress))
+          new Ablation().experiments(task, method, Some(progress), evaluationParams)
           "completed"
         }
         catch {
@@ -184,6 +202,17 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
       lmLikelihoodWeight = params.lmLikelihoodWeight,
       lmPriorWeight = params.lmPriorWeight,
       lmLengthPenalty = params.lmLengthPenalty,
+      sentencePieceModelType =
+        if (method == "lm-sentencepiece") params.sentencePieceModelType else "",
+      sentencePieceVocabSize =
+        if (method == "lm-sentencepiece") params.sentencePieceVocabSize.toString else "",
+      sentencePieceCharacterCoverage =
+        if (method == "lm-sentencepiece") params.sentencePieceCharacterCoverage.toString else "",
+      evaluationProtocol =
+        if (params.evalCrossValidation) s"${params.evalCrossValidationFolds}-fold-cross-validation"
+        else "fixed-train-test",
+      crossValidationFolds = if (params.evalCrossValidation) params.evalCrossValidationFolds.toString else "",
+      crossValidationSeed = if (params.evalCrossValidation) params.evalCrossValidationSeed.toString else "",
       corpusFilename = corpusFilename,
       resultFilename = resultFilename,
       accuracy = accuracy,
@@ -254,11 +283,21 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
 
   private def extrinsicFunction(params: Params, task: String, lm: AbstractLM): ExtrinsicLSTM = {
     task match {
+      case "ner" if params.evalCrossValidation => new CrossNEREvaluation(params, tokenizer, lm)
+      case "pos" if params.evalCrossValidation => new CrossPOSEvaluation(params, tokenizer, lm)
+      case "sentiment" if params.evalCrossValidation => new CrossSentimentEvaluation(params, tokenizer, lm)
       case "ner" => new ExtrinsicNER(params, tokenizer, lm)
       case "pos" => new ExtrinsicPOS(params, tokenizer, lm)
       case "sentiment" => new ExtrinsicSentiment(params, tokenizer, lm)
       case _ => throw new IllegalArgumentException("Unsupported extrinsic task: " + task)
     }
+  }
+
+  private def configureEvaluation(params: Params, evaluationParams: Params, task: String): Unit = {
+    val supportsCrossValidation = task == "ner" || task == "pos" || task == "sentiment"
+    params.evalCrossValidation = supportsCrossValidation && evaluationParams.evalCrossValidation
+    params.evalCrossValidationFolds = evaluationParams.evalCrossValidationFolds
+    params.evalCrossValidationSeed = evaluationParams.evalCrossValidationSeed
   }
 
   private def ensureCorpus(lm: AbstractLM, task: String): Unit = {
@@ -327,6 +366,9 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
       params.forceTrain = false
       params.lmForceTrain = false
       Array(params)
+    }
+    else if (method == "lm-sentencepiece") {
+      Array(tunedParams(method, 3, 3))
     }
     else if (method == "lm-rank" || method == "lm-lemma") {
       rankParams(method, base)
@@ -405,6 +447,7 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
       case "skiplm" | "lm-skip" => "lm-skip"
       case "syllablelm" | "lm-syllable" => "lm-syllable"
       case "lmsubword" | "lm-subword" | "subwordlm" => "lm-subword"
+      case "sentencepiece" | "sentencepiecelm" | "lm-sentencepiece" => "lm-sentencepiece"
       case other => throw new IllegalArgumentException("Unsupported LM method: " + other)
     }
   }
@@ -425,6 +468,12 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
         "lm_likelihood_weight",
         "lm_prior_weight",
         "lm_length_penalty",
+        "sentencepiece_model_type",
+        "sentencepiece_vocab_size",
+        "sentencepiece_character_coverage",
+        "evaluation_protocol",
+        "cross_validation_folds",
+        "cross_validation_seed",
         "corpus_filename",
         "result_filename",
         "accuracy",
@@ -445,6 +494,12 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
           row.lmLikelihoodWeight.toString,
           row.lmPriorWeight.toString,
           row.lmLengthPenalty,
+          row.sentencePieceModelType,
+          row.sentencePieceVocabSize,
+          row.sentencePieceCharacterCoverage,
+          row.evaluationProtocol,
+          row.crossValidationFolds,
+          row.crossValidationSeed,
           row.corpusFilename,
           row.resultFilename,
           score(row.accuracy),
@@ -472,9 +527,14 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
       }
       writer.println(s"Ablation variants: ${rows.length}")
       writer.println()
-      writer.println("Evaluations use `ExtrinsicNER`, `ExtrinsicPOS`, `ExtrinsicSentiment`, `IntrinsicEvaluation`, or direct `ExtrinsicMorphology` scoring depending on the selected strategy.")
+      writer.println("Evaluations use fixed-split or cross-validation POS/NER/Sentiment evaluators, `IntrinsicEvaluation`, or direct `ExtrinsicMorphology` scoring depending on the selected strategy.")
       if (task == "pos" || task == "ner" || task == "sentiment") {
-        writer.println("POS, NER, and Sentiment use their original fixed training and testing datasets.")
+        if (rows.exists(_.evaluationProtocol.endsWith("-fold-cross-validation"))) {
+          writer.println(s"The original training and testing datasets are merged and evaluated with ${rows.head.crossValidationFolds}-fold cross-validation using seed ${rows.head.crossValidationSeed}.")
+        }
+        else {
+          writer.println("POS, NER, and Sentiment use their original fixed training and testing datasets.")
+        }
       }
       if (task == "morphology") {
         writer.println("The CSV file beside this summary records all tuned LM parameters and direct accuracy/F1 scores for each variant.")
@@ -546,7 +606,9 @@ class Ablation(tokenizer: Tokenizer = Ablation.defaultTokenizer()) {
       writer.println()
       writer.println("Call `new Ablation().experiments()` to run every evaluation strategy and LM method in parallel.")
       writer.println()
-      writer.println("Call `new Ablation().experiments(task, method)` for a targeted run with task `POS`, `NER`, `Sentiment`, `Analogy`, or `Morphology` and method `FrequentLM`, `LemmaLM`, `RankLM`, `SkipLM`, `SyllableLM`, or `LMSubword`.")
+      writer.println("Cross-validation is opt-in. Set `evalCrossValidation = true` on a `Params` instance and pass it to `experiments(params)` or `experiments(task, method, params)`; the default remains the fixed train/test protocol.")
+      writer.println()
+      writer.println("Call `new Ablation().experiments(task, method)` for a targeted run with task `POS`, `NER`, `Sentiment`, `Analogy`, or `Morphology` and method `FrequentLM`, `LemmaLM`, `RankLM`, `SentencePieceLM`, `SkipLM`, `SyllableLM`, or `LMSubword`.")
       writer.println()
       writer.println("The runner trains or loads the selected LM, constructs the task corpus when needed, trains SkipGram on that corpus for POS/NER/Sentiment/Analogy, and writes evaluation XML plus the reviewer CSV/summary under `resources/results`.")
       writer.println("Morphology ablations do not train CBOW or SkipGram; they directly partition `resources/evaluation/morphology` sentences with the selected `AbstractLM` child and report accuracy/F1.")
@@ -616,6 +678,10 @@ object Ablation {
 
   def experiments(taskName: String, methodName: String): Unit = {
     new Ablation().experiments(taskName, methodName)
+  }
+
+  def experiments(taskName: String, methodName: String, evaluationParams: Params): Unit = {
+    new Ablation().experiments(taskName, methodName, evaluationParams)
   }
 
   def main(args: Array[String]): Unit = {

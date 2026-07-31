@@ -19,6 +19,7 @@
         <javacpp.version>1.5.10</javacpp.version>
         <javacpp.pytorch.version>2.1.2-1.5.10</javacpp.pytorch.version>
         <javacpp.cuda.version>12.3-8.9-1.5.10</javacpp.cuda.version>
+        <javacpp.sentencepiece.version>0.1.99-1.5.10</javacpp.sentencepiece.version>
     </properties>
 
     <dependencyManagement>
@@ -219,6 +220,14 @@
             </exclusions>
         </dependency>
 
+        <!-- Official SentencePiece C++ implementation through the JavaCPP
+             preset aligned with the project's JavaCPP 1.5.10 runtime. -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>sentencepiece</artifactId>
+            <version>${javacpp.sentencepiece.version}</version>
+        </dependency>
+
     </dependencies>
     <repositories>
         <repository>
@@ -288,6 +297,12 @@
                     <artifactId>cuda</artifactId>
                     <version>${javacpp.cuda.version}</version>
                     <classifier>linux-x86_64-redist</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>sentencepiece</artifactId>
+                    <version>${javacpp.sentencepiece.version}</version>
+                    <classifier>linux-x86_64</classifier>
                 </dependency>
             </dependencies>
         </profile>

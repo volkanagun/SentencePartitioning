@@ -1,2 +1,2 @@
-variant_id,task,method,lm_window_length,lm_slide_length,lm_top_split,lm_skip,lm_stem_length,lm_prune,lm_likelihood_weight,lm_prior_weight,lm_length_penalty,corpus_filename,result_filename,accuracy,f1,status
-"v1","pos","lm-word","10","7","10","20","7","100","0.15","0.85","none","resources/text//pos/249640291.txt","resources/results/skip/lm-word/pos/skip//200000-10-1188798455.xml","","","found"
+variant_id,task,method,lm_window_length,lm_slide_length,lm_top_split,lm_skip,lm_stem_length,lm_prune,lm_likelihood_weight,lm_prior_weight,lm_length_penalty,sentencepiece_model_type,sentencepiece_vocab_size,sentencepiece_character_coverage,corpus_filename,result_filename,accuracy,f1,status
+"v1","pos","lm-word","10","7","10","20","7","100","0.15","0.85","none","","","","resources/text//pos/249640291.txt","resources/results/skip/lm-word/pos/skip//200000-10-1188798455.xml","","","found"

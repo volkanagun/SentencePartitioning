@@ -1,2 +1,2 @@
-variant_id,task,method,lm_window_length,lm_slide_length,lm_top_split,lm_skip,lm_stem_length,lm_prune,lm_likelihood_weight,lm_prior_weight,lm_length_penalty,corpus_filename,result_filename,accuracy,f1,status
-"v1","morphology","lm-word","10","7","10","20","7","100","0.15","0.85","none","resources/evaluation/morphology","resources/results/reviewer1/morphology/comment1-morphology-lm-word-v1-249640291.csv","0.271060","0.345762","found"
+variant_id,task,method,lm_window_length,lm_slide_length,lm_top_split,lm_skip,lm_stem_length,lm_prune,lm_likelihood_weight,lm_prior_weight,lm_length_penalty,sentencepiece_model_type,sentencepiece_vocab_size,sentencepiece_character_coverage,corpus_filename,result_filename,accuracy,f1,status
+"v1","morphology","lm-word","10","7","10","20","7","100","0.15","0.85","none","","","","resources/evaluation/morphology","resources/results/reviewer1/morphology/comment1-morphology-lm-word-v1-249640291.csv","0.271060","0.345762","found"

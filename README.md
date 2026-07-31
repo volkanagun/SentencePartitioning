@@ -6,6 +6,8 @@ In this library, the effects of word partitioning is measured for the quality of
 
 * RankLM : It uses contextual ranking for partitioning word embeddings into useful n-grams
 * SyllableLM: It partitions the words into valid syllables.
+* SentencePieceLM: It provides a data-driven SentencePiece unigram baseline
+  backed by the official C++ trainer and processor.
 
 
 Both approaches produces multiple word splits separeted by \# symbol.
@@ -170,7 +172,48 @@ The number of most likely splits can be determined by lmTopSplit in parameters. 
 
 ```
 
-The library presented here can be used in Chinese Word Segmentation or in Hastag analysis directly by modifying the lemma dictionary.  
+## SentencePiece baseline
 
+Use `lm-sentencepiece` (or `SentencePieceLM`) to train and evaluate the
+SentencePiece baseline. The default configuration uses the unigram algorithm,
+an 8,000-piece vocabulary, and full character coverage:
 
+```scala
+val params = new Params()
+params.adapterName = "lm-sentencepiece"
+params.sentencePieceModelType = "unigram"
+params.sentencePieceVocabSize = 8000
+params.sentencePieceCharacterCoverage = 1.0
 
+val sentencePiece = params.model(params, params.adapterName)
+  .initialize()
+  .loadTrain()
+
+val pieces = sentencePiece.splitSentence(
+  Array("Türkçe", "doğal", "dil", "işleme"))
+```
+
+The trained `.model` and `.vocab` artifacts are stored under
+`resources/transducers`. Existing artifacts are loaded instead of retrained.
+The model type may also be set to `bpe`, `char`, or `word`.
+
+## Optional 10-fold extrinsic evaluation
+
+POS, NER, and Sentiment ablations continue to use their fixed training and
+testing datasets by default. To merge each task's original train/test examples
+and run deterministic 10-fold cross-validation instead, pass evaluation
+settings to the ablation runner:
+
+```scala
+val evaluationParams = new Params()
+evaluationParams.evalCrossValidation = true
+evaluationParams.evalCrossValidationFolds = 10
+evaluationParams.evalCrossValidationSeed = 17
+
+new Ablation().experiments("pos", "lm-sentencepiece", evaluationParams)
+```
+
+The cross-validation result XML and per-fold Storch checkpoints use distinct
+filenames, while the existing embedding artifact can still be reused.
+
+The library presented here can be used in Chinese Word Segmentation or in Hastag analysis directly by modifying the lemma dictionary.

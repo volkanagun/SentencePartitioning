@@ -205,7 +205,7 @@ class ExtrinsicMorphology(params: Params, tokenizer: Tokenizer, lm: AbstractLM) 
 
   private def normalize(item: String): String = {
     item.toLowerCase(locale)
-      .replaceAll("[\\#\\$\\s]+", "")
+      .replaceAll("[\\#\\$\\s\u2581]+", "")
       .trim
   }
 }
